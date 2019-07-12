@@ -4,7 +4,7 @@ const config = require("../../config.js");
 const { date, location } = require("../utils/utils.js");
 const { Weather } = require("../../infra/mysql");
 
-const serviceKey = config.weather_key;
+const serviceKey = config.WEATHER_KEY;
 
 function getForecastDate(timestamp) {
   let hour = timestamp.hour();
