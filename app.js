@@ -5,8 +5,6 @@ const logger = require("morgan");
 const cronjob = require("./cronjob");
 const { sequelizeConnect } = require("./infra/mysql/index");
 
-const indexRouter = require("./routes/index");
-
 const app = express();
 
 // sequelize connect & execute cron cronjob
@@ -17,7 +15,5 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
-
-app.use("/", indexRouter);
 
 module.exports = app;
