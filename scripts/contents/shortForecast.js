@@ -1,7 +1,7 @@
 const axios = require("axios");
 const moment = require("moment-timezone");
 const config = require("../../config.js");
-const { date, location } = require("../utils/utils.js");
+const { date, locationList } = require("../utils/utils.js");
 const { Weather } = require("../../infra/mysql");
 
 const serviceKey = config.WEATHER_KEY;
@@ -35,7 +35,7 @@ const saveItem = (obj, item, value, city) => {
   } else {
     result[`${item.fcstDate}:${item.fcstTime}`] = {
       city,
-      current_date: date.dateQuery(String(item.fcstDate), String(item.fcstTime))
+      weather_date: date.dateQuery(String(item.fcstDate), String(item.fcstTime))
     };
     result[`${item.fcstDate}:${item.fcstTime}`][value] = item.fcstValue;
   }
@@ -108,7 +108,9 @@ module.exports = () => {
 
   axios
     .all(
-      location.map(target => getForecast(target, forecastDate, forecastTime))
+      locationList.map(target =>
+        getForecast(target, forecastDate, forecastTime)
+      )
     )
     .then(res => {
       res.forEach(result => {
@@ -119,7 +121,7 @@ module.exports = () => {
           await Weather.findOne({
             where: {
               city: result[key].city,
-              current_date: date.dateQuery(fcstDate, fcstTime)
+              weather_date: date.dateQuery(fcstDate, fcstTime)
             }
           }).then(response => {
             if (response) {

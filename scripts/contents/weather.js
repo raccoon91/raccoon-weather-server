@@ -1,7 +1,7 @@
 const axios = require("axios");
 const moment = require("moment-timezone");
 const config = require("../../config.js");
-const { date, location } = require("../utils/utils.js");
+const { date, locationList } = require("../utils/utils.js");
 const { Weather } = require("../../infra/mysql");
 
 const serviceKey = config.WEATHER_KEY;
@@ -30,7 +30,7 @@ const getcurrentDate = timestamp => {
 const sliceData = (data, city, currentDate, currentTime) => {
   const result = {
     city,
-    current_date: date.dateQuery(currentDate, currentTime)
+    weather_date: date.dateQuery(currentDate, currentTime)
   };
 
   data.forEach(item => {
@@ -88,7 +88,7 @@ module.exports = () => {
 
   axios
     .all(
-      location.map(target =>
+      locationList.map(target =>
         getCurrentWeather(target, currentDate, currentTime)
       )
     )
@@ -97,7 +97,7 @@ module.exports = () => {
         Weather.findOne({
           where: {
             city: result.city,
-            current_date: result.current_date
+            weather_date: result.weather_date
           }
         }).then(response => {
           if (response) {

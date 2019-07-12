@@ -27,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.FLOAT,
         allowNull: true
       },
-      current_date: {
+      weather_date: {
         type: DataTypes.DATE,
         allowNull: false,
         unique: false

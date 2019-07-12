@@ -1,6 +1,6 @@
 const Sequelize = require("sequelize");
 const tok = require("../../config.js").MYSQL_ENDPOINT.split(":");
-const { location } = require("../../scripts/utils/utils.js");
+const { locationList } = require("../../scripts/utils/utils.js");
 
 const config = {
   database: tok[2],
@@ -44,7 +44,7 @@ db.sequelizeConnect = callback => {
     .sync({ force: true })
     .then(() => {
       db.Region.sync().then(() => {
-        location.forEach(async target => {
+        locationList.forEach(async target => {
           await db.Region.findOne({ where: { city: target.region } }).then(
             async response => {
               if (!response) {
