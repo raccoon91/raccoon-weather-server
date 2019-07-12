@@ -13,13 +13,7 @@ const date = {
   }
 };
 
-const locationList = [
-  { region: "서울", nx: 60, ny: 127 },
-  { region: "강원", nx: 73, ny: 134 },
-  { region: "경기", nx: 60, ny: 120 },
-  { region: "경남", nx: 91, ny: 77 },
-  { region: "경북", nx: 89, ny: 91 }
-];
+const locationList = [{ region: "서울", nx: 60, ny: 127 }];
 
 module.exports = {
   date,
