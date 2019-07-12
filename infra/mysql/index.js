@@ -1,5 +1,6 @@
 const Sequelize = require("sequelize");
 const tok = require("../../config.js").MYSQL_ENDPOINT.split(":");
+const production = require("../../config").PRODUCTION;
 const { locationList } = require("../../scripts/utils/utils.js");
 
 const config = {
@@ -10,6 +11,7 @@ const config = {
     host: tok[0],
     port: tok[1],
     dialect: "mysql",
+    timezone: production ? "+00:00" : "+09:00",
     define: {
       charset: "utf8mb4"
     },

@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 module.exports = {
+  PRODUCTION: process.env.NODE_ENV === "production" ? true : false,
   WEATHER_KEY: process.env.WEATHER_KEY,
 
   MYSQL_ENDPOINT:
