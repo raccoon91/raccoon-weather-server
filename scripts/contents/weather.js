@@ -27,11 +27,29 @@ const getcurrentDate = timestamp => {
   };
 };
 
-const sliceData = (data, city, currentDate, currentTime) => {
+const sliceData = async (data, city, currentDate, currentTime) => {
   const result = {
     city,
-    weather_date: date.dateQuery(currentDate, currentTime)
+    weather_date: date.dateQuery(currentDate, currentTime),
+    type: "current"
   };
+
+  await Weather.findOne({
+    where: {
+      city,
+      type: "short"
+    },
+    order: [["weather_date", "ASC"]],
+    attributes: ["sky", "pty", "pop"]
+  }).then(res => {
+    if (res) {
+      const response = res.dataValues;
+
+      result.sky = response.sky;
+      result.pty = response.pty;
+      result.pop = response.pop;
+    }
+  });
 
   data.forEach(item => {
     switch (item.category) {

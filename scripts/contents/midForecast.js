@@ -41,7 +41,11 @@ const saveItem = (obj, item, value, city) => {
   } else {
     result[`${item.fcstDate}:${item.fcstTime}`] = {
       city,
-      weather_date: date.dateQuery(String(item.fcstDate), String(item.fcstTime))
+      weather_date: date.dateQuery(
+        String(item.fcstDate),
+        String(item.fcstTime)
+      ),
+      type: "mid"
     };
     result[`${item.fcstDate}:${item.fcstTime}`][value] = item.fcstValue;
   }

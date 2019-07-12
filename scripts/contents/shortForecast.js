@@ -35,7 +35,11 @@ const saveItem = (obj, item, value, city) => {
   } else {
     result[`${item.fcstDate}:${item.fcstTime}`] = {
       city,
-      weather_date: date.dateQuery(String(item.fcstDate), String(item.fcstTime))
+      weather_date: date.dateQuery(
+        String(item.fcstDate),
+        String(item.fcstTime)
+      ),
+      type: "short"
     };
     result[`${item.fcstDate}:${item.fcstTime}`][value] = item.fcstValue;
   }
@@ -117,6 +121,21 @@ module.exports = () => {
         Object.keys(result).forEach(async key => {
           const fcstDate = key.split(":")[0];
           const fcstTime = key.split(":")[1];
+
+          await Weather.findOne({
+            where: {
+              city: result[key].city,
+              type: "mid"
+            },
+            order: [["weather_date", "ASC"]],
+            attributes: ["pop"]
+          }).then(res => {
+            if (res) {
+              const response = res.dataValues;
+
+              result[key].pop = response.pop;
+            }
+          });
 
           await Weather.findOne({
             where: {
