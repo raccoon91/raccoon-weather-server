@@ -13,7 +13,7 @@ const date = {
   }
 };
 
-const locationList = [{ region: "서울", nx: 60, ny: 127 }];
+const locationList = [{ city: "서울", nx: 60, ny: 127 }];
 
 module.exports = {
   date,

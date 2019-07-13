@@ -110,3 +110,6 @@ typings/
 # lock
 package-lock.json
 yarn.lock
+
+# vscode
+.vscode

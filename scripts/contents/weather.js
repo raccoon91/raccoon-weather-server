@@ -5,8 +5,7 @@ const { date, locationList } = require("../utils/utils.js");
 const { Weather } = require("../../infra/mysql");
 
 const serviceKey = config.WEATHER_KEY;
-
-const getcurrentDate = timestamp => {
+const { currentDate, currentTime } = (timestamp => {
   let hour = timestamp.hour();
   const minute = timestamp.minute();
   let dayCalibrate = 0;
@@ -25,9 +24,9 @@ const getcurrentDate = timestamp => {
     yesterday: date.dayCalibrate(timestamp, dayCalibrate + 1),
     currentTime: hour < 10 ? `0${hour}00` : `${hour}00`
   };
-};
+})(moment().tz("Asia/Seoul"));
 
-const sliceData = (data, city, currentDate, currentTime) => {
+const sliceData = (data, city) => {
   const result = {
     city,
     weather_date: date.dateQuery(currentDate, currentTime),
@@ -59,7 +58,7 @@ const isPossible = status => {
   return false;
 };
 
-const getCurrentWeather = (target, currentDate, currentTime) => {
+const getCurrentWeather = location => {
   return axios
     .get(
       `http://newsky2.kma.go.kr/service/SecndSrtpdFrcstInfoService2/ForecastGrib`,
@@ -68,8 +67,8 @@ const getCurrentWeather = (target, currentDate, currentTime) => {
           ServiceKey: decodeURIComponent(serviceKey),
           base_date: currentDate,
           base_time: currentTime,
-          nx: target.nx,
-          ny: target.ny,
+          nx: location.nx,
+          ny: location.ny,
           _type: "json"
         }
       }
@@ -79,21 +78,13 @@ const getCurrentWeather = (target, currentDate, currentTime) => {
 
       const data = result.data.response.body.items.item;
 
-      return sliceData(data, target.region, currentDate, currentTime);
+      return sliceData(data, location.city);
     });
 };
 
-module.exports = () => {
-  const { currentDate, currentTime } = getcurrentDate(
-    moment().tz("Asia/Seoul")
-  );
-
+const saveWeather = () => {
   axios
-    .all(
-      locationList.map(target =>
-        getCurrentWeather(target, currentDate, currentTime)
-      )
-    )
+    .all(locationList.map(location => getCurrentWeather(location)))
     .then(res => {
       res.forEach(result => {
         Weather.findOne({
@@ -145,13 +136,16 @@ module.exports = () => {
           }
         });
       });
-    })
-    .then(() => {
-      console.log(`[weather][SUCCESS][${currentDate}${currentTime}]`);
-    })
-    .catch(err => {
-      console.log(
-        `[weather][FAIL][${err.message}][${currentDate}${currentTime}]`
-      );
     });
+};
+
+module.exports = () => {
+  try {
+    saveWeather();
+    console.log(`[weather][SUCCESS][${currentDate}${currentTime}]`);
+  } catch (err) {
+    console.log(
+      `[weather][FAIL][${err.message}][${currentDate}${currentTime}]`
+    );
+  }
 };

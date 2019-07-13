@@ -5,12 +5,7 @@ const { date, locationList } = require("../utils/utils.js");
 const { Weather } = require("../../infra/mysql");
 
 const serviceKey = config.WEATHER_KEY;
-
-function calculateForecastHour(hour) {
-  return (Math.floor((hour + 1) / 3) - 1) * 3 + 2;
-}
-
-function getForecastDate(timestamp) {
+const { forecastDate, forecastTime } = (timestamp => {
   let hour = timestamp.hour();
   const minute = timestamp.minute();
   let dayCalibrate = 0;
@@ -19,7 +14,8 @@ function getForecastDate(timestamp) {
     hour -= 1;
   }
 
-  hour = calculateForecastHour(hour);
+  // mid forecast hour
+  hour = (Math.floor((hour + 1) / 3) - 1) * 3 + 2;
 
   if (hour < 0) {
     hour = 23;
@@ -28,10 +24,9 @@ function getForecastDate(timestamp) {
 
   return {
     forecastDate: date.dayCalibrate(timestamp, dayCalibrate),
-    forecastTime: hour < 10 ? `0${hour}00` : `${hour}00`,
-    targetTime: hour
+    forecastTime: hour < 10 ? `0${hour}00` : `${hour}00`
   };
-}
+})(moment().tz("Asia/Seoul"));
 
 const saveItem = (obj, item, value, city) => {
   const result = obj;
@@ -90,7 +85,7 @@ const isPossible = status => {
   return false;
 };
 
-const getForecast = (target, forecastDate, forecastTime) => {
+const getForecast = location => {
   return axios
     .get(
       `http://newsky2.kma.go.kr/service/SecndSrtpdFrcstInfoService2/ForecastSpaceData`,
@@ -99,8 +94,8 @@ const getForecast = (target, forecastDate, forecastTime) => {
           ServiceKey: decodeURIComponent(serviceKey),
           base_date: forecastDate,
           base_time: forecastTime,
-          nx: target.nx,
-          ny: target.ny,
+          nx: location.nx,
+          ny: location.ny,
           numOfRows: 184,
           _type: "json"
         }
@@ -111,48 +106,41 @@ const getForecast = (target, forecastDate, forecastTime) => {
 
       const data = result.data.response.body.items.item;
 
-      return sliceData(data, target.region, forecastDate, forecastTime);
+      return sliceData(data, location.city);
     });
 };
 
-module.exports = () => {
-  const { forecastDate, forecastTime } = getForecastDate(
-    moment().tz("Asia/Seoul")
-  );
+const saveMidForecast = () => {
+  axios.all(locationList.map(location => getForecast(location))).then(res => {
+    res.forEach(result => {
+      Object.keys(result).forEach(async key => {
+        const fcstDate = key.split(":")[0];
+        const fcstTime = key.split(":")[1];
 
-  axios
-    .all(
-      locationList.map(target =>
-        getForecast(target, forecastDate, forecastTime)
-      )
-    )
-    .then(res => {
-      res.forEach(result => {
-        Object.keys(result).forEach(async key => {
-          const fcstDate = key.split(":")[0];
-          const fcstTime = key.split(":")[1];
-
-          await Weather.findOne({
-            where: {
-              city: result[key].city,
-              weather_date: date.dateQuery(fcstDate, fcstTime)
-            }
-          }).then(response => {
-            if (response) {
-              response.update(result[key]);
-            } else {
-              Weather.create(result[key]);
-            }
-          });
+        await Weather.findOne({
+          where: {
+            city: result[key].city,
+            weather_date: date.dateQuery(fcstDate, fcstTime)
+          }
+        }).then(response => {
+          if (response) {
+            response.update(result[key]);
+          } else {
+            Weather.create(result[key]);
+          }
         });
       });
-    })
-    .then(() => {
-      console.log(`[mid_forecast][SUCCESS][${forecastDate}${forecastTime}]`);
-    })
-    .catch(err => {
-      console.log(
-        `[mid_forecast][FAIL][${err.message}][${forecastDate}${forecastTime}]`
-      );
     });
+  });
+};
+
+module.exports = () => {
+  try {
+    saveMidForecast();
+    console.log(`[mid_forecast][SUCCESS][${forecastDate}${forecastTime}]`);
+  } catch (err) {
+    console.log(
+      `[mid_forecast][FAIL][${err.message}][${forecastDate}${forecastTime}]`
+    );
+  }
 };

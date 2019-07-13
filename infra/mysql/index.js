@@ -46,11 +46,11 @@ db.sequelizeConnect = callback => {
     .sync({ force: true })
     .then(() => {
       db.Region.sync().then(() => {
-        locationList.forEach(async target => {
-          await db.Region.findOne({ where: { city: target.region } }).then(
+        locationList.forEach(async location => {
+          await db.Region.findOne({ where: { city: location.city } }).then(
             async response => {
               if (!response) {
-                await db.Region.create({ city: target.region });
+                await db.Region.create({ city: location.city });
               }
             }
           );
