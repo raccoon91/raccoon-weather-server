@@ -27,14 +27,18 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.FLOAT,
         allowNull: true
       },
+      type: {
+        type: DataTypes.STRING(10),
+        allowNull: false
+      },
+      hour: {
+        type: DataTypes.STRING(5),
+        allowNull: false
+      },
       weather_date: {
         type: DataTypes.DATE,
         allowNull: false,
         unique: false
-      },
-      type: {
-        type: DataTypes.STRING(10),
-        allowNull: false
       }
     },
     {

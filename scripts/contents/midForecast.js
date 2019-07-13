@@ -45,6 +45,7 @@ const saveItem = (obj, item, value, city) => {
         String(item.fcstDate),
         String(item.fcstTime)
       ),
+      hour: String(item.fcstTime).slice(0, 2),
       type: "mid"
     };
     result[`${item.fcstDate}:${item.fcstTime}`][value] = item.fcstValue;

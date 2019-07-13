@@ -27,29 +27,13 @@ const getcurrentDate = timestamp => {
   };
 };
 
-const sliceData = async (data, city, currentDate, currentTime) => {
+const sliceData = (data, city, currentDate, currentTime) => {
   const result = {
     city,
     weather_date: date.dateQuery(currentDate, currentTime),
+    hour: currentTime.slice(0, 2),
     type: "current"
   };
-
-  await Weather.findOne({
-    where: {
-      city,
-      type: "short"
-    },
-    order: [["weather_date", "ASC"]],
-    attributes: ["sky", "pty", "pop"]
-  }).then(res => {
-    if (res) {
-      const response = res.dataValues;
-
-      result.sky = response.sky;
-      result.pty = response.pty;
-      result.pop = response.pop;
-    }
-  });
 
   data.forEach(item => {
     switch (item.category) {
@@ -117,10 +101,46 @@ module.exports = () => {
             city: result.city,
             weather_date: result.weather_date
           }
-        }).then(response => {
+        }).then(async response => {
           if (response) {
+            if (!response.dataValues.sky) {
+              await Weather.findOne({
+                where: {
+                  city: result.city,
+                  type: "short"
+                },
+                order: [["weather_date", "ASC"]],
+                attributes: ["sky", "pty", "pop"]
+              }).then(res => {
+                if (res) {
+                  const response = res.dataValues;
+
+                  result.sky = response.sky;
+                  result.pty = response.pty;
+                  result.pop = response.pop;
+                }
+              });
+            }
+
             response.update(result);
           } else {
+            await Weather.findOne({
+              where: {
+                city: result.city,
+                type: "short"
+              },
+              order: [["weather_date", "ASC"]],
+              attributes: ["sky", "pty", "pop"]
+            }).then(res => {
+              if (res) {
+                const response = res.dataValues;
+
+                result.sky = response.sky;
+                result.pty = response.pty;
+                result.pop = response.pop;
+              }
+            });
+
             Weather.create(result);
           }
         });

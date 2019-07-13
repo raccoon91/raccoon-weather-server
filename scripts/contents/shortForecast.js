@@ -39,6 +39,7 @@ const saveItem = (obj, item, value, city) => {
         String(item.fcstDate),
         String(item.fcstTime)
       ),
+      hour: String(item.fcstTime).slice(0, 2),
       type: "short"
     };
     result[`${item.fcstDate}:${item.fcstTime}`][value] = item.fcstValue;
@@ -142,10 +143,42 @@ module.exports = () => {
               city: result[key].city,
               weather_date: date.dateQuery(fcstDate, fcstTime)
             }
-          }).then(response => {
+          }).then(async response => {
             if (response) {
+              if (!response.dataValues.pop) {
+                await Weather.findOne({
+                  where: {
+                    city: result[key].city,
+                    type: "mid"
+                  },
+                  order: [["weather_date", "ASC"]],
+                  attributes: ["pop"]
+                }).then(res => {
+                  if (res) {
+                    const response = res.dataValues;
+
+                    result[key].pop = response.pop;
+                  }
+                });
+              }
+
               response.update(result[key]);
             } else {
+              await Weather.findOne({
+                where: {
+                  city: result[key].city,
+                  type: "mid"
+                },
+                order: [["weather_date", "ASC"]],
+                attributes: ["pop"]
+              }).then(res => {
+                if (res) {
+                  const response = res.dataValues;
+
+                  result[key].pop = response.pop;
+                }
+              });
+
               Weather.create(result[key]);
             }
           });
