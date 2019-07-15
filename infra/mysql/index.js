@@ -11,6 +11,7 @@ const config = {
     host: tok[0],
     port: tok[1],
     dialect: "mysql",
+    timezone: "+09:00",
     define: {
       charset: "utf8mb4"
     },
@@ -45,7 +46,7 @@ db.Airpollution.belongsTo(db.Region, { foreignKey: "city" });
 
 db.sequelizeConnect = callback => {
   sequelize
-    .sync()
+    .sync({ force: true })
     .then(() => {
       db.Region.sync().then(() => {
         locationList.forEach(async location => {
