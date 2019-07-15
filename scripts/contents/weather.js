@@ -94,7 +94,7 @@ const saveWeather = () => {
           }
         }).then(async response => {
           if (response) {
-            if (!response.dataValues.sky) {
+            if (!response.dataValues.pop) {
               await Weather.findOne({
                 where: {
                   city: result.city,

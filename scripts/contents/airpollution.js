@@ -124,7 +124,20 @@ const saveAirpollution = () => {
       })
     )
     .then(res => {
-      Airpollution.bulkCreate(res, { ignoreDuplicates: true });
+      res.forEach(result => {
+        Airpollution.findOne({
+          where: {
+            city: result.city,
+            air_date: result.air_date
+          }
+        }).then(async response => {
+          if (response) {
+            response.update(result);
+          } else {
+            Airpollution.create(result);
+          }
+        });
+      });
     });
 };
 
