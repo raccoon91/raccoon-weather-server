@@ -37,9 +37,12 @@ db.Sequelize = Sequelize;
 
 db.Region = require("./region.js")(sequelize, Sequelize);
 db.Weather = require("./weather.js")(sequelize, Sequelize);
+db.Airpollution = require("./airpollution.js")(sequelize, Sequelize);
 
-db.Weather.belongsTo(db.Region, { foreignKey: "city" });
 db.Region.hasMany(db.Weather, { foreignKey: "city" });
+db.Region.hasMany(db.Airpollution, { foreignKey: "city" });
+db.Weather.belongsTo(db.Region, { foreignKey: "city" });
+db.Airpollution.belongsTo(db.Region, { foreignKey: "city" });
 
 db.sequelizeConnect = callback => {
   sequelize
