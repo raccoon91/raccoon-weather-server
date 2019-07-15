@@ -46,7 +46,7 @@ db.Airpollution.belongsTo(db.Region, { foreignKey: "city" });
 
 db.sequelizeConnect = callback => {
   sequelize
-    .sync({ force: true })
+    .sync()
     .then(() => {
       db.Region.sync().then(() => {
         locationList.forEach(async location => {
