@@ -5,7 +5,8 @@ const { date, locationList } = require("../utils/utils.js");
 const { Weather } = require("../../infra/mysql");
 
 const serviceKey = config.WEATHER_KEY;
-const { currentDate, currentTime } = (timestamp => {
+
+const getCurrentDate = timestamp => {
   let hour = timestamp.hour();
   const minute = timestamp.minute();
   let dayCalibrate = 0;
@@ -24,9 +25,9 @@ const { currentDate, currentTime } = (timestamp => {
     yesterday: date.dayCalibrate(timestamp, dayCalibrate + 1),
     currentTime: hour < 10 ? `0${hour}00` : `${hour}00`
   };
-})(moment().tz("Asia/Seoul"));
+};
 
-const sliceData = (data, city) => {
+const sliceData = (data, city, currentDate, currentTime) => {
   const result = {
     city,
     weather_date: date.dateQuery(currentDate, currentTime),
@@ -58,7 +59,7 @@ const isPossible = status => {
   return false;
 };
 
-const getCurrentWeather = location => {
+const getCurrentWeather = (location, currentDate, currentTime) => {
   return axios
     .get(
       `http://newsky2.kma.go.kr/service/SecndSrtpdFrcstInfoService2/ForecastGrib`,
@@ -78,13 +79,17 @@ const getCurrentWeather = location => {
 
       const data = result.data.response.body.items.item;
 
-      return sliceData(data, location.city);
+      return sliceData(data, location.city, currentDate, currentTime);
     });
 };
 
-const saveWeather = () => {
+const saveWeather = (currentDate, currentTime) => {
   axios
-    .all(locationList.map(location => getCurrentWeather(location)))
+    .all(
+      locationList.map(location =>
+        getCurrentWeather(location, currentDate, currentTime)
+      )
+    )
     .then(res => {
       res.forEach(result => {
         Weather.findOne({
@@ -140,8 +145,12 @@ const saveWeather = () => {
 };
 
 module.exports = () => {
+  const { currentDate, currentTime } = getCurrentDate(
+    moment().tz("Asia/Seoul")
+  );
+
   try {
-    saveWeather();
+    saveWeather(currentDate, currentTime);
     console.log(
       `[weather][SUCCESS][${currentDate}${currentTime}][${date.dateLog(
         moment.tz("Asia/Seoul")

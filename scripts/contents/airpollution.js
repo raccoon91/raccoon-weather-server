@@ -6,11 +6,6 @@ const { Airpollution } = require("../../infra/mysql");
 
 const serviceKey = config.WEATHER_KEY;
 
-const today = moment()
-  .tz("Asia/Seoul")
-  .format("YYYY-MM-DD");
-const tomorrow = date.tomorrow(moment().tz("Asia/Seoul"));
-
 const sliceForecastData = (data, code) => {
   const result = {};
 
@@ -60,7 +55,7 @@ const isPossible = status => {
   return false;
 };
 
-const getAirForecast = code => {
+const getAirForecast = (code, today, tomorrow) => {
   return axios
     .get(
       `http://openapi.airkorea.or.kr/openapi/services/rest/ArpltnInforInqireSvc/getMinuDustFrcstDspth`,
@@ -110,13 +105,13 @@ const getAirpollution = itemCode => {
     });
 };
 
-const saveAirpollution = () => {
+const saveAirpollution = (today, tomorrow) => {
   axios
     .all([
       getAirpollution("PM10"),
       getAirpollution("PM25"),
-      getAirForecast("PM10"),
-      getAirForecast("PM25")
+      getAirForecast("PM10", today, tomorrow),
+      getAirForecast("PM25", today, tomorrow)
     ])
     .then(
       axios.spread((pm10, pm25, pm10Forecast, pm25Forecast) => {
@@ -142,8 +137,13 @@ const saveAirpollution = () => {
 };
 
 module.exports = () => {
+  const today = moment()
+    .tz("Asia/Seoul")
+    .format("YYYY-MM-DD");
+  const tomorrow = date.tomorrow(moment().tz("Asia/Seoul"));
+
   try {
-    saveAirpollution();
+    saveAirpollution(today, tomorrow);
     console.log(
       `[airpollution][SUCCESS][${today}][${date.dateLog(
         moment.tz("Asia/Seoul")

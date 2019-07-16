@@ -5,7 +5,8 @@ const { date, locationList } = require("../utils/utils.js");
 const { Weather } = require("../../infra/mysql");
 
 const serviceKey = config.WEATHER_KEY;
-const { forecastDate, forecastTime } = (timestamp => {
+
+const getForecastDate = timestamp => {
   let hour = timestamp.hour();
   const minute = timestamp.minute();
   let dayCalibrate = 0;
@@ -23,7 +24,7 @@ const { forecastDate, forecastTime } = (timestamp => {
     forecastDate: date.dayCalibrate(timestamp, dayCalibrate),
     forecastTime: hour < 10 ? `0${hour}00` : `${hour}00`
   };
-})(moment().tz("Asia/Seoul"));
+};
 
 const saveItem = (obj, item, value, city) => {
   const result = obj;
@@ -79,7 +80,7 @@ const isPossible = status => {
   return false;
 };
 
-const getForecast = location => {
+const getForecast = (location, forecastDate, forecastTime) => {
   return axios
     .get(
       `http://newsky2.kma.go.kr/service/SecndSrtpdFrcstInfoService2/ForecastTimeData`,
@@ -104,36 +105,60 @@ const getForecast = location => {
     });
 };
 
-const saveShortForecast = () => {
-  axios.all(locationList.map(location => getForecast(location))).then(res => {
-    res.forEach(result => {
-      Object.keys(result).forEach(async key => {
-        const fcstDate = key.split(":")[0];
-        const fcstTime = key.split(":")[1];
+const saveShortForecast = (forecastDate, forecastTime) => {
+  axios
+    .all(
+      locationList.map(location =>
+        getForecast(location, forecastDate, forecastTime)
+      )
+    )
+    .then(res => {
+      res.forEach(result => {
+        Object.keys(result).forEach(async key => {
+          const fcstDate = key.split(":")[0];
+          const fcstTime = key.split(":")[1];
 
-        await Weather.findOne({
-          where: {
-            city: result[key].city,
-            type: "mid"
-          },
-          order: [["weather_date", "ASC"]],
-          attributes: ["pop"]
-        }).then(res => {
-          if (res) {
-            const response = res.dataValues;
+          await Weather.findOne({
+            where: {
+              city: result[key].city,
+              type: "mid"
+            },
+            order: [["weather_date", "ASC"]],
+            attributes: ["pop"]
+          }).then(res => {
+            if (res) {
+              const response = res.dataValues;
 
-            result[key].pop = response.pop;
-          }
-        });
+              result[key].pop = response.pop;
+            }
+          });
 
-        await Weather.findOne({
-          where: {
-            city: result[key].city,
-            weather_date: date.dateQuery(fcstDate, fcstTime)
-          }
-        }).then(async response => {
-          if (response) {
-            if (!response.dataValues.pop) {
+          await Weather.findOne({
+            where: {
+              city: result[key].city,
+              weather_date: date.dateQuery(fcstDate, fcstTime)
+            }
+          }).then(async response => {
+            if (response) {
+              if (!response.dataValues.pop) {
+                await Weather.findOne({
+                  where: {
+                    city: result[key].city,
+                    type: "mid"
+                  },
+                  order: [["weather_date", "ASC"]],
+                  attributes: ["pop"]
+                }).then(res => {
+                  if (res) {
+                    const response = res.dataValues;
+
+                    result[key].pop = response.pop;
+                  }
+                });
+              }
+
+              response.update(result[key]);
+            } else {
               await Weather.findOne({
                 where: {
                   city: result[key].city,
@@ -148,36 +173,22 @@ const saveShortForecast = () => {
                   result[key].pop = response.pop;
                 }
               });
+
+              Weather.create(result[key]);
             }
-
-            response.update(result[key]);
-          } else {
-            await Weather.findOne({
-              where: {
-                city: result[key].city,
-                type: "mid"
-              },
-              order: [["weather_date", "ASC"]],
-              attributes: ["pop"]
-            }).then(res => {
-              if (res) {
-                const response = res.dataValues;
-
-                result[key].pop = response.pop;
-              }
-            });
-
-            Weather.create(result[key]);
-          }
+          });
         });
       });
     });
-  });
 };
 
 module.exports = () => {
+  const { forecastDate, forecastTime } = getForecastDate(
+    moment().tz("Asia/Seoul")
+  );
+
   try {
-    saveShortForecast();
+    saveShortForecast(forecastDate, forecastTime);
     console.log(
       `[short_forecast][SUCCESS][${forecastDate}${forecastTime}][${date.dateLog(
         moment.tz("Asia/Seoul")
