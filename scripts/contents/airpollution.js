@@ -144,8 +144,16 @@ const saveAirpollution = () => {
 module.exports = () => {
   try {
     saveAirpollution();
-    console.log(`[airpollution][SUCCESS][${today}]`);
+    console.log(
+      `[airpollution][SUCCESS][${today}][${date.dateLog(
+        moment.tz("Asia/Seoul")
+      )}]`
+    );
   } catch (err) {
-    console.log(`[airpollution][FAIL][${err.message}][${today}]`);
+    console.warn(
+      `[airpollution][FAIL][${err.message}][${today}][${date.dateLog(
+        moment.tz("Asia/Seoul")
+      )}]`
+    );
   }
 };

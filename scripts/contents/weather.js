@@ -142,10 +142,18 @@ const saveWeather = () => {
 module.exports = () => {
   try {
     saveWeather();
-    console.log(`[weather][SUCCESS][${currentDate}${currentTime}]`);
-  } catch (err) {
     console.log(
-      `[weather][FAIL][${err.message}][${currentDate}${currentTime}]`
+      `[weather][SUCCESS][${currentDate}${currentTime}][${date.dateLog(
+        moment.tz("Asia/Seoul")
+      )}]`
+    );
+  } catch (err) {
+    console.warn(
+      `[weather][FAIL][${
+        err.message
+      }][${currentDate}${currentTime}][${date.dateLog(
+        moment.tz("Asia/Seoul")
+      )}]`
     );
   }
 };

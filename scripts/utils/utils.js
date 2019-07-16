@@ -13,6 +13,9 @@ const date = {
       4,
       6
     )}-${currentDate.slice(6)} ${currentTime.slice(0, 2)}:00:00`;
+  },
+  dateLog(timestamp) {
+    return timestamp.format("YYYY-MM-DD/HH:mm:ss");
   }
 };
 

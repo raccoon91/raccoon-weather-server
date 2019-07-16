@@ -178,10 +178,18 @@ const saveShortForecast = () => {
 module.exports = () => {
   try {
     saveShortForecast();
-    console.log(`[short_forecast][SUCCESS][${forecastDate}${forecastTime}]`);
-  } catch (err) {
     console.log(
-      `[short_forecast][FAIL][${err.message}][${forecastDate}${forecastTime}]`
+      `[short_forecast][SUCCESS][${forecastDate}${forecastTime}][${date.dateLog(
+        moment.tz("Asia/Seoul")
+      )}]`
+    );
+  } catch (err) {
+    console.warn(
+      `[short_forecast][FAIL][${
+        err.message
+      }][${forecastDate}${forecastTime}][${date.dateLog(
+        moment.tz("Asia/Seoul")
+      )}]`
     );
   }
 };

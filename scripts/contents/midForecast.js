@@ -137,10 +137,18 @@ const saveMidForecast = () => {
 module.exports = () => {
   try {
     saveMidForecast();
-    console.log(`[mid_forecast][SUCCESS][${forecastDate}${forecastTime}]`);
-  } catch (err) {
     console.log(
-      `[mid_forecast][FAIL][${err.message}][${forecastDate}${forecastTime}]`
+      `[mid_forecast][SUCCESS][${forecastDate}${forecastTime}][${date.dateLog(
+        moment.tz("Asia/Seoul")
+      )}]`
+    );
+  } catch (err) {
+    console.warn(
+      `[mid_forecast][FAIL][${
+        err.message
+      }][${forecastDate}${forecastTime}][${date.dateLog(
+        moment.tz("Asia/Seoul")
+      )}]`
     );
   }
 };
