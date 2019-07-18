@@ -59,110 +59,104 @@ const isPossible = status => {
   return false;
 };
 
-const getCurrentWeather = (location, currentDate, currentTime) => {
-  return axios
-    .get(
-      `http://newsky2.kma.go.kr/service/SecndSrtpdFrcstInfoService2/ForecastGrib`,
-      {
-        params: {
-          ServiceKey: decodeURIComponent(serviceKey),
-          base_date: currentDate,
-          base_time: currentTime,
-          nx: location.nx,
-          ny: location.ny,
-          _type: "json"
-        }
+const getCurrentWeather = async (location, currentDate, currentTime) => {
+  const response = await axios.get(
+    `http://newsky2.kma.go.kr/service/SecndSrtpdFrcstInfoService2/ForecastGrib`,
+    {
+      params: {
+        ServiceKey: decodeURIComponent(serviceKey),
+        base_date: currentDate,
+        base_time: currentTime,
+        nx: location.nx,
+        ny: location.ny,
+        _type: "json"
       }
-    )
-    .then(result => {
-      if (!isPossible(result.status)) throw new Error("request error");
+    }
+  );
 
-      const data = result.data.response.body.items.item;
+  if (!isPossible(response.status)) throw new Error("request error");
 
-      return sliceData(data, location.city, currentDate, currentTime);
-    });
+  const data = response.data.response.body.items.item;
+
+  return sliceData(data, location.city, currentDate, currentTime);
 };
 
-const saveWeather = (currentDate, currentTime) => {
-  axios
-    .all(
-      locationList.map(location =>
-        getCurrentWeather(location, currentDate, currentTime)
-      )
-    )
-    .then(res => {
-      res.forEach(result => {
-        Weather.findOne({
-          where: {
-            city: result.city,
-            weather_date: result.weather_date
-          }
-        }).then(async response => {
-          if (response) {
-            if (!response.dataValues.pop) {
-              await Weather.findOne({
-                where: {
-                  city: result.city,
-                  type: "short"
-                },
-                order: [["weather_date", "ASC"]],
-                attributes: ["sky", "pty", "pop"]
-              }).then(res => {
-                if (res) {
-                  const response = res.dataValues;
+const fillEmptyAttribute = async result => {
+  const weather = await Weather.findOne({
+    where: {
+      city: result.city,
+      type: "short"
+    },
+    order: [["weather_date", "ASC"]],
+    attributes: ["sky", "pty", "pop"]
+  });
 
-                  result.sky = response.sky;
-                  result.pty = response.pty;
-                  result.pop = response.pop;
-                }
-              });
-            }
+  if (weather) {
+    const weatherData = weather.dataValues;
 
-            response.update(result);
-          } else {
-            await Weather.findOne({
-              where: {
-                city: result.city,
-                type: "short"
-              },
-              order: [["weather_date", "ASC"]],
-              attributes: ["sky", "pty", "pop"]
-            }).then(res => {
-              if (res) {
-                const response = res.dataValues;
+    result.sky = weatherData.sky;
+    result.pty = weatherData.pty;
+    result.pop = weatherData.pop;
+  }
 
-                result.sky = response.sky;
-                result.pty = response.pty;
-                result.pop = response.pop;
-              }
-            });
-
-            Weather.create(result);
-          }
-        });
-      });
-    });
+  return result;
 };
 
-module.exports = () => {
+const bulkUpdateOrCreate = async (weather, response) => {
+  if (weather) {
+    let result = response;
+
+    if (!weather.dataValues.pop) {
+      result = await fillEmptyAttribute(response);
+    }
+
+    weather.update(result);
+  } else {
+    const result = await fillEmptyAttribute(response);
+
+    Weather.create(result);
+  }
+};
+
+const saveWeather = async (currentDate, currentTime) => {
+  const response = await axios.all(
+    locationList.map(location =>
+      getCurrentWeather(location, currentDate, currentTime)
+    )
+  );
+
+  for (let i = 0; i < response.length; i++) {
+    const weather = await Weather.findOne({
+      where: {
+        city: response[i].city,
+        weather_date: response[i].weather_date
+      }
+    });
+
+    await bulkUpdateOrCreate(weather, response[i]);
+  }
+};
+
+module.exports = async () => {
   const { currentDate, currentTime } = getCurrentDate(
     moment().tz("Asia/Seoul")
   );
 
   try {
-    saveWeather(currentDate, currentTime);
+    await saveWeather(currentDate, currentTime);
     console.log(
       `[weather][SUCCESS][${currentDate}${currentTime}][${date.dateLog(
         moment.tz("Asia/Seoul")
       )}]`
     );
   } catch (err) {
-    console.warn(
+    console.error(
       `[weather][FAIL][${
         err.message
       }][${currentDate}${currentTime}][${date.dateLog(
         moment.tz("Asia/Seoul")
       )}]`
     );
+    console.error(err.stack);
   }
 };
