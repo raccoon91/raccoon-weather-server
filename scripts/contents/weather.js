@@ -81,10 +81,10 @@ const getCurrentWeather = async (location, currentDate, currentTime) => {
   return sliceData(data, location.city, currentDate, currentTime);
 };
 
-const fillEmptyAttribute = async result => {
+const fillEmptyAttribute = async response => {
   const weather = await Weather.findOne({
     where: {
-      city: result.city,
+      city: response.city,
       type: "short"
     },
     order: [["weather_date", "ASC"]],
@@ -94,12 +94,12 @@ const fillEmptyAttribute = async result => {
   if (weather) {
     const weatherData = weather.dataValues;
 
-    result.sky = weatherData.sky;
-    result.pty = weatherData.pty;
-    result.pop = weatherData.pop;
+    response.sky = weatherData.sky;
+    response.pty = weatherData.pty;
+    response.pop = weatherData.pop;
   }
 
-  return result;
+  return response;
 };
 
 const bulkUpdateOrCreate = async (weather, response) => {

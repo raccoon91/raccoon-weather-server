@@ -86,59 +86,57 @@ const isPossible = status => {
   return false;
 };
 
-const getForecast = (location, forecastDate, forecastTime) => {
-  return axios
-    .get(
-      `http://newsky2.kma.go.kr/service/SecndSrtpdFrcstInfoService2/ForecastSpaceData`,
-      {
-        params: {
-          ServiceKey: decodeURIComponent(serviceKey),
-          base_date: forecastDate,
-          base_time: forecastTime,
-          nx: location.nx,
-          ny: location.ny,
-          numOfRows: 184,
-          _type: "json"
-        }
+const getForecast = async (location, forecastDate, forecastTime) => {
+  const response = await axios.get(
+    `http://newsky2.kma.go.kr/service/SecndSrtpdFrcstInfoService2/ForecastSpaceData`,
+    {
+      params: {
+        ServiceKey: decodeURIComponent(serviceKey),
+        base_date: forecastDate,
+        base_time: forecastTime,
+        nx: location.nx,
+        ny: location.ny,
+        numOfRows: 184,
+        _type: "json"
       }
-    )
-    .then(result => {
-      if (!isPossible(result.status)) throw new Error("request error");
+    }
+  );
 
-      const data = result.data.response.body.items.item;
+  if (!isPossible(response.status)) throw new Error("request error");
 
-      return sliceData(data, location.city);
-    });
+  const data = response.data.response.body.items.item;
+
+  return sliceData(data, location.city);
 };
 
-const saveMidForecast = (forecastDate, forecastTime) => {
-  axios
-    .all(
-      locationList.map(location =>
-        getForecast(location, forecastDate, forecastTime)
-      )
+const saveMidForecast = async (forecastDate, forecastTime) => {
+  const response = await axios.all(
+    locationList.map(location =>
+      getForecast(location, forecastDate, forecastTime)
     )
-    .then(res => {
-      res.forEach(result => {
-        Object.keys(result).forEach(async key => {
-          const fcstDate = key.split(":")[0];
-          const fcstTime = key.split(":")[1];
+  );
 
-          await Weather.findOne({
-            where: {
-              city: result[key].city,
-              weather_date: date.dateQuery(fcstDate, fcstTime)
-            }
-          }).then(response => {
-            if (response) {
-              response.update(result[key]);
-            } else {
-              Weather.create(result[key]);
-            }
-          });
-        });
+  for (let i = 0; i < response.length; i++) {
+    const forecastTime = Object.keys(response[i]);
+
+    for (let j = 0; j < forecastTime.length; j++) {
+      const fcstDate = forecastTime[j].split(":")[0];
+      const fcstTime = forecastTime[j].split(":")[1];
+
+      const weather = await Weather.findOne({
+        where: {
+          city: response[i][forecastTime[j]].city,
+          weather_date: date.dateQuery(fcstDate, fcstTime)
+        }
       });
-    });
+
+      if (weather) {
+        weather.update(response[i][forecastTime[j]]);
+      } else {
+        Weather.create(response[i][forecastTime[j]]);
+      }
+    }
+  }
 };
 
 module.exports = () => {
