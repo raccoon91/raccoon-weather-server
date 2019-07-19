@@ -6,42 +6,19 @@ const { Airpollution } = require("../../infra/mysql");
 
 const serviceKey = config.WEATHER_KEY;
 
-const sliceForecastData = (data, code) => {
-  const result = {};
-
-  data.forEach(item => {
-    item.informGrade.split(",").forEach(inform => {
-      const air = inform.split(" : ")[1];
-      let city = inform.split(" : ")[0];
-
-      if (city === "영동" || city === "영서") {
-        city = "강원";
-      } else if (city === "경기남부" || city === "경기북부") {
-        city = "경기";
-      }
-
-      result[city] = {
-        [code]: air
-      };
-    });
-  });
-
-  return result;
-};
-
-const sliceData = (pm10, pm25, pm10Forecast, pm25Forecast) => {
+const sliceData = (pm10, pm25) => {
   const result = [];
+
   Object.keys(airpollutionLocation).forEach(city_en => {
-    const temp = {
+    const currentAir = {
       city: airpollutionLocation[city_en],
       pm10: pm10[city_en],
       pm25: pm25[city_en],
-      pm10_tomorrow: pm10Forecast[airpollutionLocation[city_en]].pm10,
-      pm25_tomorrow: pm25Forecast[airpollutionLocation[city_en]].pm25,
-      air_date: moment().tz("Asia/Seoul")
+      air_date: moment().tz("Asia/Seoul"),
+      type: "current"
     };
 
-    result.push(temp);
+    result.push(currentAir);
   });
 
   return result;
@@ -55,105 +32,70 @@ const isPossible = status => {
   return false;
 };
 
-const getAirForecast = (code, today, tomorrow) => {
-  return axios
-    .get(
-      `http://openapi.airkorea.or.kr/openapi/services/rest/ArpltnInforInqireSvc/getMinuDustFrcstDspth`,
-      {
-        params: {
-          ServiceKey: decodeURIComponent(serviceKey),
-          searchDate: today,
-          informCode: code,
-          _returnType: "json"
-        }
+const getAirpollution = async itemCode => {
+  const response = await axios.get(
+    `http://openapi.airkorea.or.kr/openapi/services/rest/ArpltnInforInqireSvc/getCtprvnMesureLIst`,
+    {
+      params: {
+        ServiceKey: decodeURIComponent(serviceKey),
+        itemCode,
+        dataGubun: "HOUR",
+        searchCondition: "WEEK",
+        pageNo: 1,
+        numOfRows: 1,
+        _returnType: "json"
       }
-    )
-    .then(result => {
-      if (!isPossible(result.status)) throw new Error("request error");
+    }
+  );
 
-      let list = result.data.list;
-      const dataTime = list[0].f_data_time;
+  if (!isPossible(response.status)) throw new Error("request error");
 
-      list = list.filter(item => {
-        return item.f_data_time === dataTime && item.f_inform_data === tomorrow;
-      });
-
-      return sliceForecastData(list, code.toLowerCase());
-    });
+  return response.data.list[0];
 };
 
-const getAirpollution = itemCode => {
-  return axios
-    .get(
-      `http://openapi.airkorea.or.kr/openapi/services/rest/ArpltnInforInqireSvc/getCtprvnMesureLIst`,
-      {
-        params: {
-          ServiceKey: decodeURIComponent(serviceKey),
-          itemCode,
-          dataGubun: "HOUR",
-          searchCondition: "WEEK",
-          pageNo: 1,
-          numOfRows: 1,
-          _returnType: "json"
-        }
+const saveAirpollution = async () => {
+  const [pm10, pm25] = await axios.all([
+    getAirpollution("PM10"),
+    getAirpollution("PM25")
+  ]);
+
+  const result = sliceData(pm10, pm25);
+
+  for (let i = 0; i < result.length; i++) {
+    const weather = await Airpollution.findOne({
+      where: {
+        city: result[i].city,
+        air_date: result[i].air_date
       }
-    )
-    .then(result => {
-      if (!isPossible(result.status)) throw new Error("request error");
-
-      return result.data.list[0];
     });
-};
 
-const saveAirpollution = (today, tomorrow) => {
-  axios
-    .all([
-      getAirpollution("PM10"),
-      getAirpollution("PM25"),
-      getAirForecast("PM10", today, tomorrow),
-      getAirForecast("PM25", today, tomorrow)
-    ])
-    .then(
-      axios.spread((pm10, pm25, pm10Forecast, pm25Forecast) => {
-        return sliceData(pm10, pm25, pm10Forecast, pm25Forecast);
-      })
-    )
-    .then(res => {
-      res.forEach(result => {
-        Airpollution.findOne({
-          where: {
-            city: result.city,
-            air_date: result.air_date
-          }
-        }).then(async response => {
-          if (response) {
-            response.update(result);
-          } else {
-            Airpollution.create(result);
-          }
-        });
-      });
-    });
+    if (weather) {
+      weather.update(result[i]);
+    } else {
+      Airpollution.create(result[i]);
+    }
+  }
 };
 
 module.exports = () => {
   const today = moment()
     .tz("Asia/Seoul")
     .format("YYYY-MM-DD");
-  const tomorrow = date.tomorrow(moment().tz("Asia/Seoul"));
 
   try {
-    saveAirpollution(today, tomorrow);
+    saveAirpollution();
+
     console.log(
       `[airpollution][SUCCESS][${today}][${date.dateLog(
         moment.tz("Asia/Seoul")
       )}]`
     );
   } catch (err) {
-    console.warn(
+    console.error(
       `[airpollution][FAIL][${err.message}][${today}][${date.dateLog(
         moment.tz("Asia/Seoul")
       )}]`
     );
+    console.error(err.stack);
   }
 };

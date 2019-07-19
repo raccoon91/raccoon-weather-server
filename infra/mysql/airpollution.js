@@ -15,16 +15,12 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(5),
         allowNull: false
       },
-      pm10_tomorrow: {
-        type: DataTypes.STRING(5),
-        allowNull: true
-      },
-      pm25_tomorrow: {
-        type: DataTypes.STRING(5),
-        allowNull: true
-      },
       air_date: {
         type: DataTypes.DATEONLY,
+        allowNull: false
+      },
+      type: {
+        type: DataTypes.STRING(10),
         allowNull: false
       }
     },
