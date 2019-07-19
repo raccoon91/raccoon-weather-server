@@ -11,4 +11,31 @@ router.get("/", (req, res) => {
     .catch(console.warn);
 });
 
+router.get("/weather", async (req, res) => {
+  const weather = await Weather.findOne({
+    where: { city: "서울", type: "current" },
+    order: [["weather_date", "DESC"]],
+    attributes: [
+      "city",
+      "temp",
+      "yesterday_temp",
+      "sky",
+      "pty",
+      "pop",
+      "humidity",
+      "hour"
+    ]
+  });
+
+  const air = await Airpollution.findOne({
+    where: { city: "서울", type: "current" },
+    order: [["air_date", "DESC"]]
+  });
+
+  weather.pm10 = air.pm10;
+  weather.pm25 = air.pm25;
+
+  res.json(weather);
+});
+
 module.exports = router;
