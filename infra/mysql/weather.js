@@ -11,6 +11,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.FLOAT,
         allowNull: true
       },
+      yesterday_temp: {
+        type: DataTypes.FLOAT,
+        allowNull: true
+      },
       sky: {
         type: DataTypes.INTEGER,
         allowNull: true

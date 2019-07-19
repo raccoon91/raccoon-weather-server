@@ -81,7 +81,7 @@ const getCurrentWeather = async (location, currentDate, currentTime) => {
   return sliceData(data, location.city, currentDate, currentTime);
 };
 
-const fillEmptyAttribute = async response => {
+const fillEmptyAttribute = async (response, yesterday, currentTime) => {
   const weather = await Weather.findOne({
     where: {
       city: response.city,
@@ -89,6 +89,13 @@ const fillEmptyAttribute = async response => {
     },
     order: [["weather_date", "ASC"]],
     attributes: ["sky", "pty", "pop"]
+  });
+
+  const yesterdayWeather = await Weather.findOne({
+    where: {
+      city: response.city,
+      weather_date: date.dateQuery(yesterday, currentTime)
+    }
   });
 
   if (weather) {
@@ -99,26 +106,37 @@ const fillEmptyAttribute = async response => {
     response.pop = weatherData.pop;
   }
 
+  if (yesterdayWeather) {
+    const yesterdayData = yesterdayWeather.dataValues;
+
+    response.yesterday_temp = yesterdayData.temp;
+  }
+
   return response;
 };
 
-const bulkUpdateOrCreate = async (weather, response) => {
+const bulkUpdateOrCreate = async (
+  weather,
+  response,
+  yesterday,
+  currentTime
+) => {
   if (weather) {
     let result = response;
 
     if (!weather.dataValues.pop) {
-      result = await fillEmptyAttribute(response);
+      result = await fillEmptyAttribute(response, yesterday, currentTime);
     }
 
     weather.update(result);
   } else {
-    const result = await fillEmptyAttribute(response);
+    const result = await fillEmptyAttribute(response, yesterday, currentTime);
 
     Weather.create(result);
   }
 };
 
-const saveWeather = async (currentDate, currentTime) => {
+const saveWeather = async (currentDate, currentTime, yesterday) => {
   const response = await axios.all(
     locationList.map(location =>
       getCurrentWeather(location, currentDate, currentTime)
@@ -133,17 +151,17 @@ const saveWeather = async (currentDate, currentTime) => {
       }
     });
 
-    await bulkUpdateOrCreate(weather, response[i]);
+    await bulkUpdateOrCreate(weather, response[i], yesterday, currentTime);
   }
 };
 
 module.exports = async () => {
-  const { currentDate, currentTime } = getCurrentDate(
+  const { currentDate, currentTime, yesterday } = getCurrentDate(
     moment().tz("Asia/Seoul")
   );
 
   try {
-    await saveWeather(currentDate, currentTime);
+    await saveWeather(currentDate, currentTime, yesterday);
     console.log(
       `[weather][SUCCESS][${currentDate}${currentTime}][${date.dateLog(
         moment.tz("Asia/Seoul")
