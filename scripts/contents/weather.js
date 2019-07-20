@@ -3,6 +3,7 @@ const moment = require("moment-timezone");
 const config = require("../../config.js");
 const { date, locationList } = require("../utils/utils.js");
 const { Weather } = require("../../infra/mysql");
+const { Op } = require("sequelize");
 
 const serviceKey = config.WEATHER_KEY;
 
@@ -110,6 +111,8 @@ const fillEmptyAttribute = async (response, yesterday, currentTime) => {
     const yesterdayData = yesterdayWeather.dataValues;
 
     response.yesterday_temp = yesterdayData.temp;
+
+    await yesterdayWeather.update({ type: "delete" });
   }
 
   return response;
@@ -136,6 +139,14 @@ const bulkUpdateOrCreate = async (
   }
 };
 
+const changePastWeatherType = async pastWeather => {
+  for (let i = 0; i < pastWeather.length; i++) {
+    if (pastWeather[i]) {
+      pastWeather[i].update({ type: "past" });
+    }
+  }
+};
+
 const saveWeather = async (currentDate, currentTime, yesterday) => {
   const response = await axios.all(
     locationList.map(location =>
@@ -151,7 +162,16 @@ const saveWeather = async (currentDate, currentTime, yesterday) => {
       }
     });
 
+    const pastWeather = await Weather.findAll({
+      where: {
+        weather_date: {
+          [Op.lt]: response[i].weather_date
+        }
+      }
+    });
+
     await bulkUpdateOrCreate(weather, response[i], yesterday, currentTime);
+    await changePastWeatherType(pastWeather);
   }
 };
 
