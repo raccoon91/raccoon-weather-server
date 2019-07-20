@@ -32,8 +32,8 @@ router.get("/weather", async (req, res) => {
     order: [["air_date", "DESC"]]
   });
 
-  weather.pm10 = air.pm10;
-  weather.pm25 = air.pm25;
+  weather.dataValues.pm10 = air.pm10;
+  weather.dataValues.pm25 = air.pm25;
 
   res.json(weather);
 });
