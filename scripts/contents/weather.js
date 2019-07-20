@@ -139,7 +139,7 @@ const bulkUpdateOrCreate = async (
   if (weather) {
     let result = response;
 
-    if (!weather.dataValues.pop) {
+    if (!weather.dataValues.yesterday_temp) {
       result = await fillEmptyAttribute(response, yesterday, currentTime);
     }
 
