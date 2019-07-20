@@ -103,7 +103,7 @@ const getForecast = async (location, forecastDate, forecastTime) => {
   return sliceData(data, location.city);
 };
 
-const fillEmptyAttribute = async response => {
+const fillEmptyAttribute = async (response, weatherDate) => {
   const weather = await Weather.findOne({
     where: {
       city: response.city,
@@ -113,26 +113,39 @@ const fillEmptyAttribute = async response => {
     attributes: ["pop"]
   });
 
+  const yesterdayWeather = await Weather.findOne({
+    where: {
+      city: response.city,
+      weather_date: date.yesterday(moment(weatherDate))
+    }
+  });
+
   if (weather) {
     const weatherData = weather.dataValues;
 
     response.pop = weatherData.pop;
   }
 
+  if (yesterdayWeather) {
+    const yesterdayData = yesterdayWeather.dataValues;
+
+    response.yesterday_temp = yesterdayData.temp;
+  }
+
   return response;
 };
 
-const bulkUpdateOrCreate = async (weather, response) => {
+const bulkUpdateOrCreate = async (weather, response, weatherDate) => {
   if (weather) {
     let result = response;
 
-    if (!weather.dataValues.pop) {
-      result = await fillEmptyAttribute(response);
+    if (!weather.dataValues.yesterday_temp) {
+      result = await fillEmptyAttribute(response, weatherDate);
     }
 
     weather.update(result);
   } else {
-    const result = await fillEmptyAttribute(response);
+    const result = await fillEmptyAttribute(response, weatherDate);
 
     Weather.create(result);
   }
@@ -159,7 +172,11 @@ const saveShortForecast = async (forecastDate, forecastTime) => {
         }
       });
 
-      await bulkUpdateOrCreate(weather, response[i][forecastTime[j]]);
+      await bulkUpdateOrCreate(
+        weather,
+        response[i][forecastTime[j]],
+        date.dateQuery(fcstDate, fcstTime)
+      );
     }
   }
 };

@@ -109,6 +109,39 @@ const getForecast = async (location, forecastDate, forecastTime) => {
   return sliceData(data, location.city);
 };
 
+const fillEmptyAttribute = async (response, weatherDate) => {
+  const yesterdayWeather = await Weather.findOne({
+    where: {
+      city: response.city,
+      weather_date: date.yesterday(moment(weatherDate))
+    }
+  });
+
+  if (yesterdayWeather) {
+    const yesterdayData = yesterdayWeather.dataValues;
+
+    response.yesterday_temp = yesterdayData.temp;
+  }
+
+  return response;
+};
+
+const bulkUpdateOrCreate = async (weather, response, weatherDate) => {
+  if (weather) {
+    let result = response;
+
+    if (!weather.dataValues.yesterday_temp) {
+      result = await fillEmptyAttribute(response, weatherDate);
+    }
+
+    weather.update(result);
+  } else {
+    const result = await fillEmptyAttribute(response, weatherDate);
+
+    Weather.create(result);
+  }
+};
+
 const saveMidForecast = async (forecastDate, forecastTime) => {
   const response = await axios.all(
     locationList.map(location =>
@@ -130,11 +163,11 @@ const saveMidForecast = async (forecastDate, forecastTime) => {
         }
       });
 
-      if (weather) {
-        weather.update(response[i][forecastTime[j]]);
-      } else {
-        Weather.create(response[i][forecastTime[j]]);
-      }
+      await bulkUpdateOrCreate(
+        weather,
+        response[i][forecastTime[j]],
+        date.dateQuery(fcstDate, fcstTime)
+      );
     }
   }
 };
