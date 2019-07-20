@@ -83,7 +83,7 @@ const getCurrentWeather = async (location, currentDate, currentTime) => {
 };
 
 const fillEmptyAttribute = async (response, yesterday, currentTime) => {
-  const weather = await Weather.findOne({
+  let weather = await Weather.findOne({
     where: {
       city: response.city,
       type: "short"
@@ -91,6 +91,17 @@ const fillEmptyAttribute = async (response, yesterday, currentTime) => {
     order: [["weather_date", "ASC"]],
     attributes: ["sky", "pty", "pop"]
   });
+
+  if (!weather) {
+    weather = await Weather.findOne({
+      where: {
+        city: response.city,
+        type: "mid"
+      },
+      order: [["weather_date", "ASC"]],
+      attributes: ["sky", "pty", "pop"]
+    });
+  }
 
   const yesterdayWeather = await Weather.findOne({
     where: {
@@ -124,6 +135,7 @@ const bulkUpdateOrCreate = async (
   yesterday,
   currentTime
 ) => {
+  fillEmptyAttribute(response, yesterday, currentTime);
   if (weather) {
     let result = response;
 
