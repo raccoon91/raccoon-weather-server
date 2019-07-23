@@ -11,6 +11,10 @@ const config = {
     host: tok[0],
     port: tok[1],
     dialect: "mysql",
+    dialectOptions: {
+      dateStrings: true,
+      typeCast: true
+    },
     timezone: "+09:00",
     define: {
       charset: "utf8mb4"
