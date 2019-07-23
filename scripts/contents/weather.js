@@ -153,7 +153,7 @@ const bulkUpdateOrCreate = async (
 
 const changePastWeatherType = async pastWeather => {
   for (let i = 0; i < pastWeather.length; i++) {
-    if (pastWeather[i]) {
+    if (pastWeather[i] && pastWeather[i].dataValues.type !== "delete") {
       pastWeather[i].update({ type: "past" });
     }
   }
