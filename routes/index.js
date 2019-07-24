@@ -52,30 +52,24 @@ router.get("/weather/rain", async (req, res) => {
     },
     limit: 7
   });
+
   const categories = [current.dataValues.hour];
-  const data = [current.dataValues.pop];
-  let maxData = 0;
+  const rainProbData = [current.dataValues.pop];
+  const humidityData = [current.dataValues.humidity];
+  const tempData = [current.dataValues.temp];
 
   forecast.forEach(item => {
     categories.push(item.dataValues.hour);
-    data.push(item.dataValues.pop);
-
-    if (item.dataValues.pop > maxData) {
-      maxData = item.dataValues.pop;
-    }
+    rainProbData.push(item.dataValues.pop);
+    humidityData.push(item.dataValues.humidity);
+    tempData.push(item.dataValues.temp);
   });
-
-  maxData = Math.ceil(maxData);
-
-  if (maxData % 10 === 0) {
-    maxData += 10;
-  }
 
   res.json({
     series: [
       {
         name: "Rain Probability",
-        data
+        data: rainProbData
       }
     ],
     chartOptions: {
@@ -102,7 +96,8 @@ router.get("/weather/rain", async (req, res) => {
         enabled: true
       },
       stroke: {
-        curve: "smooth"
+        curve: "smooth",
+        width: 2
       },
       markers: {
         size: 6
@@ -111,15 +106,21 @@ router.get("/weather/rain", async (req, res) => {
         categories,
         axisBorder: {
           show: false
+        },
+        axisTicks: {
+          show: false
         }
       },
       yaxis: {
-        min: 0,
-        max: maxData,
         labels: {
           show: false
         },
-        tickAmount: 2
+        axisBorder: {
+          show: false
+        }
+      },
+      grid: {
+        show: false
       },
       legend: {
         position: "top",
