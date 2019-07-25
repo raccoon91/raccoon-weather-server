@@ -45,12 +45,19 @@ router.get("/weather/forecast", async (req, res) => {
     where: { city: "서울", type: "current" }
   });
 
-  const forecast = await Weather.findAll({
+  const shorForecast = await Weather.findAll({
     where: {
       city: "서울",
-      [Op.or]: [{ type: "short" }, { type: "mid" }]
+      type: "short"
+    }
+  });
+
+  const midForecast = await Weather.findAll({
+    where: {
+      city: "서울",
+      type: "mid"
     },
-    limit: 7
+    limit: 7 - shorForecast.length
   });
 
   const categories = [current.dataValues.hour];
@@ -59,7 +66,15 @@ router.get("/weather/forecast", async (req, res) => {
   const tempData = [current.dataValues.temp];
   const condition = [[current.dataValues.sky, current.dataValues.pty]];
 
-  forecast.forEach(item => {
+  shorForecast.forEach(item => {
+    categories.push(item.dataValues.hour);
+    rainProbData.push(item.dataValues.pop);
+    humidityData.push(item.dataValues.humidity);
+    tempData.push(item.dataValues.temp);
+    condition.push([item.dataValues.sky, item.dataValues.pty]);
+  });
+
+  midForecast.forEach(item => {
     categories.push(item.dataValues.hour);
     rainProbData.push(item.dataValues.pop);
     humidityData.push(item.dataValues.humidity);
