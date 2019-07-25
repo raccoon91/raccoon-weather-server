@@ -49,7 +49,8 @@ router.get("/weather/forecast", async (req, res) => {
     where: {
       city: "서울",
       type: "short"
-    }
+    },
+    order: [["weather_date", "ASC"]]
   });
 
   const midForecast = await Weather.findAll({
@@ -57,6 +58,7 @@ router.get("/weather/forecast", async (req, res) => {
       city: "서울",
       type: "mid"
     },
+    order: [["weather_date", "ASC"]],
     limit: 7 - shorForecast.length
   });
 
