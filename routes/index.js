@@ -40,7 +40,7 @@ router.get("/weather", async (req, res) => {
   res.json(weather);
 });
 
-router.get("/weather/rain", async (req, res) => {
+router.get("/weather/forecast", async (req, res) => {
   const current = await Weather.findOne({
     where: { city: "서울", type: "current" }
   });
@@ -57,79 +57,22 @@ router.get("/weather/rain", async (req, res) => {
   const rainProbData = [current.dataValues.pop];
   const humidityData = [current.dataValues.humidity];
   const tempData = [current.dataValues.temp];
+  const condition = [[current.dataValues.sky, current.dataValues.pty]];
 
   forecast.forEach(item => {
     categories.push(item.dataValues.hour);
     rainProbData.push(item.dataValues.pop);
     humidityData.push(item.dataValues.humidity);
     tempData.push(item.dataValues.temp);
+    condition.push([item.dataValues.sky, item.dataValues.pty]);
   });
 
   res.json({
-    series: [
-      {
-        name: "Rain Probability",
-        data: rainProbData
-      }
-    ],
-    chartOptions: {
-      chart: {
-        animations: {
-          enabled: true,
-          easing: "easeinout",
-          speed: 800,
-          animateGradually: {
-            enabled: true,
-            delay: 150
-          },
-          dynamicAnimation: {
-            enabled: true,
-            speed: 350
-          }
-        },
-        toolbar: {
-          show: false
-        }
-      },
-      colors: ["#77B6EA"],
-      dataLabels: {
-        enabled: true
-      },
-      stroke: {
-        curve: "smooth",
-        width: 2
-      },
-      markers: {
-        size: 6
-      },
-      xaxis: {
-        categories,
-        axisBorder: {
-          show: false
-        },
-        axisTicks: {
-          show: false
-        }
-      },
-      yaxis: {
-        labels: {
-          show: false
-        },
-        axisBorder: {
-          show: false
-        }
-      },
-      grid: {
-        show: false
-      },
-      legend: {
-        position: "top",
-        horizontalAlign: "right",
-        floating: true,
-        offsetY: -25,
-        offsetX: -5
-      }
-    }
+    categories,
+    rainProbData,
+    humidityData,
+    tempData,
+    condition
   });
 });
 
