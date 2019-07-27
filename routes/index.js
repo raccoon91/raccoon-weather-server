@@ -103,7 +103,7 @@ router.get("/location", (req, res) => {
     const timeStamp = Math.floor(+new Date()).toString();
     const sortedSet = {};
 
-    sortedSet.ip = ip !== "127.0.0.1" ? ip : "211.36.142.207";
+    sortedSet.ip = ip === "127.0.0.1" || ip === "::1" ? "211.36.142.207" : ip;
     sortedSet.ext = "t";
     sortedSet.responseFormatType = "json";
 
@@ -135,8 +135,8 @@ router.get("/location", (req, res) => {
         res.send(response.data);
       })
       .catch(err => {
-        console.error(err.response.data);
-        res.send("naver geolocation error");
+        console.log(err.response.data);
+        res.send(`naver geolocation error`);
       });
   })();
 });
