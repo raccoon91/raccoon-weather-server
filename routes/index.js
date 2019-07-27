@@ -99,11 +99,13 @@ router.get("/weather/forecast", async (req, res) => {
 router.get("/location", (req, res) => {
   (() => {
     const { ACCESS_KEY, SECRET_KEY } = config;
-    const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+    let ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
     const timeStamp = Math.floor(+new Date()).toString();
     const sortedSet = {};
 
-    sortedSet.ip = ip === "127.0.0.1" || ip === "::1" ? "211.36.142.207" : ip;
+    ip = ip.split(":").pop();
+
+    sortedSet.ip = ip === "127.0.0.1" || ip === "1" ? "211.36.142.207" : ip;
     sortedSet.ext = "t";
     sortedSet.responseFormatType = "json";
 
