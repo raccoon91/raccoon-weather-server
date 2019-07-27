@@ -1,21 +1,12 @@
 const express = require("express");
-const axios = require("axios");
-const CryptoJS = require("crypto-js");
-const config = require("../config.js");
 const { Region, Weather, Airpollution } = require("../infra/mysql");
+const { getLocation } = require("./utils/utils.js");
 const { Op } = require("sequelize");
 
 const router = express.Router();
 
-router.get("/", (req, res) => {
-  Region.findAll({ include: [Weather, Airpollution], where: { city: "서울" } })
-    .then(result => {
-      res.json(result);
-    })
-    .catch(console.warn);
-});
-
 router.get("/weather", async (req, res) => {
+  const location = await getLocation(req);
   const weather = await Weather.findOne({
     where: { city: "서울", type: "current" },
     order: [["weather_date", "DESC"]],
@@ -40,7 +31,7 @@ router.get("/weather", async (req, res) => {
   weather.dataValues.pm10 = air.pm10;
   weather.dataValues.pm25 = air.pm25;
 
-  res.json(weather);
+  res.json({ weather, location: location.data.geoLocation });
 });
 
 router.get("/weather/forecast", async (req, res) => {
@@ -95,69 +86,5 @@ router.get("/weather/forecast", async (req, res) => {
     condition
   });
 });
-
-router.get("/location", (req, res) => {
-  (() => {
-    const { ACCESS_KEY, SECRET_KEY } = config;
-    let ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
-    const timeStamp = Math.floor(+new Date()).toString();
-    const sortedSet = {};
-
-    ip = ip.split(":").pop();
-
-    sortedSet.ip = ip === "127.0.0.1" || ip === "1" ? "211.36.142.207" : ip;
-    sortedSet.ext = "t";
-    sortedSet.responseFormatType = "json";
-
-    let queryString = Object.keys(sortedSet).reduce((prev, curr) => {
-      return `${prev}${curr}=${sortedSet[curr]}&`;
-    }, "");
-
-    queryString = queryString.substr(0, queryString.length - 1);
-
-    const baseString = `${config.requestUrl}?${queryString}`;
-    const signature = makeSignature(
-      SECRET_KEY,
-      "GET",
-      baseString,
-      timeStamp,
-      ACCESS_KEY
-    );
-    const options = {
-      headers: {
-        "x-ncp-apigw-timestamp": timeStamp,
-        "x-ncp-iam-access-key": ACCESS_KEY,
-        "x-ncp-apigw-signature-v2": signature
-      }
-    };
-
-    axios
-      .get(`${config.hostName}${baseString}`, options)
-      .then(response => {
-        res.send(response.data);
-      })
-      .catch(err => {
-        console.log(err.response.data);
-        res.send(`naver geolocation error`);
-      });
-  })();
-});
-
-const makeSignature = (secretKey, method, baseString, timestamp, accessKey) => {
-  const space = " ";
-  const newLine = "\n";
-  const hmac = CryptoJS.algo.HMAC.create(CryptoJS.algo.SHA256, secretKey);
-
-  hmac.update(method);
-  hmac.update(space);
-  hmac.update(baseString);
-  hmac.update(newLine);
-  hmac.update(timestamp);
-  hmac.update(newLine);
-  hmac.update(accessKey);
-  const hash = hmac.finalize();
-
-  return hash.toString(CryptoJS.enc.Base64);
-};
 
 module.exports = router;
