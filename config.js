@@ -2,6 +2,12 @@ require("dotenv").config();
 
 module.exports = {
   PRODUCTION: process.env.NODE_ENV === "production" ? true : false,
+
+  ACCESS_KEY: process.env.ACCESS_KEY,
+  SECRET_KEY: process.env.SECRET_KEY,
+  hostName: "https://geolocation.apigw.ntruss.com",
+  requestUrl: "/geolocation/v2/geoLocation",
+
   WEATHER_KEY: process.env.WEATHER_KEY,
 
   MYSQL_ENDPOINT:
