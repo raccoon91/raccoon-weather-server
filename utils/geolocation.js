@@ -1,6 +1,6 @@
 const axios = require("axios");
 const CryptoJS = require("crypto-js");
-const config = require("../../config.js");
+const config = require("../config.js");
 
 const getLocation = req => {
   const { ACCESS_KEY, SECRET_KEY } = config;

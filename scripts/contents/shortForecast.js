@@ -1,7 +1,7 @@
 const axios = require("axios");
 const moment = require("moment-timezone");
 const config = require("../../config.js");
-const { date, locationList } = require("../utils/utils.js");
+const { date, locationList } = require("../../utils/utils.js");
 const { Weather } = require("../../infra/mysql");
 
 const serviceKey = config.WEATHER_KEY;

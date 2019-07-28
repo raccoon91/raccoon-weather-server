@@ -1,14 +1,18 @@
 const express = require("express");
 const { Region, Weather, Airpollution } = require("../infra/mysql");
-const { getLocation } = require("./utils/utils.js");
+const { getLocation } = require("../utils/geolocation.js");
+const { cityConvert } = require("../utils/utils.js");
 const { Op } = require("sequelize");
 
 const router = express.Router();
 
 router.get("/weather", async (req, res) => {
   const location = await getLocation(req);
+  const city = cityConvert[location.data.geoLocation.r1];
+  location.data.geoLocation.city = city;
+
   const weather = await Weather.findOne({
-    where: { city: "서울", type: "current" },
+    where: { city, type: "current" },
     order: [["weather_date", "DESC"]],
     attributes: [
       "city",
@@ -24,7 +28,7 @@ router.get("/weather", async (req, res) => {
   });
 
   const air = await Airpollution.findOne({
-    where: { city: "서울", type: "current" },
+    where: { city, type: "current" },
     order: [["air_date", "DESC"]]
   });
 
@@ -35,13 +39,16 @@ router.get("/weather", async (req, res) => {
 });
 
 router.get("/weather/forecast", async (req, res) => {
+  const location = await getLocation(req);
+  const city = cityConvert[location.data.geoLocation.r1];
+
   const current = await Weather.findOne({
-    where: { city: "서울", type: "current" }
+    where: { city, type: "current" }
   });
 
   const shorForecast = await Weather.findAll({
     where: {
-      city: "서울",
+      city,
       type: "short"
     },
     order: [["weather_date", "ASC"]]
@@ -49,7 +56,7 @@ router.get("/weather/forecast", async (req, res) => {
 
   const midForecast = await Weather.findAll({
     where: {
-      city: "서울",
+      city,
       type: "mid"
     },
     order: [["weather_date", "ASC"]],

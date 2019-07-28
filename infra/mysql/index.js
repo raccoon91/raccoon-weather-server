@@ -1,7 +1,6 @@
 const Sequelize = require("sequelize");
 const tok = require("../../config.js").MYSQL_ENDPOINT.split(":");
-const production = require("../../config").PRODUCTION;
-const { locationList } = require("../../scripts/utils/utils.js");
+const { locationList } = require("../../utils/utils.js");
 
 const config = {
   database: tok[2],
