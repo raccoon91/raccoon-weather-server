@@ -4,8 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       city: {
         type: DataTypes.STRING(20),
-        allowNull: false,
-        references: { model: "regions", key: "city" }
+        allowNull: false
       },
       pm10: {
         type: DataTypes.STRING(5),

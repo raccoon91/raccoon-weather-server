@@ -1,6 +1,6 @@
 const express = require("express");
 const moment = require("moment-timezone");
-const { Region, Weather, Airpollution } = require("../infra/mysql");
+const { Weather, Airpollution } = require("../infra/mysql");
 const { getLocation } = require("../utils/geolocation.js");
 const { date, cityConvert } = require("../utils/utils.js");
 const { Op } = require("sequelize");
