@@ -6,7 +6,7 @@ const date = {
     return date.format(timestamp.subtract(day, "days"));
   },
   tomorrow(timestamp) {
-    return date.format(timestamp.add(1, "days"));
+    return timestamp.add(1, "days").format("YYYY-MM-DD 00:00:00");
   },
   dateQuery(currentDate, currentTime) {
     return `${currentDate.slice(0, 4)}-${currentDate.slice(

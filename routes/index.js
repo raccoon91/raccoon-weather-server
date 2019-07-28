@@ -1,7 +1,8 @@
 const express = require("express");
+const moment = require("moment-timezone");
 const { Region, Weather, Airpollution } = require("../infra/mysql");
 const { getLocation } = require("../utils/geolocation.js");
-const { cityConvert } = require("../utils/utils.js");
+const { date, cityConvert } = require("../utils/utils.js");
 const { Op } = require("sequelize");
 
 const router = express.Router();
@@ -86,6 +87,39 @@ router.get("/weather/forecast", async (req, res) => {
   });
 
   res.json({
+    categories,
+    rainProbData,
+    humidityData,
+    tempData,
+    condition
+  });
+});
+
+router.get("/weather/tomorrow", async (req, res) => {
+  const tomorrow = date.tomorrow(moment.tz("Asia/Seoul"));
+  const location = await getLocation(req);
+  const city = cityConvert[location.data.geoLocation.r1];
+
+  const weather = await Weather.findAll({
+    where: { city, weather_date: { [Op.gte]: tomorrow } },
+    limit: 8
+  });
+
+  const categories = [];
+  const rainProbData = [];
+  const tempData = [];
+  const humidityData = [];
+  const condition = [];
+
+  weather.forEach(item => {
+    categories.push(item.dataValues.hour);
+    rainProbData.push(item.dataValues.pop);
+    humidityData.push(item.dataValues.humidity);
+    tempData.push(item.dataValues.temp);
+    condition.push([item.dataValues.sky, item.dataValues.pty]);
+  });
+
+  res.send({
     categories,
     rainProbData,
     humidityData,
