@@ -119,7 +119,7 @@ router.get("/weather/tomorrow", async (req, res) => {
     condition.push([item.dataValues.sky, item.dataValues.pty]);
   });
 
-  res.send({
+  res.json({
     categories,
     rainProbData,
     humidityData,
@@ -131,7 +131,7 @@ router.get("/weather/tomorrow", async (req, res) => {
 router.get("/location", async (req, res) => {
   const location = await getLocation(req);
 
-  res.json(location);
+  res.send(location.data);
 });
 
 module.exports = router;
