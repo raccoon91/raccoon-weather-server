@@ -128,4 +128,10 @@ router.get("/weather/tomorrow", async (req, res) => {
   });
 });
 
+router.get('/location', (req, res) => {
+  const location = await getLocation(req);
+
+  res.json(location);
+})
+
 module.exports = router;
