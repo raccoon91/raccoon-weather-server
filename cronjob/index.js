@@ -13,6 +13,14 @@ const jobList = [
   { func: airForecast, cron: "00 00 05,11,17,23 * * *" }
 ];
 
+const testList = [
+  { func: weather, cron: "*/5 * * * * *" },
+  { func: shortForecast, cron: "*/5 * * * * *" },
+  { func: midForecast, cron: "*/5 * * * * *" },
+  { func: airpollution, cron: "*/5 * * * * *" },
+  { func: airForecast, cron: "*/5 * * * * *" }
+];
+
 const cronjob = () => {
   jobList.forEach(job => {
     new CronJob(job.cron, () => job.func(), null, false, "Asia/Seoul").start();
