@@ -9,10 +9,10 @@ const router = express.Router();
 
 router.get("/weather", async (req, res) => {
   const location = await getLocation(req);
+
+  if (!location) return res.send({ location });
+
   const city = cityConvert[location.data.geoLocation.r1];
-
-  if (!location || location.data) return res.json({ location });
-
   location.data.geoLocation.city = city;
 
   const weather = await Weather.findOne({
@@ -35,7 +35,7 @@ router.get("/weather", async (req, res) => {
     order: [["air_date", "DESC"]]
   });
 
-  if (!weather || !air) return res.json({ weather, air });
+  if (!weather || !air) return res.send({ weather, air });
 
   weather.dataValues.pm10 = air.pm10;
   weather.dataValues.pm25 = air.pm25;
@@ -46,7 +46,7 @@ router.get("/weather", async (req, res) => {
 router.get("/weather/forecast", async (req, res) => {
   const location = await getLocation(req);
 
-  if (!location || location.data) return res.json({ location });
+  if (!location) return res.send({ location });
 
   const city = cityConvert[location.data.geoLocation.r1];
 
@@ -71,8 +71,8 @@ router.get("/weather/forecast", async (req, res) => {
     limit: 7 - shorForecast.length
   });
 
-  if (!weather || !(shorForecast || midForecast))
-    return res.json({ weather, shorForecast, midForecast });
+  if (!current || !(shorForecast || midForecast))
+    return res.send({ weather, shorForecast, midForecast });
 
   const categories = [current.dataValues.hour];
   const rainProbData = [current.dataValues.pop];
@@ -109,7 +109,7 @@ router.get("/weather/tomorrow", async (req, res) => {
   const tomorrow = date.tomorrow(moment.tz("Asia/Seoul"));
   const location = await getLocation(req);
 
-  if (!location || location.data) return res.json({ location });
+  if (!location) return res.send({ location });
 
   const city = cityConvert[location.data.geoLocation.r1];
 
@@ -118,7 +118,7 @@ router.get("/weather/tomorrow", async (req, res) => {
     limit: 8
   });
 
-  if (!weather) res.json({ weather });
+  if (!weather) res.send({ weather });
 
   const categories = [];
   const rainProbData = [];
