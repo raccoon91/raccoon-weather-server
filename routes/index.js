@@ -10,11 +10,13 @@ const router = express.Router();
 router.get("/weather", async (req, res) => {
   const location = await getLocation(req);
   const city = cityConvert[location.data.geoLocation.r1];
+
+  if (!location || location.data) return res.json({ location });
+
   location.data.geoLocation.city = city;
 
   const weather = await Weather.findOne({
     where: { city, type: "current" },
-    order: [["weather_date", "DESC"]],
     attributes: [
       "city",
       "temp",
@@ -33,6 +35,8 @@ router.get("/weather", async (req, res) => {
     order: [["air_date", "DESC"]]
   });
 
+  if (!weather || !air) return res.json({ weather, air });
+
   weather.dataValues.pm10 = air.pm10;
   weather.dataValues.pm25 = air.pm25;
 
@@ -41,6 +45,9 @@ router.get("/weather", async (req, res) => {
 
 router.get("/weather/forecast", async (req, res) => {
   const location = await getLocation(req);
+
+  if (!location || location.data) return res.json({ location });
+
   const city = cityConvert[location.data.geoLocation.r1];
 
   const current = await Weather.findOne({
@@ -63,6 +70,9 @@ router.get("/weather/forecast", async (req, res) => {
     order: [["weather_date", "ASC"]],
     limit: 7 - shorForecast.length
   });
+
+  if (!weather || !(shorForecast || midForecast))
+    return res.json({ weather, shorForecast, midForecast });
 
   const categories = [current.dataValues.hour];
   const rainProbData = [current.dataValues.pop];
@@ -98,12 +108,17 @@ router.get("/weather/forecast", async (req, res) => {
 router.get("/weather/tomorrow", async (req, res) => {
   const tomorrow = date.tomorrow(moment.tz("Asia/Seoul"));
   const location = await getLocation(req);
+
+  if (!location || location.data) return res.json({ location });
+
   const city = cityConvert[location.data.geoLocation.r1];
 
   const weather = await Weather.findAll({
     where: { city, weather_date: { [Op.gte]: tomorrow } },
     limit: 8
   });
+
+  if (!weather) res.json({ weather });
 
   const categories = [];
   const rainProbData = [];
