@@ -1,6 +1,7 @@
 const axios = require("axios");
 const CryptoJS = require("crypto-js");
 const config = require("../config.js");
+const { cityConvert } = require("../utils/utils.js");
 
 const getLocation = req => {
   const { ACCESS_KEY, SECRET_KEY } = config;
@@ -56,4 +57,15 @@ const makeSignature = (secretKey, method, baseString, timestamp, accessKey) => {
   return hash.toString(CryptoJS.enc.Base64);
 };
 
-module.exports = { getLocation };
+module.exports = async (req, res, next) => {
+  try {
+    const location = await getLocation(req);
+    const city = cityConvert[location.data.geoLocation.r1];
+    location.data.geoLocation.city = city;
+    req.location = location;
+
+    next();
+  } catch (err) {
+    res.send({ err });
+  }
+};

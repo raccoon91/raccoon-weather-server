@@ -1,19 +1,14 @@
 const express = require("express");
 const moment = require("moment-timezone");
 const { Weather, Airpollution } = require("../infra/mysql");
-const { getLocation } = require("../utils/geolocation.js");
-const { date, cityConvert } = require("../utils/utils.js");
+const { date } = require("../utils/utils.js");
 const { Op } = require("sequelize");
 
 const router = express.Router();
 
 router.get("/weather", async (req, res) => {
-  const location = await getLocation(req);
-
-  if (!location) res.send({ location });
-
-  const city = cityConvert[location.data.geoLocation.r1];
-  location.data.geoLocation.city = city;
+  const location = req.location;
+  const city = location.data.geoLocation.city;
 
   const weather = await Weather.findOne({
     where: { city, type: "current" },
@@ -44,11 +39,7 @@ router.get("/weather", async (req, res) => {
 });
 
 router.get("/weather/forecast", async (req, res) => {
-  const location = await getLocation(req);
-
-  if (!location) res.send({ message: "data not found", location });
-
-  const city = cityConvert[location.data.geoLocation.r1];
+  const city = req.location.data.geoLocation.city;
 
   const current = await Weather.findOne({
     where: { city, type: "current" }
@@ -64,7 +55,7 @@ router.get("/weather/forecast", async (req, res) => {
   });
 
   if (!current || !forecast)
-    res.send({
+    return res.send({
       message: "data not found",
       weather,
       forecast
@@ -95,18 +86,14 @@ router.get("/weather/forecast", async (req, res) => {
 
 router.get("/weather/tomorrow", async (req, res) => {
   const tomorrow = date.tomorrow(moment.tz("Asia/Seoul"));
-  const location = await getLocation(req);
-
-  if (!location) res.send({ message: "data not found", location });
-
-  const city = cityConvert[location.data.geoLocation.r1];
+  const city = req.location.data.geoLocation.city;
 
   const weather = await Weather.findAll({
     where: { city, weather_date: { [Op.gte]: tomorrow } },
     limit: 8
   });
 
-  if (!weather) res.send({ message: "data not found", weather });
+  if (!weather) return res.send({ message: "data not found", weather });
 
   const categories = [];
   const rainProbData = [];
@@ -132,9 +119,7 @@ router.get("/weather/tomorrow", async (req, res) => {
 });
 
 router.get("/location", async (req, res) => {
-  const location = await getLocation(req);
-
-  if (!location) res.json({ message: "data not found", location });
+  const location = req.location;
 
   res.send(location.data);
 });
