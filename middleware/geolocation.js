@@ -3,7 +3,24 @@ const CryptoJS = require("crypto-js");
 const config = require("../config.js");
 const { cityConvert } = require("../utils/utils.js");
 
-const getLocation = req => {
+const makeSignature = (secretKey, method, baseString, timestamp, accessKey) => {
+  const space = " ";
+  const newLine = "\n";
+  const hmac = CryptoJS.algo.HMAC.create(CryptoJS.algo.SHA256, secretKey);
+
+  hmac.update(method);
+  hmac.update(space);
+  hmac.update(baseString);
+  hmac.update(newLine);
+  hmac.update(timestamp);
+  hmac.update(newLine);
+  hmac.update(accessKey);
+  const hash = hmac.finalize();
+
+  return hash.toString(CryptoJS.enc.Base64);
+};
+
+const getLocation = async (req, res) => {
   const { ACCESS_KEY, SECRET_KEY } = config;
   let ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
   const timeStamp = Math.floor(+new Date()).toString();
@@ -37,35 +54,42 @@ const getLocation = req => {
     }
   };
 
-  return axios.get(`${config.hostName}${baseString}`, options);
-};
+  // const location = await axios.get(
+  //   `${config.hostName}${baseString}`,
+  //   options
+  // );
 
-const makeSignature = (secretKey, method, baseString, timestamp, accessKey) => {
-  const space = " ";
-  const newLine = "\n";
-  const hmac = CryptoJS.algo.HMAC.create(CryptoJS.algo.SHA256, secretKey);
+  const location = {
+    data: {
+      geoLocation: {
+        r1: "서울특별시",
+        r2: "중구",
+        r3: "남산동",
+        date: new Date()
+      }
+    }
+  };
 
-  hmac.update(method);
-  hmac.update(space);
-  hmac.update(baseString);
-  hmac.update(newLine);
-  hmac.update(timestamp);
-  hmac.update(newLine);
-  hmac.update(accessKey);
-  const hash = hmac.finalize();
+  const city = cityConvert[location.data.geoLocation.r1];
+  location.data.geoLocation.city = city;
 
-  return hash.toString(CryptoJS.enc.Base64);
+  await res.cookie("location", location, {
+    maxAge: 1000 * 60 * 60 * 6
+  });
+
+  return location;
 };
 
 module.exports = async (req, res, next) => {
   try {
-    const location = await getLocation(req);
-    const city = cityConvert[location.data.geoLocation.r1];
-    location.data.geoLocation.city = city;
-    req.location = location;
+    const location = await req.cookies.location;
+
+    if (!location) {
+      req.cookies.location = await getLocation(req, res);
+    }
 
     next();
   } catch (err) {
-    res.send({ err });
+    res.send(err);
   }
 };
