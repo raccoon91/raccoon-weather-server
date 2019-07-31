@@ -54,27 +54,13 @@ const getLocation = async (req, res) => {
     }
   };
 
-  // const location = await axios.get(
-  //   `${config.hostName}${baseString}`,
-  //   options
-  // );
-
-  const location = {
-    data: {
-      geoLocation: {
-        r1: "서울특별시",
-        r2: "중구",
-        r3: "남산동",
-        date: new Date()
-      }
-    }
-  };
+  const location = await axios.get(`${config.hostName}${baseString}`, options);
 
   const city = cityConvert[location.data.geoLocation.r1];
   location.data.geoLocation.city = city;
 
   await res.cookie("location", location, {
-    maxAge: 1000 * 60 * 60 * 6
+    maxAge: 1000 * 60 * 60 * 3
   });
 
   return location;
