@@ -54,23 +54,7 @@ const getLocation = async (req, res) => {
     }
   };
 
-  // const location = await axios.get(`${config.hostName}${baseString}`, options);
-  const location = {
-    data: {
-      returnCode: 0,
-      requestId: "b3b0ba19-66b8-44ec-b895-bdecd3e8e919",
-      geoLocation: {
-        country: "KR",
-        code: "1114055000",
-        r1: "서울특별시",
-        r2: "중구",
-        r3: "남산동2가",
-        lat: 37.558333,
-        long: 126.9858,
-        net: "LGTELECOM"
-      }
-    }
-  };
+  const location = await axios.get(`${config.hostName}${baseString}`, options);
 
   const city = cityConvert[location.data.geoLocation.r1];
   location.data.geoLocation.city = city;
