@@ -4,8 +4,11 @@ const { Weather, Airpollution } = require("../infra/mysql");
 const { date } = require("../utils/utils.js");
 const { Op } = require("sequelize");
 const { redisGet, redisSet } = require("../infra/redis");
+const geolocation = require("../middleware/geolocation.js");
 
 const router = express.Router();
+
+router.use(geolocation);
 
 router.get("/weather", async (req, res) => {
   const location = req.cookies.location;
