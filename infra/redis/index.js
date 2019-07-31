@@ -22,7 +22,7 @@ const redisGet = key => {
 };
 
 const redisSet = (key, value) => {
-  return client.set(key, value, "EX", 10);
+  return client.set(key, value, "EX", 60 * 5);
 };
 
 module.exports = {
