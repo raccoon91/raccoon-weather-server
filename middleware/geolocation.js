@@ -59,11 +59,11 @@ const getLocation = async (req, res) => {
   const city = cityConvert[location.data.geoLocation.r1];
   location.data.geoLocation.city = city;
 
-  await res.cookie("location", location, {
+  await res.cookie("location", location.data, {
     maxAge: 1000 * 60 * 60 * 3
   });
 
-  return location;
+  return location.data;
 };
 
 module.exports = async (req, res, next) => {

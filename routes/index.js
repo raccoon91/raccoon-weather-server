@@ -12,7 +12,7 @@ router.use(geolocation);
 
 router.get("/weather", async (req, res) => {
   const location = req.cookies.location;
-  const city = location.data.geoLocation.city;
+  const city = location.geoLocation.city;
   const key = `${city}/weather`;
 
   const cache = await redisGet(key);
@@ -48,14 +48,14 @@ router.get("/weather", async (req, res) => {
 
   await redisSet(
     key,
-    JSON.stringify({ weather, location: location.data.geoLocation })
+    JSON.stringify({ weather, location: location.geoLocation })
   );
 
-  res.json({ weather, location: location.data.geoLocation });
+  res.json({ weather, location: location.geoLocation });
 });
 
 router.get("/weather/forecast", async (req, res) => {
-  const city = req.cookies.location.data.geoLocation.city;
+  const city = req.cookies.location.geoLocation.city;
   const key = `${city}/weather/forecast`;
 
   const cache = await redisGet(key);
@@ -120,7 +120,7 @@ router.get("/weather/forecast", async (req, res) => {
 
 router.get("/weather/tomorrow", async (req, res) => {
   const tomorrow = date.tomorrow(moment.tz("Asia/Seoul"));
-  const city = req.cookies.location.data.geoLocation.city;
+  const city = req.cookies.location.geoLocation.city;
   const key = `${city}/weather/tomorrow`;
 
   const cache = await redisGet(key);
@@ -173,7 +173,7 @@ router.get("/weather/tomorrow", async (req, res) => {
 router.get("/location", async (req, res) => {
   const location = req.cookies.location;
 
-  res.send(location.data);
+  res.send(location);
 });
 
 module.exports = router;
