@@ -3,11 +3,12 @@ const moment = require("moment-timezone");
 const { Weather, Airpollution } = require("../infra/mysql");
 const { date } = require("../utils/utils.js");
 const { Op } = require("sequelize");
+const { redisGet, redisSet } = require("../infra/redis");
 
 const router = express.Router();
 
 router.get("/weather", async (req, res) => {
-  const location = req.location;
+  const location = req.cookies.location;
   const city = location.data.geoLocation.city;
 
   const weather = await Weather.findOne({
@@ -39,7 +40,7 @@ router.get("/weather", async (req, res) => {
 });
 
 router.get("/weather/forecast", async (req, res) => {
-  const city = req.location.data.geoLocation.city;
+  const city = req.cookies.location.data.geoLocation.city;
 
   const current = await Weather.findOne({
     where: { city, type: "current" }
@@ -86,7 +87,7 @@ router.get("/weather/forecast", async (req, res) => {
 
 router.get("/weather/tomorrow", async (req, res) => {
   const tomorrow = date.tomorrow(moment.tz("Asia/Seoul"));
-  const city = req.location.data.geoLocation.city;
+  const city = req.cookies.location.data.geoLocation.city;
 
   const weather = await Weather.findAll({
     where: { city, weather_date: { [Op.gte]: tomorrow } },
@@ -119,9 +120,22 @@ router.get("/weather/tomorrow", async (req, res) => {
 });
 
 router.get("/location", async (req, res) => {
-  const location = req.location;
+  const location = req.cookies.location;
 
   res.send(location.data);
+});
+
+router.get("/redis", async (req, res) => {
+  const key = req.query.key;
+  const result = await redisGet(key);
+
+  if (result) {
+    return res.send({ message: "get", key, result });
+  }
+
+  const response = await redisSet(key, "good");
+
+  res.send({ message: "set", key, response });
 });
 
 module.exports = router;
