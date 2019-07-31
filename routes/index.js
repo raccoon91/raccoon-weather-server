@@ -10,6 +10,13 @@ const router = express.Router();
 router.get("/weather", async (req, res) => {
   const location = req.cookies.location;
   const city = location.data.geoLocation.city;
+  const key = `${city}/weather`;
+
+  const cache = await redisGet(key);
+
+  if (cache) {
+    return res.json(JSON.parse(cache));
+  }
 
   const weather = await Weather.findOne({
     where: { city, type: "current" },
@@ -36,11 +43,23 @@ router.get("/weather", async (req, res) => {
   weather.dataValues.pm10 = air.pm10;
   weather.dataValues.pm25 = air.pm25;
 
+  await redisSet(
+    key,
+    JSON.stringify({ weather, location: location.data.geoLocation })
+  );
+
   res.json({ weather, location: location.data.geoLocation });
 });
 
 router.get("/weather/forecast", async (req, res) => {
   const city = req.cookies.location.data.geoLocation.city;
+  const key = `${city}/weather/forecast`;
+
+  const cache = await redisGet(key);
+
+  if (cache) {
+    return res.json(JSON.parse(cache));
+  }
 
   const current = await Weather.findOne({
     where: { city, type: "current" }
@@ -76,6 +95,17 @@ router.get("/weather/forecast", async (req, res) => {
     condition.push([item.dataValues.sky, item.dataValues.pty]);
   });
 
+  await redisSet(
+    key,
+    JSON.stringify({
+      categories,
+      rainProbData,
+      humidityData,
+      tempData,
+      condition
+    })
+  );
+
   res.json({
     categories,
     rainProbData,
@@ -88,6 +118,13 @@ router.get("/weather/forecast", async (req, res) => {
 router.get("/weather/tomorrow", async (req, res) => {
   const tomorrow = date.tomorrow(moment.tz("Asia/Seoul"));
   const city = req.cookies.location.data.geoLocation.city;
+  const key = `${city}/weather/tomorrow`;
+
+  const cache = await redisGet(key);
+
+  if (cache) {
+    return res.json(JSON.parse(cache));
+  }
 
   const weather = await Weather.findAll({
     where: { city, weather_date: { [Op.gte]: tomorrow } },
@@ -109,6 +146,17 @@ router.get("/weather/tomorrow", async (req, res) => {
     tempData.push(item.dataValues.temp);
     condition.push([item.dataValues.sky, item.dataValues.pty]);
   });
+
+  await redisSet(
+    key,
+    JSON.stringify({
+      categories,
+      rainProbData,
+      humidityData,
+      tempData,
+      condition
+    })
+  );
 
   res.json({
     categories,
