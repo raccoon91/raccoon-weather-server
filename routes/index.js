@@ -173,17 +173,4 @@ router.get("/location", async (req, res) => {
   res.send(location.data);
 });
 
-router.get("/redis", async (req, res) => {
-  const key = req.query.key;
-  const result = await redisGet(key);
-
-  if (result) {
-    return res.send({ message: "get", key, result });
-  }
-
-  const response = await redisSet(key, "good");
-
-  res.send({ message: "set", key, response });
-});
-
 module.exports = router;
