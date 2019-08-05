@@ -2,6 +2,8 @@
 
 <a href="https://chrome.google.com/webstore/detail/raccoon-weather/ljgmcohabpgbcghaejceankdhceibdaf" target="_blank">Raccon Weather</a>
 
+<a href="https://github.com/raccoon91/raccoon-weather-extension" target="_blank">raccoon-weather-extension</a>
+
 ### Introduction
 
 - Vue.js를 이용한 Chrome Extension
