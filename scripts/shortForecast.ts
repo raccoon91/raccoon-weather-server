@@ -1,18 +1,18 @@
-import config from "../../config";
-import requestWeatherApi from "../../lib/requestWeatherApi";
+import config from "../config";
+import requestWeatherApi from "../lib/requestWeatherApi";
 
 // const { Weather } = require("../../infra/mysql");
 
-import { IMidForecastResponseData, IMidForecastData, ICityGeolocation } from "../../interface/weather";
-import { ICityKor } from "../../interface/location";
+import { IShortForecastResponseData, IShortForecastData, ICityGeolocation } from "../interface/weather";
+import { ICityKor } from "../interface/location";
 
-import { cityGeolocationList } from "../../utils/location";
-import date from "../../utils/date";
+import { cityGeolocationList } from "../utils/location";
+import date from "../utils/date";
 
 const { OPEN_WEATHER_API_KEY } = config;
 
-const sliceData = (data: IMidForecastResponseData[], city: ICityKor): IMidForecastData => {
-	let result: IMidForecastData = {};
+const sliceData = (data: IShortForecastResponseData[], city: ICityKor): IShortForecastData => {
+	let result: IShortForecastData = {};
 
 	data.forEach((item) => {
 		const { fcstDate, fcstTime, fcstValue, category } = item;
@@ -22,13 +22,13 @@ const sliceData = (data: IMidForecastResponseData[], city: ICityKor): IMidForeca
 				city,
 				weather_date: date.dateQuery(String(fcstDate), String(fcstTime)),
 				hour: String(fcstTime).slice(0, 2),
-				type: "mid",
+				type: "short",
 			};
 		}
 
 		switch (category) {
-			case "POP":
-				result[`${fcstDate}:${fcstTime}`].pop = fcstValue;
+			case "T1H":
+				result[`${fcstDate}:${fcstTime}`].temp = fcstValue;
 				break;
 			case "SKY":
 				result[`${fcstDate}:${fcstTime}`].sky = fcstValue;
@@ -38,9 +38,6 @@ const sliceData = (data: IMidForecastResponseData[], city: ICityKor): IMidForeca
 				break;
 			case "REH":
 				result[`${fcstDate}:${fcstTime}`].humidity = fcstValue;
-				break;
-			case "T3H":
-				result[`${fcstDate}:${fcstTime}`].temp = fcstValue;
 				break;
 			default:
 				break;
@@ -53,17 +50,17 @@ const sliceData = (data: IMidForecastResponseData[], city: ICityKor): IMidForeca
 const getForecast = async (location: ICityGeolocation, forecastDate: string, forecastTime: string) => {
 	const response: {
 		status?: number;
-		data?: { response?: { body?: { items?: { item?: IMidForecastResponseData[] } } } };
+		data?: { response?: { body?: { items?: { item?: IShortForecastResponseData[] } } } };
 	} = await requestWeatherApi({
 		method: "get",
-		url: "ForecastSpaceData",
+		url: "ForecastTimeData",
 		params: {
 			ServiceKey: decodeURIComponent(OPEN_WEATHER_API_KEY),
 			base_date: forecastDate,
 			base_time: forecastTime,
 			nx: location.nx,
 			ny: location.ny,
-			numOfRows: 184,
+			numOfRows: 40,
 			_type: "json",
 		},
 	});
@@ -75,18 +72,33 @@ const getForecast = async (location: ICityGeolocation, forecastDate: string, for
 	if (!response.data.response.body) throw new Error(`open api response empty. item: weather`);
 
 	const data = response.data.response.body.items.item;
-	const midForecast = sliceData(data, location.city);
+	const shortForecast = sliceData(data, location.city);
 
-	return midForecast;
+	return shortForecast;
 };
 
 // const fillEmptyAttribute = async (response, weatherDate) => {
+// 	const weather = await Weather.findOne({
+// 		where: {
+// 			city: response.city,
+// 			type: "shor",
+// 		},
+// 		order: [["weather_date", "ASC"]],
+// 		attributes: ["pop"],
+// 	});
+
 // 	const yesterdayWeather = await Weather.findOne({
 // 		where: {
 // 			city: response.city,
 // 			weather_date: date.yesterday(moment(weatherDate)),
 // 		},
 // 	});
+
+// 	if (weather) {
+// 		const weatherData = weather.dataValues;
+
+// 		response.pop = weatherData.pop;
+// 	}
 
 // 	if (yesterdayWeather) {
 // 		const yesterdayData = yesterdayWeather.dataValues;
@@ -115,11 +127,11 @@ const getForecast = async (location: ICityGeolocation, forecastDate: string, for
 
 const saveShortForecast = async () => {
 	try {
-		const { forecastDate, forecastTime } = date.getMidForecastDate();
+		const { currentDate, currentTime } = date.getWeatherDate();
 
 		for (let i = 0; i < cityGeolocationList.length; i++) {
 			const location = cityGeolocationList[i];
-			await getForecast(location, forecastDate, forecastTime);
+			await getForecast(location, currentDate, currentTime);
 		}
 
 		// for (let i = 0; i < response.length; i++) {
@@ -140,7 +152,7 @@ const saveShortForecast = async () => {
 		// 	}
 		// }
 	} catch (error) {
-		console.error(`[mid forecast request FAIL ${date.today()}][${error.message}]`);
+		console.error(`[short forecast request FAIL ${date.today()}][${error.message}]`);
 		console.error(error.stack);
 	}
 };

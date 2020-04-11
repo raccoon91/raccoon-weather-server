@@ -1,14 +1,14 @@
-import config from "../../config";
-import requestWeatherApi from "../../lib/requestWeatherApi";
+import config from "../config";
+import requestWeatherApi from "../lib/requestWeatherApi";
 
 // const { Weather } = require("../../infra/mysql");
 // const { Op } = require("sequelize");
 
-import { IWeatherResponseData, ICityGeolocation, IWeatherData } from "../../interface/weather";
-import { ICityKor } from "../../interface/location";
+import { IWeatherResponseData, ICityGeolocation, IWeatherData } from "../interface/weather";
+import { ICityKor } from "../interface/location";
 
-import { cityGeolocationList } from "../../utils/location";
-import date from "../../utils/date";
+import { cityGeolocationList } from "../utils/location";
+import date from "../utils/date";
 
 const { OPEN_WEATHER_API_KEY } = config;
 

@@ -1,12 +1,12 @@
-import config from "../../config";
-import requestAirPollutionApi from "../../lib/requestAirPollutionApi";
+import config from "../config";
+import requestAirPollutionApi from "../lib/requestAirPollutionApi";
 
 // const { Airpollution } = require("../../infra/mysql");
 
-import { IForecastResponseData, IForecastList, IForecastData } from "../../interface/air";
+import { IForecastResponseData, IForecastList, IForecastData } from "../interface/air";
 
-import { cityEngToKorDictionary } from "../../utils/location";
-import date from "../../utils/date";
+import { cityEngToKorDictionary } from "../utils/location";
+import date from "../utils/date";
 
 const { OPEN_WEATHER_API_KEY } = config;
 
