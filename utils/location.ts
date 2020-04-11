@@ -1,4 +1,6 @@
-export const airpollutionLocation = {
+import { ICityGeolocation } from "../interface/weather";
+
+export const cityEngToKorDictionary = {
 	seoul: "서울",
 	chungbuk: "충북",
 	busan: "부산",
@@ -18,7 +20,7 @@ export const airpollutionLocation = {
 	ulsan: "울산",
 };
 
-export const locationList = [
+export const cityGeolocationList: ICityGeolocation[] = [
 	{ city: "서울", nx: 60, ny: 127 },
 	{ city: "강원", nx: 73, ny: 134 },
 	{ city: "경기", nx: 60, ny: 120 },
@@ -38,7 +40,7 @@ export const locationList = [
 	{ city: "충북", nx: 69, ny: 107 },
 ];
 
-export const cityConvert = {
+export const cityAbbreviations = {
 	서울특별시: "서울",
 	부산광역시: "부산",
 	대구광역시: "대구",

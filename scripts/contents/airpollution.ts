@@ -5,7 +5,7 @@ import requestAirPollutionApi from "../../lib/requestAirPollutionApi";
 
 import { IPollutionResponseData, IPollutionData } from "../../interface/air";
 
-import { airpollutionLocation } from "../../utils/location";
+import { cityEngToKorDictionary } from "../../utils/location";
 import date from "../../utils/date";
 
 const { OPEN_WEATHER_API_KEY } = config;
@@ -13,9 +13,9 @@ const { OPEN_WEATHER_API_KEY } = config;
 const combineData = (pm10: IPollutionResponseData, pm25: IPollutionResponseData): IPollutionData[] => {
 	const result: IPollutionData[] = [];
 
-	Object.keys(airpollutionLocation).forEach((city_en: string) => {
+	Object.keys(cityEngToKorDictionary).forEach((city_en: string) => {
 		const currentAir: IPollutionData = {
-			city: airpollutionLocation[city_en],
+			city: cityEngToKorDictionary[city_en],
 			pm10: pm10[city_en],
 			pm25: pm25[city_en],
 			air_date: date.today(),

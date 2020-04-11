@@ -5,7 +5,7 @@ import requestAirPollutionApi from "../../lib/requestAirPollutionApi";
 
 import { IForecastResponseData, IForecastList, IForecastData } from "../../interface/air";
 
-import { airpollutionLocation } from "../../utils/location";
+import { cityEngToKorDictionary } from "../../utils/location";
 import date from "../../utils/date";
 
 const { OPEN_WEATHER_API_KEY } = config;
@@ -40,11 +40,11 @@ const combineData = (pm10Forecast: IForecastList, pm25Forecast: IForecastList): 
 	const result: IForecastData[] = [];
 
 	Object.keys(pm10Forecast).forEach((forecastDate) => {
-		Object.keys(airpollutionLocation).forEach((city_en) => {
+		Object.keys(cityEngToKorDictionary).forEach((city_en) => {
 			const forecast: IForecastData = {
-				city: airpollutionLocation[city_en],
-				pm10: pm10Forecast[forecastDate][airpollutionLocation[city_en]].pm10,
-				pm25: pm25Forecast[forecastDate][airpollutionLocation[city_en]].pm25,
+				city: cityEngToKorDictionary[city_en],
+				pm10: pm10Forecast[forecastDate][cityEngToKorDictionary[city_en]].pm10,
+				pm25: pm25Forecast[forecastDate][cityEngToKorDictionary[city_en]].pm25,
 				air_date: forecastDate,
 				type: "forecast",
 			};
