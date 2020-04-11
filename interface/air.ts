@@ -1,40 +1,4 @@
-export type IKoCity =
-	| "서울"
-	| "제주"
-	| "전남"
-	| "전북"
-	| "광주"
-	| "경남"
-	| "경북"
-	| "울산"
-	| "대구"
-	| "부산"
-	| "충남"
-	| "충북"
-	| "세종"
-	| "대전"
-	| "강원"
-	| "경기"
-	| "인천";
-
-export type IEnCity =
-	| "seoul"
-	| "chungbuk"
-	| "busan"
-	| "chungnam"
-	| "daegu"
-	| "daejeon"
-	| "gangwon"
-	| "gwangju"
-	| "gyeongbuk"
-	| "gyeonggi"
-	| "gyeongnam"
-	| "incheon"
-	| "jeju"
-	| "jeonbuk"
-	| "jeonnam"
-	| "sejong"
-	| "ulsan";
+import { ICityKor } from "./location";
 
 export type IItemCode = "pm10" | "pm25";
 
@@ -84,7 +48,7 @@ export interface IForecastResponseData {
 }
 
 export type IForecast = {
-	[key in IKoCity]: { [key in IItemCode]: string };
+	[key in ICityKor]: { [key in IItemCode]: string };
 };
 
 export type IForecastList = {
@@ -92,7 +56,7 @@ export type IForecastList = {
 };
 
 export interface IForecastData {
-	city: IKoCity;
+	city: ICityKor;
 	pm10: string;
 	pm25: string;
 	air_date: string;
