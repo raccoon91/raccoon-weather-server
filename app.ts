@@ -3,8 +3,9 @@ import path from "path";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
-import cronjob from "./cronjob";
-import { sequelizeConnect } from "./infra/mysql/index";
+// import cronjob from "./cronjob";
+// import { sequelizeConnect } from "./infra/mysql/index";
+import getAir from "./scripts/contents/airpollution";
 
 // const indexRouter = require("./routes/index");
 
@@ -21,7 +22,9 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 // app.use("/", indexRouter);
-app.get("/", (req, res) => {
+app.get("/", async (req, res) => {
+	const result = await getAir();
+	console.log(result);
 	res.send("hi");
 });
 
