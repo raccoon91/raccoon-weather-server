@@ -1,9 +1,9 @@
 import config from "../config";
 import requestAirPollutionApi from "../lib/requestAirPollutionApi";
 
-// const { Airpollution } = require("../../infra/mysql");
+import { bulkUpdateOrCreateAirForecast } from "../infra/mysql";
 
-import { IForecastResponseData, IForecastList, IForecastData } from "../interface/air";
+import { IForecastResponseData, IForecastList, IPollutionData } from "../interface/air";
 
 import { cityEngToKorDictionary } from "../utils/location";
 import date from "../utils/date";
@@ -36,12 +36,12 @@ const sliceForecastData = (forecastList: IForecastResponseData[], itemCode: stri
 	return result;
 };
 
-const combineData = (pm10Forecast: IForecastList, pm25Forecast: IForecastList): IForecastData[] => {
-	const result: IForecastData[] = [];
+const combineData = (pm10Forecast: IForecastList, pm25Forecast: IForecastList): IPollutionData[] => {
+	const result: IPollutionData[] = [];
 
 	Object.keys(pm10Forecast).forEach((forecastDate) => {
 		Object.keys(cityEngToKorDictionary).forEach((city_en) => {
-			const forecast: IForecastData = {
+			const forecast: IPollutionData = {
 				city: cityEngToKorDictionary[city_en],
 				pm10: pm10Forecast[forecastDate][cityEngToKorDictionary[city_en]].pm10,
 				pm25: pm25Forecast[forecastDate][cityEngToKorDictionary[city_en]].pm25,
@@ -84,36 +84,19 @@ const requestAirForecast = async (itemCode: string, today: string): Promise<IFor
 	return sliceForecastData(filteredList, itemCode.toLowerCase());
 };
 
-const getAirForecast = async (): Promise<IForecastData[]> => {
+const getAirForecast = async () => {
 	try {
 		const today = date.today();
 		const pm10Forecast = await requestAirForecast("PM10", today);
 		const pm25Forecast = await requestAirForecast("PM25", today);
 
-		const forecastData = combineData(pm10Forecast, pm25Forecast);
+		const forecastDataList = combineData(pm10Forecast, pm25Forecast);
 
-		return forecastData;
+		await bulkUpdateOrCreateAirForecast(forecastDataList);
 	} catch (error) {
 		console.error(`[air forecast request FAIL ${date.today()}][${error.message}]`);
 		console.error(error.stack);
 	}
-
-	// for (let i = 0; i < result.length; i++) {
-	// 	const weather = await Airpollution.findOne({
-	// 		where: {
-	// 			city: result[i].city,
-	// 			air_date: result[i].air_date,
-	// 		},
-	// 	});
-
-	// 	if (weather) {
-	// 		if (weather.dataValues.type !== "current") {
-	// 			weather.update(result[i]);
-	// 		}
-	// 	} else {
-	// 		Airpollution.create(result[i]);
-	// 	}
-	// }
 };
 
 export default getAirForecast;

@@ -1,7 +1,7 @@
 import config from "../config";
 import requestAirPollutionApi from "../lib/requestAirPollutionApi";
 
-// const { Airpollution } = require("../../infra/mysql");
+import { bulkUpdateOrCreateAirPollution } from "../infra/mysql";
 
 import { IPollutionResponseData, IPollutionData } from "../interface/air";
 
@@ -49,33 +49,18 @@ const requestAirPollution = async (itemCode: string): Promise<IPollutionResponse
 	return response.data.list[0];
 };
 
-const getAirpollution = async (): Promise<IPollutionData[]> => {
+const getAirpollution = async () => {
 	try {
 		const pm10 = await requestAirPollution("PM10");
 		const pm25 = await requestAirPollution("PM25");
 
-		const pollutionData = combineData(pm10, pm25);
+		const pollutionDataList = combineData(pm10, pm25);
 
-		return pollutionData;
+		await bulkUpdateOrCreateAirPollution(pollutionDataList);
 	} catch (error) {
 		console.error(`[airpollution request FAIL ${date.today()}][${error.message}]`);
 		console.error(error.stack);
 	}
-
-	// for (let i = 0; i < result.length; i++) {
-	// 	const weather = await Airpollution.findOne({
-	// 		where: {
-	// 			city: result[i].city,
-	// 			air_date: result[i].air_date,
-	// 		},
-	// 	});
-
-	// 	if (weather) {
-	// 		weather.update(result[i]);
-	// 	} else {
-	// 		Airpollution.create(result[i]);
-	// 	}
-	// }
 };
 
 export default getAirpollution;

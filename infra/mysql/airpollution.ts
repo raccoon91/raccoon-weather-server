@@ -1,6 +1,8 @@
 import { Model, DataTypes, BuildOptions } from "sequelize";
 import { sequelize } from "./index";
 
+import { IPollutionData } from "../../interface/air";
+
 interface IAirPollutionModel extends Model {
 	city: string;
 	pm10: string;
@@ -35,3 +37,43 @@ export const AirPollutionModel = <IAirPollutionModelStatic>sequelize.define("air
 		allowNull: false,
 	},
 });
+
+export const bulkUpdateOrCreateAirPollution = async (response: IPollutionData[]) => {
+	for (let i = 0; i < response.length; i++) {
+		const airPollution = response[i];
+
+		const weather = await AirPollutionModel.findOne({
+			where: {
+				city: airPollution.city,
+				air_date: airPollution.air_date,
+			},
+		});
+
+		if (weather) {
+			await weather.update(airPollution);
+		} else {
+			await AirPollutionModel.create(airPollution);
+		}
+	}
+};
+
+export const bulkUpdateOrCreateAirForecast = async (response: IPollutionData[]) => {
+	for (let i = 0; i < response.length; i++) {
+		const airForecast = response[i];
+
+		const weather = await AirPollutionModel.findOne({
+			where: {
+				city: airForecast.city,
+				air_date: airForecast.air_date,
+			},
+		});
+
+		if (weather) {
+			if (weather.type !== "current") {
+				weather.update(airForecast);
+			}
+		} else {
+			AirPollutionModel.create(airForecast);
+		}
+	}
+};
