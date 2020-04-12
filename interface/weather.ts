@@ -70,18 +70,18 @@ export interface IShortForecastResponseData {
 	ny: number;
 }
 
-export interface IShortForecastData {
-	city?: ICityKor;
-	temp?: number;
-	yesterday_temp?: number;
-	sky?: number;
-	pty?: number;
-	pop?: number;
-	humidity?: number;
-	hour?: string;
-	weather_date?: string;
-	type?: IWeatherType;
-}
+// export interface IShortForecastData {
+// 	city?: ICityKor;
+// 	temp?: number;
+// 	yesterday_temp?: number;
+// 	sky?: number;
+// 	pty?: number;
+// 	pop?: number;
+// 	humidity?: number;
+// 	hour?: string;
+// 	weather_date?: string;
+// 	type?: IWeatherType;
+// }
 
 export interface IMidForecastResponseData {
 	baseDate: string;
@@ -94,15 +94,15 @@ export interface IMidForecastResponseData {
 	ny: number;
 }
 
-export interface IMidForecastData {
-	city?: ICityKor;
-	temp?: number;
-	yesterday_temp?: number;
-	sky?: number;
-	pty?: number;
-	pop?: number;
-	humidity?: number;
-	hour?: string;
-	weather_date?: string;
-	type?: IWeatherType;
-}
+// export interface IMidForecastData {
+// 	city?: ICityKor;
+// 	temp?: number;
+// 	yesterday_temp?: number;
+// 	sky?: number;
+// 	pty?: number;
+// 	pop?: number;
+// 	humidity?: number;
+// 	hour?: string;
+// 	weather_date?: string;
+// 	type?: IWeatherType;
+// }

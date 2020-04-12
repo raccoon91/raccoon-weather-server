@@ -55,10 +55,10 @@ export type IForecastList = {
 	[key: string]: IForecast;
 };
 
-export interface IForecastData {
-	city: ICityKor;
-	pm10: string;
-	pm25: string;
-	air_date: string;
-	type: IAirDataType;
-}
+// export interface IForecastData {
+// 	city: ICityKor;
+// 	pm10: string;
+// 	pm25: string;
+// 	air_date: string;
+// 	type: IAirDataType;
+// }
