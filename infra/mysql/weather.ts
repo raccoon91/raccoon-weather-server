@@ -125,7 +125,7 @@ export const changePastWeatherType = async (weatherDate: string) => {
 	if (pastWeather && pastWeather.length) {
 		for (let i = 0; i < pastWeather.length; i++) {
 			if (pastWeather[i] && pastWeather[i].type !== "delete") {
-				pastWeather[i].update({ type: "past" });
+				await pastWeather[i].update({ type: "past" });
 			}
 		}
 	}
@@ -148,11 +148,11 @@ export const updateOrCreateCurrentWeather = async (response: IWeatherData, yeste
 			result = await fillCurrentWeatherColumn(response, yesterday, currentTime);
 		}
 
-		weather.update(result);
+		await weather.update(result);
 	} else {
 		const result = await fillCurrentWeatherColumn(response, yesterday, currentTime);
 
-		WeatherModel.create(result);
+		await WeatherModel.create(result);
 	}
 };
 
@@ -203,11 +203,11 @@ export const updateOrCreateShortForecast = async (response: IWeatherData, weathe
 			result = await fillShortForecastColumn(response, weatherDate);
 		}
 
-		weather.update(result);
+		await weather.update(result);
 	} else {
 		const result = await fillShortForecastColumn(response, weatherDate);
 
-		WeatherModel.create(result);
+		await WeatherModel.create(result);
 	}
 };
 
@@ -243,10 +243,10 @@ export const updateOrCreateMidForecast = async (response: IWeatherData, weatherD
 			result = await fillMidForecastColumn(response, weatherDate);
 		}
 
-		weather.update(result);
+		await weather.update(result);
 	} else {
 		const result = await fillMidForecastColumn(response, weatherDate);
 
-		WeatherModel.create(result);
+		await WeatherModel.create(result);
 	}
 };
