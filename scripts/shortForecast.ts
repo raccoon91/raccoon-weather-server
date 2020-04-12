@@ -1,9 +1,8 @@
 import config from "../config";
 import requestWeatherApi from "../lib/requestWeatherApi";
+import { updateOrCreateShortForecast } from "../infra/mysql";
 
-// const { Weather } = require("../../infra/mysql");
-
-import { IShortForecastResponseData, IShortForecastData, ICityGeolocation } from "../interface/weather";
+import { IShortForecastResponseData, IWeatherData, ICityGeolocation } from "../interface/weather";
 import { ICityKor } from "../interface/location";
 
 import { cityGeolocationList } from "../utils/location";
@@ -11,8 +10,8 @@ import date from "../utils/date";
 
 const { OPEN_WEATHER_API_KEY } = config;
 
-const sliceData = (data: IShortForecastResponseData[], city: ICityKor): IShortForecastData => {
-	let result: IShortForecastData = {};
+const sliceData = (data: IShortForecastResponseData[], city: ICityKor): IWeatherData => {
+	let result: IWeatherData = {};
 
 	data.forEach((item) => {
 		const { fcstDate, fcstTime, fcstValue, category } = item;
@@ -77,80 +76,22 @@ const getForecast = async (location: ICityGeolocation, forecastDate: string, for
 	return shortForecast;
 };
 
-// const fillEmptyAttribute = async (response, weatherDate) => {
-// 	const weather = await Weather.findOne({
-// 		where: {
-// 			city: response.city,
-// 			type: "shor",
-// 		},
-// 		order: [["weather_date", "ASC"]],
-// 		attributes: ["pop"],
-// 	});
-
-// 	const yesterdayWeather = await Weather.findOne({
-// 		where: {
-// 			city: response.city,
-// 			weather_date: date.yesterday(moment(weatherDate)),
-// 		},
-// 	});
-
-// 	if (weather) {
-// 		const weatherData = weather.dataValues;
-
-// 		response.pop = weatherData.pop;
-// 	}
-
-// 	if (yesterdayWeather) {
-// 		const yesterdayData = yesterdayWeather.dataValues;
-
-// 		response.yesterday_temp = yesterdayData.temp;
-// 	}
-
-// 	return response;
-// };
-
-// const bulkUpdateOrCreate = async (weather, response, weatherDate) => {
-// 	if (weather) {
-// 		let result = response;
-
-// 		if (!weather.dataValues.yesterday_temp) {
-// 			result = await fillEmptyAttribute(response, weatherDate);
-// 		}
-
-// 		weather.update(result);
-// 	} else {
-// 		const result = await fillEmptyAttribute(response, weatherDate);
-
-// 		Weather.create(result);
-// 	}
-// };
-
 const saveShortForecast = async () => {
 	try {
 		const { currentDate, currentTime } = date.getWeatherDate();
 
 		for (let i = 0; i < cityGeolocationList.length; i++) {
 			const location = cityGeolocationList[i];
-			await getForecast(location, currentDate, currentTime);
+			const shortForecast = await getForecast(location, currentDate, currentTime);
+
+			const forecastTime = Object.keys(shortForecast);
+
+			for (let i = 0; i < forecastTime.length; i++) {
+				const [fcstDate, fcstTime] = forecastTime[i].split(":");
+
+				await updateOrCreateShortForecast(shortForecast[forecastTime[i]], date.dateQuery(fcstDate, fcstTime));
+			}
 		}
-
-		// for (let i = 0; i < response.length; i++) {
-		// 	const forecastTime = Object.keys(response[i]);
-
-		// 	for (let j = 0; j < forecastTime.length; j++) {
-		// 		const fcstDate = forecastTime[j].split(":")[0];
-		// 		const fcstTime = forecastTime[j].split(":")[1];
-
-		// 		const weather = await Weather.findOne({
-		// 			where: {
-		// 				city: response[i][forecastTime[j]].city,
-		// 				weather_date: date.dateQuery(fcstDate, fcstTime),
-		// 			},
-		// 		});
-
-		// 		await bulkUpdateOrCreate(weather, response[i][forecastTime[j]], date.dateQuery(fcstDate, fcstTime));
-		// 	}
-		// }
 	} catch (error) {
 		console.error(`[short forecast request FAIL ${date.today()}][${error.message}]`);
 		console.error(error.stack);

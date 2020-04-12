@@ -65,12 +65,12 @@ export default {
 		)}:00:00`;
 	},
 	dateLog: () => {
-		return dayjs().format("YYYY-MM-DD/HH:mm:ss");
+		return dayjs().format("YYYY-MM-DD HH:mm:ss");
+	},
+	yesterday: (timestamp): string => {
+		return dayjs(timestamp).subtract(1, "day").format("YYYY-MM-DD HH:mm:ss");
 	},
 	// tomorrow(timestamp) {
 	// 	return timestamp.add(1, "days").format("YYYY-MM-DD 00:00:00");
-	// },
-	// yesterday(timestamp) {
-	// 	return timestamp.subtract(1, "days");
 	// },
 };

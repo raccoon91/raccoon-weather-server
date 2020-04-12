@@ -6,6 +6,8 @@ export interface ICityGeolocation {
 	ny: number;
 }
 
+type IWeatherType = "current" | "short" | "mid" | "past" | "delete";
+
 export type IWeatherCategory =
 	| "PTY" // 강수형태
 	| "REH" // 습도
@@ -45,12 +47,16 @@ export interface IWeatherResponseData {
 }
 
 export interface IWeatherData {
-	city: ICityKor;
-	weather_date: string;
-	hour: string;
-	type: "current";
+	city?: ICityKor;
 	temp?: number;
+	yesterday_temp?: number;
+	sky?: number;
+	pty?: number;
+	pop?: number;
 	humidity?: number;
+	hour?: string;
+	weather_date?: string;
+	type?: IWeatherType;
 }
 
 export interface IShortForecastResponseData {
@@ -66,13 +72,15 @@ export interface IShortForecastResponseData {
 
 export interface IShortForecastData {
 	city?: ICityKor;
-	weather_date?: string;
-	hour?: string;
-	pty?: number;
-	sky?: number;
 	temp?: number;
+	yesterday_temp?: number;
+	sky?: number;
+	pty?: number;
+	pop?: number;
 	humidity?: number;
-	type?: "short";
+	hour?: string;
+	weather_date?: string;
+	type?: IWeatherType;
 }
 
 export interface IMidForecastResponseData {
@@ -88,12 +96,13 @@ export interface IMidForecastResponseData {
 
 export interface IMidForecastData {
 	city?: ICityKor;
-	weather_date?: string;
-	hour?: string;
-	pop?: number;
-	pty?: number;
-	humidity?: number;
-	sky?: number;
 	temp?: number;
-	type?: "mid";
+	yesterday_temp?: number;
+	sky?: number;
+	pty?: number;
+	pop?: number;
+	humidity?: number;
+	hour?: string;
+	weather_date?: string;
+	type?: IWeatherType;
 }
