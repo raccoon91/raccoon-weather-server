@@ -8,7 +8,12 @@ export default {
 
 	OPEN_WEATHER_API_KEY: process.env.OPEN_WEATHER_API_KEY,
 
-	MYSQL_ENDPOINT: process.env.MYSQL_ENDPOINT,
+	MYSQL_HOST: process.env.MYSQL_HOST,
+	MYSQL_PORT: process.env.MYSQL_PORT,
+	MYSQL_DB: process.env.MYSQL_DB,
+	MYSQL_USER: process.env.MYSQL_USER,
+	MYSQL_PASSWORD: process.env.MYSQL_PASSWORD,
+
 	REDIS_HOST: process.env.REDIS_HOST,
 	REDIS_PORT: process.env.REDIS_PORT,
 	REDIS_PASSWORD: process.env.REDIS_PASS,
