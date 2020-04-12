@@ -1,9 +1,9 @@
 import { CronJob } from "cron";
-import weather from "../scripts/weather.js";
-import shortForecast from "../scripts/shortForecast.js";
-import midForecast from "../scripts/midForecast.js";
-import airpollution from "../scripts/airpollution.js";
-import airForecast from "../scripts/airForecast.js";
+import weather from "../scripts/weather";
+import shortForecast from "../scripts/shortForecast";
+import midForecast from "../scripts/midForecast";
+import airpollution from "../scripts/airpollution";
+import airForecast from "../scripts/airForecast";
 
 const jobList = [
 	{ func: weather, cron: "50 00,10,20,30,40,50 * * * *" },
@@ -14,11 +14,11 @@ const jobList = [
 ];
 
 // const testList = [
-//   { func: weather, cron: "*/5 * * * * *" },
-//   { func: shortForecast, cron: "*/5 * * * * *" },
-//   { func: midForecast, cron: "*/5 * * * * *" },
-//   { func: airpollution, cron: "*/5 * * * * *" },
-//   { func: airForecast, cron: "*/5 * * * * *" }
+// 	{ func: weather, cron: "*/5 * * * * *" },
+// 	{ func: shortForecast, cron: "*/5 * * * * *" },
+// 	{ func: midForecast, cron: "*/5 * * * * *" },
+// 	{ func: airpollution, cron: "*/5 * * * * *" },
+// 	{ func: airForecast, cron: "*/5 * * * * *" },
 // ];
 
 const cronjob = (): void => {

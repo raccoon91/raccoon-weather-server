@@ -34,6 +34,7 @@ export const sequelizeConnect = (cronJob: () => void): void => {
 
 			// execute cron job
 			cronJob();
+			console.log("execute cron job");
 		})
 		.catch((err) => {
 			console.error("Connection with mysql failed.", err);
