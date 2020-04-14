@@ -112,7 +112,7 @@ const fillCurrentWeatherColumn = async (response: IWeatherData, yesterday, curre
 	return response;
 };
 
-export const changePastWeatherType = async (weatherDate: string) => {
+export const changePastWeatherType = async (weatherDate: string): Promise<void> => {
 	const pastWeather = await WeatherModel.findAll({
 		where: {
 			weather_date: {
@@ -131,7 +131,11 @@ export const changePastWeatherType = async (weatherDate: string) => {
 	}
 };
 
-export const updateOrCreateCurrentWeather = async (response: IWeatherData, yesterday: string, currentTime: string) => {
+export const updateOrCreateCurrentWeather = async (
+	response: IWeatherData,
+	yesterday: string,
+	currentTime: string,
+): Promise<void> => {
 	const weather = await WeatherModel.findOne({
 		where: {
 			city: response.city,
@@ -188,7 +192,7 @@ const fillShortForecastColumn = async (response: IWeatherData, weatherDate: stri
 	return response;
 };
 
-export const updateOrCreateShortForecast = async (response: IWeatherData, weatherDate: string) => {
+export const updateOrCreateShortForecast = async (response: IWeatherData, weatherDate: string): Promise<void> => {
 	const weather = await WeatherModel.findOne({
 		where: {
 			city: response.city,
@@ -228,7 +232,7 @@ const fillMidForecastColumn = async (response: IWeatherData, weatherDate: string
 	return response;
 };
 
-export const updateOrCreateMidForecast = async (response: IWeatherData, weatherDate: string) => {
+export const updateOrCreateMidForecast = async (response: IWeatherData, weatherDate: string): Promise<void> => {
 	const weather = await WeatherModel.findOne({
 		where: {
 			city: response.city,

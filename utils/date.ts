@@ -64,7 +64,7 @@ export default {
 			2,
 		)}:00:00`;
 	},
-	dateLog: () => {
+	dateLog: (): string => {
 		return dayjs().format("YYYY-MM-DD HH:mm:ss");
 	},
 	yesterday: (timestamp): string => {

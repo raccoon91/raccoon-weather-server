@@ -38,7 +38,7 @@ export const AirPollutionModel = <IAirPollutionModelStatic>sequelize.define("air
 	},
 });
 
-export const bulkUpdateOrCreateAirPollution = async (response: IPollutionData[]) => {
+export const bulkUpdateOrCreateAirPollution = async (response: IPollutionData[]): Promise<void> => {
 	for (let i = 0; i < response.length; i++) {
 		const airPollution = response[i];
 
@@ -57,7 +57,7 @@ export const bulkUpdateOrCreateAirPollution = async (response: IPollutionData[])
 	}
 };
 
-export const bulkUpdateOrCreateAirForecast = async (response: IPollutionData[]) => {
+export const bulkUpdateOrCreateAirForecast = async (response: IPollutionData[]): Promise<void> => {
 	for (let i = 0; i < response.length; i++) {
 		const airForecast = response[i];
 
