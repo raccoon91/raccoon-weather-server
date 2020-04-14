@@ -32,13 +32,16 @@ app.use(geo);
 
 // app.use("/", indexRouter);
 app.get("/", (req, res) => {
+	const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 	const clientIp = requestIp.getClientIp(req);
 
 	console.log(clientIp);
 	console.log(req.headers);
 
 	res.send(
-		`Raccoon Weather Server ${config.ENVIRONMENT} ip - ${clientIp} location - ${JSON.stringify(req.body.location)}`,
+		`Raccoon Weather Server ${config.ENVIRONMENT} ip - ${ip} - ${clientIp} location - ${JSON.stringify(
+			req.body.location,
+		)}`,
 	);
 });
 
