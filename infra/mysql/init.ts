@@ -5,7 +5,7 @@ const { MYSQL_HOST, MYSQL_PORT, MYSQL_DB, MYSQL_USER, MYSQL_PASSWORD } = config;
 
 const mysqlOption: Options = {
 	host: MYSQL_HOST,
-	port: MYSQL_PORT,
+	port: Number(MYSQL_PORT),
 	dialect: "mysql",
 	dialectOptions: {
 		dateStrings: true,
