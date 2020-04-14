@@ -1,6 +1,8 @@
 require("dotenv").config();
 
 export default {
+	ENVIRONMENT: process.env.ENVIRONMENT,
+
 	NAVER_ACCESS_KEY: process.env.NAVER_ACCESS_KEY,
 	NAVER_SECRET_KEY: process.env.NAVER_SECRET_KEY,
 	NAVER_HOST_NAME: process.env.NAVER_HOST_NAME,

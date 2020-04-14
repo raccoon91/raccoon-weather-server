@@ -9,6 +9,8 @@ import logger from "morgan";
 
 import geo from "./middleware/geolocation";
 
+import config from "./config";
+
 // const indexRouter = require("./routes/index");
 
 const app = express();
@@ -29,7 +31,7 @@ app.use(geo);
 
 // app.use("/", indexRouter);
 app.get("/", (req, res) => {
-	res.send("hi");
+	res.send(`Hello World!!! ${config.ENVIRONMENT}`);
 });
 
 export default app;
