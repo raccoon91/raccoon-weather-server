@@ -3,6 +3,7 @@ import path from "path";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
+import requestIp from "request-ip";
 // import cronjob from "./cronjob";
 // import { sequelizeConnect } from "./infra/mysql";
 // import { connectRedis } from "./infra/redis";
@@ -31,7 +32,14 @@ app.use(geo);
 
 // app.use("/", indexRouter);
 app.get("/", (req, res) => {
-	res.send(`Raccoon Weather Server ${config.ENVIRONMENT} ${JSON.stringify(req.body.location)}`);
+	const clientIp = requestIp.getClientIp(req);
+
+	console.log(clientIp);
+	console.log(req.headers);
+
+	res.send(
+		`Raccoon Weather Server ${config.ENVIRONMENT} ip - ${clientIp} location - ${JSON.stringify(req.body.location)}`,
+	);
 });
 
 export default app;
