@@ -14,6 +14,7 @@ interface IGeoResponseData {
 	returnCode?: number;
 	requestId?: string;
 	geoLocation?: {
+		ip?: string;
 		country?: string;
 		code?: string;
 		r1?: string;
@@ -50,14 +51,14 @@ const makeSignature = (
 	return hash.toString(CryptoJS.enc.Base64);
 };
 
-const getLocation = async (req: Request): Promise<IGeoResponseData> => {
+const getLocation = async (): Promise<IGeoResponseData["geoLocation"]> => {
 	const timeStamp = Math.floor(+new Date()).toString();
 	const sortedSet: { ip?: string; ext?: string; responseFormatType?: "json" } = {};
-	let ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
-	ip = typeof ip === "string" ? ip.split(":").pop() : null;
+	const res = await axios.get("https://api.ipify.org?format=json");
+	const ip = res.data.ip;
 
-	sortedSet.ip = ip === "127.0.0.1" || ip === "1" ? "211.36.142.207" : ip;
+	sortedSet.ip = ip === "127.0.0.1" ? "211.36.142.207" : ip;
 	sortedSet.ext = "t";
 	sortedSet.responseFormatType = "json";
 
@@ -81,14 +82,16 @@ const getLocation = async (req: Request): Promise<IGeoResponseData> => {
 
 	const city = cityAbbreviations[response.data.geoLocation.r1];
 
-	response.data.geoLocation.city = city;
+	return {
+		ip,
+		city,
+		...response.data.geoLocation,
+	};
 
 	// TODO: use redis here
 	// await res.cookie("location", response.data, {
 	// 	maxAge: 1000 * 60 * 60 * 3,
 	// });
-
-	return response.data;
 };
 
 export default async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -99,7 +102,7 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
 		// if (!location) {
 		// }
 
-		const geolocation = await getLocation(req);
+		const geolocation = await getLocation();
 		req.body.location = geolocation;
 	} catch (error) {
 		console.error(`[geolocation request FAIL ${date.today()}][${error.message}]`);

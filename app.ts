@@ -27,13 +27,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
-// app.use(geo);
+app.use(geo);
 
 // app.use("/", indexRouter);
 app.get("/", (req, res) => {
-	const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
-
-	res.send(`Raccoon Weather Server ${config.ENVIRONMENT} ip - ${ip} location - ${JSON.stringify(req.body.location)}`);
+	res.send(`Raccoon Weather Server ${config.ENVIRONMENT} location - ${JSON.stringify(req.body.location)}`);
 });
 
 export default app;
