@@ -3,7 +3,6 @@ import path from "path";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
-import requestIp from "request-ip";
 // import cronjob from "./cronjob";
 // import { sequelizeConnect } from "./infra/mysql";
 // import { connectRedis } from "./infra/redis";
@@ -28,21 +27,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
-app.use(geo);
+// app.use(geo);
 
 // app.use("/", indexRouter);
 app.get("/", (req, res) => {
 	const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
-	const clientIp = requestIp.getClientIp(req);
 
-	console.log(clientIp);
-	console.log(req.headers);
-
-	res.send(
-		`Raccoon Weather Server ${config.ENVIRONMENT} ip - ${ip} - ${clientIp} location - ${JSON.stringify(
-			req.body.location,
-		)}`,
-	);
+	res.send(`Raccoon Weather Server ${config.ENVIRONMENT} ip - ${ip} location - ${JSON.stringify(req.body.location)}`);
 });
 
 export default app;
