@@ -51,12 +51,9 @@ const makeSignature = (
 	return hash.toString(CryptoJS.enc.Base64);
 };
 
-const getLocation = async (): Promise<IGeoResponseData["geoLocation"]> => {
+const getLocation = async (ip: string): Promise<IGeoResponseData["geoLocation"]> => {
 	const timeStamp = Math.floor(+new Date()).toString();
 	const sortedSet: { ip?: string; ext?: string; responseFormatType?: "json" } = {};
-
-	const res = await axios.get("https://api.ipify.org?format=json");
-	const ip = res.data.ip;
 
 	sortedSet.ip = ip === "127.0.0.1" ? "211.36.142.207" : ip;
 	sortedSet.ext = "t";
@@ -102,7 +99,8 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
 		// if (!location) {
 		// }
 
-		const geolocation = await getLocation();
+		const ip = req.query.ip as string;
+		const geolocation = await getLocation(ip);
 		req.body.location = geolocation;
 	} catch (error) {
 		console.error(`[geolocation request FAIL ${date.today()}][${error.message}]`);
