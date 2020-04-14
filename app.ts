@@ -31,7 +31,7 @@ app.use(geo);
 
 // app.use("/", indexRouter);
 app.get("/", (req, res) => {
-	res.send(`Hello World!!! ${config.ENVIRONMENT}`);
+	res.send(`Raccoon Weather Server ${config.ENVIRONMENT} ${JSON.stringify(req.body.location)}`);
 });
 
 export default app;
