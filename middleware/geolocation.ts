@@ -1,7 +1,7 @@
 // naver cloud flatform geolocation
 
 import axios, { AxiosResponse } from "axios";
-import CryptoJS, { Hasher } from "crypto-js";
+import CryptoJS from "crypto-js";
 import { Request, Response, NextFunction } from "express";
 import config from "../config";
 
@@ -35,8 +35,8 @@ const makeSignature = (
 ): string => {
 	const space = " ";
 	const newLine = "\n";
-	const createHMAC: (hasher: Hasher, key: string) => any = CryptoJS.algo.HMAC.create;
-	const hmac = createHMAC(CryptoJS.algo.SHA256, secretKey);
+	// @ts-ignore
+	const hmac = CryptoJS.algo.HMAC.create(CryptoJS.algo.SHA256, secretKey);
 
 	hmac.update(method);
 	hmac.update(space);
