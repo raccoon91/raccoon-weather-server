@@ -5,9 +5,9 @@ import cookieParser from "cookie-parser";
 import logger from "morgan";
 import cronjob from "./cronjob";
 import { sequelizeConnect } from "./infra/mysql";
-// import { connectRedis } from "./infra/redis";
+import { connectRedis } from "./infra/redis";
 import geo from "./middleware/geolocation";
-// const indexRouter = require("./routes/index");
+import indexRouter from "./routes/index";
 
 const app = express();
 
@@ -15,7 +15,7 @@ const app = express();
 sequelizeConnect(cronjob);
 
 // // connect redis
-// connectRedis();
+connectRedis();
 
 app.use(cors());
 app.use(logger("dev"));
@@ -25,9 +25,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 app.use(geo);
 
-// app.use("/", indexRouter);
-app.get("/", (req, res) => {
-	res.send(`Raccoon Weather Server location - ${JSON.stringify(req.body.location)}`);
-});
+app.use("/", indexRouter);
 
 export default app;

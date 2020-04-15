@@ -4,6 +4,7 @@ import axios, { AxiosResponse } from "axios";
 import CryptoJS from "crypto-js";
 import { Request, Response, NextFunction } from "express";
 import config from "../config";
+import { redisGet, redisSet } from "../infra/redis";
 
 import { cityAbbreviations } from "../utils/location";
 import date from "../utils/date";
@@ -84,24 +85,24 @@ const getLocation = async (ip: string): Promise<IGeoResponseData["geoLocation"]>
 		city,
 		...response.data.geoLocation,
 	};
-
-	// TODO: use redis here
-	// await res.cookie("location", response.data, {
-	// 	maxAge: 1000 * 60 * 60 * 3,
-	// });
 };
 
 export default async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 	try {
-		// TODO: use redis-session here
-		// const location = req.cookies.location;
-
-		// if (!location) {
-		// }
-
 		const ip = req.query.ip as string;
-		const geolocation = await getLocation(ip);
-		req.body.location = geolocation;
+
+		const cache = await redisGet(ip);
+
+		if (cache) {
+			console.log("cached ip", JSON.parse(cache));
+			req.body.location = JSON.parse(cache);
+		} else {
+			const geolocation = await getLocation(ip);
+
+			await redisSet(ip, JSON.stringify(geolocation), "EX", 60 * 5);
+
+			req.body.location = geolocation;
+		}
 	} catch (error) {
 		console.error(`[geolocation request FAIL ${date.today()}][${error.message}]`);
 		console.error(error.stack);
