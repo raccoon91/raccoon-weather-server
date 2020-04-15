@@ -1,9 +1,9 @@
 import { CronJob } from "cron";
-import weather from "../scripts/weather";
-import shortForecast from "../scripts/shortForecast";
-import midForecast from "../scripts/midForecast";
-import airpollution from "../scripts/airpollution";
-import airForecast from "../scripts/airForecast";
+import weather from "./weather";
+import shortForecast from "./shortForecast";
+import midForecast from "./midForecast";
+import airpollution from "./airpollution";
+import airForecast from "./airForecast";
 
 const jobList = [
 	{ func: weather, cron: "50 00,10,20,30,40,50 * * * *" },

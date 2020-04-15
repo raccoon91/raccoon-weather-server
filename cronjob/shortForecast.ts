@@ -11,7 +11,7 @@ import date from "../utils/date";
 const { OPEN_WEATHER_API_KEY } = config;
 
 const sliceData = (data: IShortForecastResponseData[], city: ICityKor): IWeatherData => {
-	let result: IWeatherData = {};
+	const result: IWeatherData = {};
 
 	data.forEach((item) => {
 		const { fcstDate, fcstTime, fcstValue, category } = item;
@@ -46,7 +46,11 @@ const sliceData = (data: IShortForecastResponseData[], city: ICityKor): IWeather
 	return result;
 };
 
-const getForecast = async (location: ICityGeolocation, forecastDate: string, forecastTime: string) => {
+const getForecast = async (
+	location: ICityGeolocation,
+	forecastDate: string,
+	forecastTime: string,
+): Promise<IWeatherData> => {
 	const response: {
 		status?: number;
 		data?: { response?: { body?: { items?: { item?: IShortForecastResponseData[] } } } };
@@ -76,7 +80,7 @@ const getForecast = async (location: ICityGeolocation, forecastDate: string, for
 	return shortForecast;
 };
 
-const saveShortForecast = async () => {
+const saveShortForecast = async (): Promise<void> => {
 	try {
 		const { currentDate, currentTime } = date.getWeatherDate();
 

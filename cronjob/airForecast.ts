@@ -15,7 +15,9 @@ const sliceForecastData = (forecastList: IForecastResponseData[], itemCode: stri
 
 	forecastList.forEach((item: IForecastResponseData): void => {
 		item.informGrade.split(",").forEach((inform) => {
-			let [city, air] = inform.split(" : ");
+			const splitedInform = inform.split(" : ");
+			let city = splitedInform[0];
+			const air = splitedInform[1];
 
 			if (city === "영동" || city === "영서") {
 				city = "강원";
@@ -84,7 +86,7 @@ const requestAirForecast = async (itemCode: string, today: string): Promise<IFor
 	return sliceForecastData(filteredList, itemCode.toLowerCase());
 };
 
-const getAirForecast = async () => {
+const getAirForecast = async (): Promise<void> => {
 	try {
 		const today = date.today();
 		const pm10Forecast = await requestAirForecast("PM10", today);

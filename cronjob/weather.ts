@@ -39,7 +39,11 @@ const sliceData = (
 	return result;
 };
 
-const requestCurrentWeather = async (location: ICityGeolocation, currentDate: string, currentTime: string) => {
+const requestCurrentWeather = async (
+	location: ICityGeolocation,
+	currentDate: string,
+	currentTime: string,
+): Promise<IWeatherData> => {
 	const response: {
 		status?: number;
 		data?: { response?: { body?: { items?: { item?: IWeatherResponseData[] } } } };
@@ -68,7 +72,7 @@ const requestCurrentWeather = async (location: ICityGeolocation, currentDate: st
 	return currentWeather;
 };
 
-const getCurrentWeather = async () => {
+const getCurrentWeather = async (): Promise<void> => {
 	try {
 		const { currentDate, currentTime, yesterday } = date.getWeatherDate();
 		let weatherDate: string;

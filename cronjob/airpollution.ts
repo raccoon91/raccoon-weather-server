@@ -49,7 +49,7 @@ const requestAirPollution = async (itemCode: string): Promise<IPollutionResponse
 	return response.data.list[0];
 };
 
-const getAirpollution = async () => {
+const getAirpollution = async (): Promise<void> => {
 	try {
 		const pm10 = await requestAirPollution("PM10");
 		const pm25 = await requestAirPollution("PM25");
