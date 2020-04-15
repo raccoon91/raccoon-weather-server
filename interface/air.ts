@@ -27,11 +27,11 @@ export interface IPollutionResponseData {
 }
 
 export interface IPollutionData {
-	city: string;
-	pm10: number;
-	pm25: number;
-	air_date: string;
-	type: IAirDataType;
+	city?: string;
+	pm10?: number;
+	pm25?: number;
+	air_date?: string;
+	type?: IAirDataType;
 }
 
 export interface IForecastResponseData {
