@@ -6,7 +6,6 @@ import logger from "morgan";
 import cronjob from "./cronjob";
 import { sequelizeConnect } from "./infra/mysql";
 import { connectRedis } from "./infra/redis";
-import geo from "./middleware/geolocation";
 import indexRouter from "./routes/index";
 
 const app = express();
@@ -23,7 +22,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
-app.use(geo);
 
 app.use("/", indexRouter);
 

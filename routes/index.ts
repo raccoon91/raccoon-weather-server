@@ -5,11 +5,11 @@ import { WeatherModel, AirPollutionModel } from "../infra/mysql";
 // import { IWeatherData } from "../interface/weather";
 // import { IPollutionData } from "../interface/air";
 import { redisGet, redisSet } from "../infra/redis";
-// import geolocation from "../middleware/geolocation.js";
+import geolocation from "../middleware/geolocation";
 
 const router = express.Router();
 
-// router.use(geolocation);
+router.use(geolocation);
 
 router.get("/weather", async (req, res) => {
 	const { location } = req.body;
