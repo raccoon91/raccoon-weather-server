@@ -152,7 +152,10 @@ export const updateOrCreateCurrentWeather = async (
 			result = await fillCurrentWeatherColumn(response, yesterday, currentTime);
 		}
 
-		await weather.update(result);
+		const updateResult = await weather.update(result);
+		if (updateResult.city === "서울") {
+			console.log("weather updated", updateResult.temp, updateResult.weather_date);
+		}
 	} else {
 		const result = await fillCurrentWeatherColumn(response, yesterday, currentTime);
 
@@ -207,7 +210,11 @@ export const updateOrCreateShortForecast = async (response: IWeatherData, weathe
 			result = await fillShortForecastColumn(response, weatherDate);
 		}
 
-		await weather.update(result);
+		const updateResult = await weather.update(result);
+
+		if (updateResult.city === "서울") {
+			console.log("short forecast updated", updateResult.temp, updateResult.weather_date);
+		}
 	} else {
 		const result = await fillShortForecastColumn(response, weatherDate);
 
@@ -247,7 +254,12 @@ export const updateOrCreateMidForecast = async (response: IWeatherData, weatherD
 			result = await fillMidForecastColumn(response, weatherDate);
 		}
 
-		await weather.update(result);
+		// await weather.update(result);
+		const updateResult = await weather.update(result);
+
+		if (updateResult.city === "서울") {
+			console.log("mid forecast updated", updateResult.temp, updateResult.weather_date);
+		}
 	} else {
 		const result = await fillMidForecastColumn(response, weatherDate);
 
