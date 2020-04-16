@@ -155,6 +155,7 @@ export const updateOrCreateCurrentWeather = async (
 		const updateResult = await weather.update(result);
 		if (updateResult.city === "서울") {
 			console.log("weather updated", updateResult.temp, updateResult.weather_date);
+			console.log(updateResult);
 		}
 	} else {
 		const result = await fillCurrentWeatherColumn(response, yesterday, currentTime);

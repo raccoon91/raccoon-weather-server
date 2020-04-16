@@ -1,16 +1,15 @@
-import dayjs from "dayjs";
-import ko from "dayjs/locale/ko";
+import moment from "moment-timezone";
 
 export default {
 	today: (): string => {
-		return dayjs().locale(ko).subtract(1, "day").format("YYYY-MM-DD");
+		return moment().tz("Asia/Seoul").subtract(1, "days").format("YYYY-MM-DD");
 	},
 	getWeatherDate: (): {
 		currentDate: string;
 		currentTime: string;
 		yesterday: string;
 	} => {
-		const current = dayjs().locale(ko);
+		const current = moment().tz("Asia/Seoul");
 		let hour = current.hour();
 		const minute = current.minute();
 		let dayCalibrate = 0;
@@ -25,16 +24,16 @@ export default {
 		}
 
 		return {
-			currentDate: current.subtract(dayCalibrate, "day").format("YYYYMMDD"),
+			currentDate: current.subtract(dayCalibrate, "days").format("YYYYMMDD"),
 			currentTime: hour < 10 ? `0${hour}00` : `${hour}00`,
-			yesterday: current.subtract(dayCalibrate + 1, "day").format("YYYYMMDD"),
+			yesterday: current.subtract(dayCalibrate + 1, "days").format("YYYYMMDD"),
 		};
 	},
 	getMidForecastDate: (): {
 		forecastDate: string;
 		forecastTime: string;
 	} => {
-		const current = dayjs().locale(ko);
+		const current = moment().tz("Asia/Seoul");
 		let hour = current.hour();
 		const minute = current.minute();
 		let dayCalibrate = 0;
@@ -63,10 +62,10 @@ export default {
 		)}:00:00`;
 	},
 	dateLog: (): string => {
-		return dayjs().locale(ko).format("YYYY-MM-DD HH:mm:ss");
+		return moment().tz("Asia/Seoul").format("YYYY-MM-DD HH:mm:ss");
 	},
 	yesterday: (timestamp): string => {
-		return dayjs(timestamp).subtract(1, "day").format("YYYY-MM-DD HH:mm:ss");
+		return moment(timestamp).subtract(1, "days").format("YYYY-MM-DD HH:mm:ss");
 	},
 	// tomorrow(timestamp) {
 	// 	return timestamp.add(1, "days").format("YYYY-MM-DD 00:00:00");
