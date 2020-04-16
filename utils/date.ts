@@ -1,18 +1,16 @@
 import dayjs from "dayjs";
-require("dayjs/locale/ko");
-
-dayjs.locale("ko");
+import ko from "dayjs/locale/ko";
 
 export default {
 	today: (): string => {
-		return dayjs().subtract(1, "day").format("YYYY-MM-DD");
+		return dayjs().locale(ko).subtract(1, "day").format("YYYY-MM-DD");
 	},
 	getWeatherDate: (): {
 		currentDate: string;
 		currentTime: string;
 		yesterday: string;
 	} => {
-		const current = dayjs();
+		const current = dayjs().locale(ko);
 		let hour = current.hour();
 		const minute = current.minute();
 		let dayCalibrate = 0;
@@ -36,7 +34,7 @@ export default {
 		forecastDate: string;
 		forecastTime: string;
 	} => {
-		const current = dayjs();
+		const current = dayjs().locale(ko);
 		let hour = current.hour();
 		const minute = current.minute();
 		let dayCalibrate = 0;
@@ -65,7 +63,7 @@ export default {
 		)}:00:00`;
 	},
 	dateLog: (): string => {
-		return dayjs().format("YYYY-MM-DD HH:mm:ss");
+		return dayjs().locale(ko).format("YYYY-MM-DD HH:mm:ss");
 	},
 	yesterday: (timestamp): string => {
 		return dayjs(timestamp).subtract(1, "day").format("YYYY-MM-DD HH:mm:ss");
