@@ -2,7 +2,7 @@ import config from "../config";
 import requestWeatherApi from "../lib/requestWeatherApi";
 import { updateOrCreateShortForecast } from "../infra/mysql";
 
-import { IShortForecastResponseData, IWeatherData, ICityGeolocation } from "../interface/weather";
+import { IShortForecastResponseData, IShortForecastData, ICityGeolocation } from "../interface/weather";
 import { ICityKor } from "../interface/location";
 
 import { cityGeolocationList } from "../utils/location";
@@ -10,8 +10,8 @@ import date from "../utils/date";
 
 const { OPEN_WEATHER_API_KEY } = config;
 
-const sliceData = (data: IShortForecastResponseData[], city: ICityKor): IWeatherData => {
-	const result: IWeatherData = {};
+const sliceData = (data: IShortForecastResponseData[], city: ICityKor): IShortForecastData => {
+	const result: IShortForecastData = {};
 
 	data.forEach((item) => {
 		const { fcstDate, fcstTime, fcstValue, category } = item;
@@ -19,9 +19,8 @@ const sliceData = (data: IShortForecastResponseData[], city: ICityKor): IWeather
 		if (!result[`${fcstDate}:${fcstTime}`]) {
 			result[`${fcstDate}:${fcstTime}`] = {
 				city,
-				weather_date: date.dateQuery(String(fcstDate), String(fcstTime)),
+				weather_date: date.forecastDateQuery(String(fcstDate), String(fcstTime)),
 				hour: String(fcstTime).slice(0, 2),
-				type: "short",
 			};
 		}
 
@@ -38,6 +37,15 @@ const sliceData = (data: IShortForecastResponseData[], city: ICityKor): IWeather
 			case "REH":
 				result[`${fcstDate}:${fcstTime}`].humidity = fcstValue;
 				break;
+			case "RN1":
+				result[`${fcstDate}:${fcstTime}`].rn1 = fcstValue;
+				break;
+			case "PTY":
+				result[`${fcstDate}:${fcstTime}`].pty = fcstValue;
+				break;
+			case "LGT":
+				result[`${fcstDate}:${fcstTime}`].lgt = fcstValue;
+				break;
 			default:
 				break;
 		}
@@ -50,21 +58,22 @@ const getForecast = async (
 	location: ICityGeolocation,
 	forecastDate: string,
 	forecastTime: string,
-): Promise<IWeatherData> => {
+): Promise<IShortForecastData> => {
 	const response: {
 		status?: number;
 		data?: { response?: { body?: { items?: { item?: IShortForecastResponseData[] } } } };
 	} = await requestWeatherApi({
 		method: "get",
-		url: "ForecastTimeData",
+		url: "getUltraSrtFcst",
 		params: {
-			ServiceKey: decodeURIComponent(OPEN_WEATHER_API_KEY),
+			serviceKey: decodeURIComponent(OPEN_WEATHER_API_KEY),
 			base_date: forecastDate,
 			base_time: forecastTime,
 			nx: location.nx,
 			ny: location.ny,
+			dataType: "JSON",
 			numOfRows: 40,
-			_type: "json",
+			pageNo: 1,
 		},
 	});
 
@@ -93,7 +102,7 @@ const saveShortForecast = async (): Promise<void> => {
 			for (let i = 0; i < forecastTime.length; i++) {
 				const [fcstDate, fcstTime] = forecastTime[i].split(":");
 
-				await updateOrCreateShortForecast(shortForecast[forecastTime[i]], date.dateQuery(fcstDate, fcstTime));
+				await updateOrCreateShortForecast(shortForecast[forecastTime[i]], date.forecastDateQuery(fcstDate, fcstTime));
 			}
 		}
 	} catch (error) {

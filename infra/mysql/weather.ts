@@ -1,140 +1,146 @@
-import { Model, DataTypes, BuildOptions, Op } from "sequelize";
+import { Model, DataTypes, BuildOptions } from "sequelize";
 import { sequelize } from "./index";
 import date from "../../utils/date";
 
 import { IWeatherData } from "../../interface/weather";
 
 interface IWeatherModel extends Model {
-	city: string;
-	temp: number;
-	yesterday_temp: number;
-	sky: number;
-	pty: number;
-	pop: number;
-	humidity: number;
-	hour: string;
-	weather_date: Date;
-	type: string;
+	city?: string;
+	temp?: number;
+	yesterday_temp?: number;
+	max_temp?: number;
+	min_tamp?: number;
+	sky?: number;
+	pty?: number;
+	pop?: number;
+	rn1?: number;
+	humidity?: number;
+	lgt?: number;
+	hour?: string;
+	weather_date?: string;
+	type?: string;
 }
 
 type IWeatherModelStatic = typeof Model & {
 	new (values?: object, options?: BuildOptions): IWeatherModel;
 };
 
-export const WeatherModel = <IWeatherModelStatic>sequelize.define("weather", {
-	city: {
-		type: DataTypes.STRING(20),
-		allowNull: false,
+export const WeatherModel = <IWeatherModelStatic>sequelize.define(
+	"weather",
+	{
+		city: {
+			type: DataTypes.STRING(20),
+			allowNull: false,
+		},
+		temp: {
+			type: DataTypes.FLOAT,
+			allowNull: true,
+		},
+		max_temp: {
+			type: DataTypes.FLOAT,
+			allowNull: true,
+		},
+		min_temp: {
+			type: DataTypes.FLOAT,
+			allowNull: true,
+		},
+		yesterday_temp: {
+			type: DataTypes.FLOAT,
+			allowNull: true,
+		},
+		sky: {
+			type: DataTypes.INTEGER,
+			allowNull: true,
+		},
+		pty: {
+			type: DataTypes.INTEGER,
+			allowNull: true,
+		},
+		pop: {
+			type: DataTypes.INTEGER,
+			allowNull: true,
+		},
+		rn1: {
+			type: DataTypes.FLOAT,
+			allowNull: true,
+		},
+		humidity: {
+			type: DataTypes.FLOAT,
+			allowNull: true,
+		},
+		lgt: {
+			type: DataTypes.INTEGER,
+			allowNull: true,
+		},
+		hour: {
+			type: DataTypes.STRING(5),
+			allowNull: false,
+		},
+		weather_date: {
+			type: DataTypes.DATE,
+			allowNull: false,
+			unique: false,
+		},
 	},
-	temp: {
-		type: DataTypes.FLOAT,
-		allowNull: true,
-	},
-	yesterday_temp: {
-		type: DataTypes.FLOAT,
-		allowNull: true,
-	},
-	sky: {
-		type: DataTypes.INTEGER,
-		allowNull: true,
-	},
-	pty: {
-		type: DataTypes.INTEGER,
-		allowNull: true,
-	},
-	pop: {
-		type: DataTypes.INTEGER,
-		allowNull: true,
-	},
-	humidity: {
-		type: DataTypes.FLOAT,
-		allowNull: true,
-	},
-	hour: {
-		type: DataTypes.STRING(5),
-		allowNull: false,
-	},
-	weather_date: {
-		type: DataTypes.DATE,
-		allowNull: false,
-		unique: false,
-	},
-	type: {
-		type: DataTypes.STRING(10),
-		allowNull: false,
-	},
-});
+	{ updatedAt: false },
+);
 
-const fillCurrentWeatherColumn = async (response: IWeatherData, yesterday, currentTime): Promise<IWeatherData> => {
-	let weather = await WeatherModel.findOne({
+const fillCurrentWeatherColumn = async (
+	response: IWeatherData,
+	currentDate: string,
+	currentTime: string,
+	currentMinute: string,
+): Promise<IWeatherData> => {
+	const weather = response;
+
+	const shortForecast = await WeatherModel.findOne({
 		where: {
-			city: response.city,
-			type: "short",
+			city: weather.city,
 		},
 		order: [["weather_date", "ASC"]],
-		attributes: ["sky", "pty", "pop"],
+		attributes: ["sky", "pty", "lgt"],
 	});
 
-	if (!weather) {
-		weather = await WeatherModel.findOne({
-			where: {
-				city: response.city,
-				type: "mid",
-			},
-			order: [["weather_date", "ASC"]],
-			attributes: ["sky", "pty", "pop"],
-		});
-	}
+	const midForecast = await WeatherModel.findOne({
+		where: {
+			city: weather.city,
+		},
+		order: [["weather_date", "ASC"]],
+		attributes: ["max_temp", "min_temp", "pop"],
+	});
 
 	const yesterdayWeather = await WeatherModel.findOne({
 		where: {
-			city: response.city,
-			weather_date: date.dateQuery(yesterday, currentTime),
+			city: weather.city,
+			weather_date: date.yesterdayDateQuery(currentDate, currentTime, currentMinute),
 		},
+		attributes: ["temp"],
 	});
 
-	if (weather) {
-		const weatherData = weather;
+	if (shortForecast) {
+		weather.sky = shortForecast.sky;
+		weather.pty = shortForecast.pty;
+		weather.lgt = shortForecast.lgt;
+	}
 
-		response.sky = weatherData.sky;
-		response.pty = weatherData.pty;
-		response.pop = weatherData.pop;
+	if (midForecast) {
+		weather["max_temp"] = midForecast["max_temp"];
+		weather["min_temp"] = midForecast["min_temp"];
+		weather.pop = midForecast.pop;
 	}
 
 	if (yesterdayWeather) {
-		const yesterdayData = yesterdayWeather;
-
-		response.yesterday_temp = yesterdayData.temp;
-
-		await yesterdayWeather.update({ type: "delete" });
+		weather.yesterday_temp = yesterdayWeather.temp;
 	}
 
-	return response;
-};
-
-export const changePastWeatherType = async (weatherDate: string): Promise<void> => {
-	const pastWeather = await WeatherModel.findAll({
-		where: {
-			weather_date: {
-				[Op.lt]: weatherDate,
-			},
-			type: "current",
-		},
-	});
-
-	if (pastWeather && pastWeather.length) {
-		for (let i = 0; i < pastWeather.length; i++) {
-			if (pastWeather[i] && pastWeather[i].type !== "delete") {
-				await pastWeather[i].update({ type: "past" });
-			}
-		}
-	}
+	return weather;
 };
 
 export const updateOrCreateCurrentWeather = async (
 	response: IWeatherData,
-	yesterday: string,
+	currentDate: string,
 	currentTime: string,
+	currentMinute: string,
 ): Promise<void> => {
 	const weather = await WeatherModel.findOne({
 		where: {
@@ -143,113 +149,8 @@ export const updateOrCreateCurrentWeather = async (
 		},
 	});
 
-	// fillCurrentWeatherColumn(response, yesterday, currentTime);
-
-	if (weather) {
-		let result = response;
-
-		if (!weather.yesterday_temp) {
-			result = await fillCurrentWeatherColumn(response, yesterday, currentTime);
-		}
-
-		await weather.update(result);
-	} else {
-		const result = await fillCurrentWeatherColumn(response, yesterday, currentTime);
-
-		await WeatherModel.create(result);
-	}
-};
-
-const fillShortForecastColumn = async (response: IWeatherData, weatherDate: string): Promise<IWeatherData> => {
-	const weather = await WeatherModel.findOne({
-		where: {
-			city: response.city,
-			type: "short",
-		},
-		order: [["weather_date", "ASC"]],
-		attributes: ["pop"],
-	});
-
-	const yesterdayWeather = await WeatherModel.findOne({
-		where: {
-			city: response.city,
-			weather_date: date.yesterday(weatherDate),
-		},
-	});
-
-	if (weather) {
-		const weatherData = weather;
-
-		response.pop = weatherData.pop;
-	}
-
-	if (yesterdayWeather) {
-		const yesterdayData = yesterdayWeather;
-
-		response.yesterday_temp = yesterdayData.temp;
-	}
-
-	return response;
-};
-
-export const updateOrCreateShortForecast = async (response: IWeatherData, weatherDate: string): Promise<void> => {
-	const weather = await WeatherModel.findOne({
-		where: {
-			city: response.city,
-			weather_date: weatherDate,
-		},
-	});
-
-	if (weather) {
-		let result = response;
-
-		if (!weather.yesterday_temp) {
-			result = await fillShortForecastColumn(response, weatherDate);
-		}
-
-		await weather.update(result);
-	} else {
-		const result = await fillShortForecastColumn(response, weatherDate);
-
-		await WeatherModel.create(result);
-	}
-};
-
-const fillMidForecastColumn = async (response: IWeatherData, weatherDate: string): Promise<IWeatherData> => {
-	const yesterdayWeather = await WeatherModel.findOne({
-		where: {
-			city: response.city,
-			weather_date: date.yesterday(weatherDate),
-		},
-	});
-
-	if (yesterdayWeather) {
-		const yesterdayData = yesterdayWeather;
-
-		response.yesterday_temp = yesterdayData.temp;
-	}
-
-	return response;
-};
-
-export const updateOrCreateMidForecast = async (response: IWeatherData, weatherDate: string): Promise<void> => {
-	const weather = await WeatherModel.findOne({
-		where: {
-			city: response.city,
-			weather_date: weatherDate,
-		},
-	});
-
-	if (weather) {
-		let result = response;
-
-		if (!weather.yesterday_temp) {
-			result = await fillMidForecastColumn(response, weatherDate);
-		}
-
-		await weather.update(result);
-	} else {
-		const result = await fillMidForecastColumn(response, weatherDate);
+	if (!weather) {
+		const result = await fillCurrentWeatherColumn(response, currentDate, currentTime, currentMinute);
 
 		await WeatherModel.create(result);
 	}

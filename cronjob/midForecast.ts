@@ -19,7 +19,7 @@ const sliceData = (data: IMidForecastResponseData[], city: ICityKor): IWeatherDa
 		if (!result[`${fcstDate}:${fcstTime}`]) {
 			result[`${fcstDate}:${fcstTime}`] = {
 				city,
-				weather_date: date.dateQuery(String(fcstDate), String(fcstTime)),
+				weather_date: date.forecastDateQuery(String(fcstDate), String(fcstTime)),
 				hour: String(fcstTime).slice(0, 2),
 				type: "mid",
 			};
@@ -39,7 +39,13 @@ const sliceData = (data: IMidForecastResponseData[], city: ICityKor): IWeatherDa
 				result[`${fcstDate}:${fcstTime}`].humidity = fcstValue;
 				break;
 			case "T3H":
-				result[`${fcstDate}:${fcstTime}`].temp = fcstValue;
+				result[`${fcstDate}:${fcstTime}`].t3h = fcstValue;
+				break;
+			case "TMX":
+				result[`${fcstDate}:${fcstTime}`]["max_temp"] = fcstValue;
+				break;
+			case "TMN":
+				result[`${fcstDate}:${fcstTime}`]["min_temp"] = fcstValue;
 				break;
 			default:
 				break;
@@ -59,15 +65,16 @@ const getForecast = async (
 		data?: { response?: { body?: { items?: { item?: IMidForecastResponseData[] } } } };
 	} = await requestWeatherApi({
 		method: "get",
-		url: "ForecastSpaceData",
+		url: "getVilageFcst",
 		params: {
-			ServiceKey: decodeURIComponent(OPEN_WEATHER_API_KEY),
+			serviceKey: decodeURIComponent(OPEN_WEATHER_API_KEY),
 			base_date: forecastDate,
 			base_time: forecastTime,
 			nx: location.nx,
 			ny: location.ny,
+			dataType: "JSON",
 			numOfRows: 184,
-			_type: "json",
+			pageNo: 1,
 		},
 	});
 
@@ -96,7 +103,7 @@ const saveShortForecast = async (): Promise<void> => {
 			for (let i = 0; i < forecast.length; i++) {
 				const [fcstDate, fcstTime] = forecast[i].split(":");
 
-				await updateOrCreateMidForecast(midForecast[forecast[i]], date.dateQuery(fcstDate, fcstTime));
+				await updateOrCreateMidForecast(midForecast[forecast[i]], date.forecastDateQuery(fcstDate, fcstTime));
 			}
 		}
 	} catch (error) {
