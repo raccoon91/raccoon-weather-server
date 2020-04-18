@@ -96,7 +96,7 @@ const getAirForecast = async (): Promise<void> => {
 
 		await bulkUpdateOrCreateAirForecast(forecastDataList);
 	} catch (error) {
-		console.error(`[air forecast request FAIL ${date.today()}][${error.message}]`);
+		console.error(`[air forecast request FAIL ${date.dateLog()}][${error.message}]`);
 		console.error(error.stack);
 	}
 };

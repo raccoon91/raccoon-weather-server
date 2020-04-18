@@ -2,7 +2,6 @@ import { Model, DataTypes, BuildOptions } from "sequelize";
 import { sequelize } from "./index";
 
 import { IShortForecastData } from "../../interface/weather";
-import { response } from "express";
 
 interface IShortForecast extends Model {
 	city?: string;

@@ -58,7 +58,7 @@ const getAirpollution = async (): Promise<void> => {
 
 		await bulkUpdateOrCreateAirPollution(pollutionDataList);
 	} catch (error) {
-		console.error(`[airpollution request FAIL ${date.today()}][${error.message}]`);
+		console.error(`[airpollution request FAIL ${date.dateLog()}][${error.message}]`);
 		console.error(error.stack);
 	}
 };

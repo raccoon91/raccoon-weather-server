@@ -90,7 +90,7 @@ const getCurrentWeather = async (): Promise<void> => {
 			await updateOrCreateCurrentWeather(currentWeather, currentDate, currentTime, currentMinute);
 		}
 	} catch (error) {
-		console.error(`[weather request FAIL ${date.today()}][${error.message}]`);
+		console.error(`[weather request FAIL ${date.dateLog()}][${error.message}]`);
 		console.error(error.stack);
 	}
 };

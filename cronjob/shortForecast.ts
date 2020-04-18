@@ -109,7 +109,7 @@ const saveShortForecast = async (): Promise<void> => {
 			}
 		}
 	} catch (error) {
-		console.error(`[short forecast request FAIL ${date.today()}][${error.message}]`);
+		console.error(`[short forecast request FAIL ${date.dateLog()}][${error.message}]`);
 		console.error(error.stack);
 	}
 };
