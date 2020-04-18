@@ -14,9 +14,10 @@ export default {
 		let hour = current.hour();
 		const minute = current.minute();
 		let dayCalibrate = 0;
-		const currentMinute = (Math.floor(minute / 10) + (minute % 10 === 0 ? 0 : 1)) * 10;
+		const currentMinute = Math.floor(minute / 10) * 10;
 
 		if (minute < 30) {
+			// Todo separate weather 20 vs short forecase 30
 			hour -= 1;
 		}
 
@@ -28,7 +29,7 @@ export default {
 		return {
 			currentDate: current.subtract(dayCalibrate, "days").format("YYYYMMDD"),
 			currentTime: hour < 10 ? `0${hour}00` : `${hour}00`,
-			currentMinute: String(currentMinute),
+			currentMinute: currentMinute === 0 ? "00" : `${currentMinute}`,
 			yesterday: current.subtract(dayCalibrate + 1, "days").format("YYYYMMDD"),
 		};
 	},
@@ -69,6 +70,18 @@ export default {
 			0,
 			2,
 		)}:00:00`;
+	},
+	midForecastDateQuery: (weather_date: string): string => {
+		const [date, time] = weather_date.split(" ");
+		const hour = time.split(":")[0];
+
+		if (Number(hour) < 15) {
+			return `${date} 15:00:00`;
+		}
+
+		const tomorrowDate = moment(weather_date).add(1, "day").format("YYYY-MM-DD");
+
+		return `${tomorrowDate} 15:00:00`;
 	},
 	yesterdayDateQuery: (currentDate, currentTime, currentMinute): string => {
 		return moment(

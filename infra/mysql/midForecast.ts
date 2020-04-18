@@ -1,7 +1,7 @@
 import { Model, DataTypes, BuildOptions } from "sequelize";
 import { sequelize } from "./index";
 
-import { IWeatherData } from "../../interface/weather";
+import { IMidForecastData } from "../../interface/weather";
 
 interface IMidForecast extends Model {
 	city?: string;
@@ -68,7 +68,7 @@ export const MidForecast = <IMidForecastStatic>sequelize.define(
 	{ updatedAt: false },
 );
 
-export const updateOrCreateMidForecast = async (response: IWeatherData, weatherDate: string): Promise<void> => {
+export const updateOrCreateMidForecast = async (response: IMidForecastData, weatherDate: string): Promise<void> => {
 	const midForecast = await MidForecast.findOne({
 		where: {
 			city: response.city,

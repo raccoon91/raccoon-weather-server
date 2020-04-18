@@ -9,6 +9,7 @@ interface IShortForecast extends Model {
 	sky?: number;
 	pty?: number;
 	rn1?: number;
+	lgt?: number;
 	humidity?: number;
 	hour?: string;
 	weather_date?: string;
@@ -43,6 +44,10 @@ export const ShortForecast = <IShortForecastStatic>sequelize.define(
 		},
 		humidity: {
 			type: DataTypes.FLOAT,
+			allowNull: true,
+		},
+		lgt: {
+			type: DataTypes.INTEGER,
 			allowNull: true,
 		},
 		hour: {

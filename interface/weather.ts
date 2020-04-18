@@ -58,7 +58,7 @@ export interface IWeatherData {
 	temp?: number;
 	yesterday_temp?: number;
 	max_temp?: number;
-	min_tamp?: number;
+	min_temp?: number;
 	sky?: number;
 	pty?: number;
 	pop?: number;
@@ -86,6 +86,7 @@ export interface IShortForecastData {
 	sky?: number;
 	pty?: number;
 	rn1?: number;
+	lgt?: number;
 	humidity?: number;
 	hour?: string;
 	weather_date?: string;

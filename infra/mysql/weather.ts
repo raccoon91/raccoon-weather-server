@@ -1,8 +1,8 @@
-import { Model, DataTypes, BuildOptions } from "sequelize";
-import { sequelize } from "./index";
-import date from "../../utils/date";
+import { Model, DataTypes, BuildOptions, Op } from "sequelize";
+import { sequelize, ShortForecast, MidForecast } from "./index";
 
 import { IWeatherData } from "../../interface/weather";
+import date from "../../utils/date";
 
 interface IWeatherModel extends Model {
 	city?: string;
@@ -92,22 +92,53 @@ const fillCurrentWeatherColumn = async (
 	currentMinute: string,
 ): Promise<IWeatherData> => {
 	const weather = response;
+	const [forecastDate, forecastTime] = weather.weather_date.split(" ");
+	const forecastHour = forecastTime.split(":")[0];
 
-	const shortForecast = await WeatherModel.findOne({
+	const shortForecast = await ShortForecast.findOne({
 		where: {
 			city: weather.city,
+			weather_date: date.forecastDateQuery(currentDate, currentTime),
 		},
-		order: [["weather_date", "ASC"]],
-		attributes: ["sky", "pty", "lgt"],
+		attributes: ["sky", "lgt"],
 	});
 
-	const midForecast = await WeatherModel.findOne({
+	const midForecast = await MidForecast.findOne({
 		where: {
 			city: weather.city,
+			weather_date: { [Op.gte]: date.forecastDateQuery(currentDate, currentTime) },
 		},
 		order: [["weather_date", "ASC"]],
 		attributes: ["max_temp", "min_temp", "pop"],
 	});
+
+	if (forecastHour !== "15") {
+		const midForecastMaxTemp = await MidForecast.findOne({
+			where: {
+				city: weather.city,
+				weather_date: `${forecastDate} 15`,
+			},
+			attributes: ["max_temp"],
+		});
+
+		if (midForecastMaxTemp) {
+			midForecast.max_temp = midForecastMaxTemp.max_temp;
+		}
+	}
+
+	if (forecastHour !== "06") {
+		const midForecastMinTemp = await MidForecast.findOne({
+			where: {
+				city: weather.city,
+				weather_date: `${forecastDate} 06`,
+			},
+			attributes: ["min_temp"],
+		});
+
+		if (midForecastMinTemp) {
+			midForecast.min_temp = midForecastMinTemp.min_temp;
+		}
+	}
 
 	const yesterdayWeather = await WeatherModel.findOne({
 		where: {
@@ -119,14 +150,13 @@ const fillCurrentWeatherColumn = async (
 
 	if (shortForecast) {
 		weather.sky = shortForecast.sky;
-		weather.pty = shortForecast.pty;
 		weather.lgt = shortForecast.lgt;
 	}
 
 	if (midForecast) {
-		weather["max_temp"] = midForecast["max_temp"];
-		weather["min_temp"] = midForecast["min_temp"];
 		weather.pop = midForecast.pop;
+		weather.max_temp = midForecast.max_temp;
+		weather.min_temp = midForecast.min_temp;
 	}
 
 	if (yesterdayWeather) {
@@ -148,10 +178,9 @@ export const updateOrCreateCurrentWeather = async (
 			weather_date: response.weather_date,
 		},
 	});
+	const result = await fillCurrentWeatherColumn(response, currentDate, currentTime, currentMinute);
 
 	if (!weather) {
-		const result = await fillCurrentWeatherColumn(response, currentDate, currentTime, currentMinute);
-
 		await WeatherModel.create(result);
 	}
 };
