@@ -20,7 +20,7 @@ export default {
 		const currentMinute = Math.floor(minute / 10) * 10;
 		let dayCalibrate = 0;
 
-		if (minute < 20) {
+		if (minute <= 20) {
 			hour -= 1;
 		}
 
