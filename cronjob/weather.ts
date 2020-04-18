@@ -19,7 +19,7 @@ const sliceData = (
 ): IWeatherData => {
 	const result: IWeatherData = {
 		city,
-		weather_date: date.weatherDateQuery(currentDate, currentTime, currentMinute),
+		weather_date: date.format(`${currentDate} ${currentTime.slice(0, 2)}${currentMinute}`, "YYYY-MM-DD HH:mm:00"),
 		hour: currentTime.slice(0, 2),
 	};
 
@@ -81,7 +81,7 @@ const requestCurrentWeather = async (
 
 const getCurrentWeather = async (): Promise<void> => {
 	try {
-		const { currentDate, currentTime, currentMinute } = date.getWeatherDate();
+		const { currentDate, currentTime, currentMinute } = date.getCurrentWeatherDate();
 
 		for (let i = 0; i < cityGeolocationList.length; i++) {
 			const location = cityGeolocationList[i];

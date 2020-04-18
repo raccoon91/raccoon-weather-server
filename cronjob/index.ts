@@ -14,9 +14,9 @@ const jobList = [
 ];
 
 // const testList = [
-// 	{ func: weather, cron: "*/10 * * * * *" },
-// 	{ func: shortForecast, cron: "*/5 * * * * *" },
-// 	{ func: midForecast, cron: "*/5 * * * * *" },
+// { func: weather, cron: "*/5 * * * * *" },
+// { func: shortForecast, cron: "*/5 * * * * *" },
+// { func: midForecast, cron: "*/5 * * * * *" },
 // { func: airpollution, cron: "*/5 * * * * *" },
 // { func: airForecast, cron: "*/5 * * * * *" },
 // ];

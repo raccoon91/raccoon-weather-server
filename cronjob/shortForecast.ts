@@ -19,7 +19,7 @@ const sliceData = (data: IShortForecastResponseData[], city: ICityKor): IShortFo
 		if (!result[`${fcstDate}:${fcstTime}`]) {
 			result[`${fcstDate}:${fcstTime}`] = {
 				city,
-				weather_date: date.forecastDateQuery(String(fcstDate), String(fcstTime)),
+				weather_date: date.format(`${fcstDate} ${fcstTime}`, "YYYY-MM-DD HH:00:00"),
 				hour: String(fcstTime).slice(0, 2),
 			};
 		}
@@ -91,7 +91,7 @@ const getForecast = async (
 
 const saveShortForecast = async (): Promise<void> => {
 	try {
-		const { currentDate, currentTime } = date.getWeatherDate();
+		const { currentDate, currentTime } = date.getShortForecastDate();
 
 		for (let i = 0; i < cityGeolocationList.length; i++) {
 			const location = cityGeolocationList[i];
@@ -102,7 +102,10 @@ const saveShortForecast = async (): Promise<void> => {
 			for (let i = 0; i < forecastTime.length; i++) {
 				const [fcstDate, fcstTime] = forecastTime[i].split(":");
 
-				await updateOrCreateShortForecast(shortForecast[forecastTime[i]], date.forecastDateQuery(fcstDate, fcstTime));
+				await updateOrCreateShortForecast(
+					shortForecast[forecastTime[i]],
+					date.format(`${fcstDate} ${fcstTime}`, "YYYY-MM-DD HH:00:00"),
+				);
 			}
 		}
 	} catch (error) {

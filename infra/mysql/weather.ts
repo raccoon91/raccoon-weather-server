@@ -98,7 +98,7 @@ const fillCurrentWeatherColumn = async (
 	const shortForecast = await ShortForecast.findOne({
 		where: {
 			city: weather.city,
-			weather_date: date.forecastDateQuery(currentDate, currentTime),
+			weather_date: date.format(`${currentDate} ${currentTime}`, "YYYY-MM-DD HH:00:00"),
 		},
 		attributes: ["sky", "lgt"],
 	});
@@ -106,7 +106,7 @@ const fillCurrentWeatherColumn = async (
 	const midForecast = await MidForecast.findOne({
 		where: {
 			city: weather.city,
-			weather_date: { [Op.gte]: date.forecastDateQuery(currentDate, currentTime) },
+			weather_date: { [Op.gte]: date.format(`${currentDate} ${currentTime}`, "YYYY-MM-DD HH:00:00") },
 		},
 		order: [["weather_date", "ASC"]],
 		attributes: ["max_temp", "min_temp", "pop"],
@@ -143,7 +143,10 @@ const fillCurrentWeatherColumn = async (
 	const yesterdayWeather = await WeatherModel.findOne({
 		where: {
 			city: weather.city,
-			weather_date: date.yesterdayDateQuery(currentDate, currentTime, currentMinute),
+			weather_date: date.format(
+				date.yesterday(`${currentDate} ${currentTime.slice(0, 2)}${currentMinute}`),
+				"YYYY-MM-DD HH:mm:00",
+			),
 		},
 		attributes: ["temp"],
 	});

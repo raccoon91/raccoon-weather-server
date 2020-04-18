@@ -19,9 +19,8 @@ const sliceData = (data: IMidForecastResponseData[], city: ICityKor): IWeatherDa
 		if (!result[`${fcstDate}:${fcstTime}`]) {
 			result[`${fcstDate}:${fcstTime}`] = {
 				city,
-				weather_date: date.forecastDateQuery(String(fcstDate), String(fcstTime)),
-				hour: String(fcstTime).slice(0, 2),
-				type: "mid",
+				weather_date: date.format(`${fcstDate} ${fcstTime}`, "YYYY-MM-DD HH:00:00"),
+				hour: fcstTime.slice(0, 2),
 			};
 		}
 
@@ -103,7 +102,10 @@ const saveShortForecast = async (): Promise<void> => {
 			for (let i = 0; i < forecast.length; i++) {
 				const [fcstDate, fcstTime] = forecast[i].split(":");
 
-				await updateOrCreateMidForecast(midForecast[forecast[i]], date.forecastDateQuery(fcstDate, fcstTime));
+				await updateOrCreateMidForecast(
+					midForecast[forecast[i]],
+					date.format(`${fcstDate} ${fcstTime}`, "YYYY-MM-DD HH:00:00"),
+				);
 			}
 		}
 	} catch (error) {
