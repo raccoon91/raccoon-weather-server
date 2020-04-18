@@ -1,7 +1,7 @@
 import { Model, DataTypes, BuildOptions } from "sequelize";
 import { sequelize } from "./index";
 
-import { IMidForecastData } from "../../interface/weather";
+import { IMidForecastData } from "../../interface";
 
 interface IMidForecast extends Model {
 	city?: string;

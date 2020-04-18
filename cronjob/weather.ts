@@ -2,8 +2,7 @@ import config from "../config";
 import requestWeatherApi from "../lib/requestWeatherApi";
 import { updateOrCreateCurrentWeather } from "../infra/mysql";
 
-import { IWeatherResponseData, ICityGeolocation, IWeatherData } from "../interface/weather";
-import { ICityKor } from "../interface/location";
+import { IWeatherResponseData, ICityGeolocation, IWeatherData, ICityKor } from "../interface";
 
 import { cityGeolocationList } from "../utils/location";
 import date from "../utils/date";

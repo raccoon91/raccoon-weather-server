@@ -1,7 +1,7 @@
 import { Model, DataTypes, BuildOptions, Op } from "sequelize";
 import { sequelize, ShortForecast, MidForecast } from "./index";
 
-import { IWeatherData } from "../../interface/weather";
+import { IWeatherData } from "../../interface";
 import date from "../../utils/date";
 
 interface IWeatherModel extends Model {

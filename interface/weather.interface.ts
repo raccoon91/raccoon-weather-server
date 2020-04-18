@@ -1,4 +1,4 @@
-import { ICityKor } from "./location";
+import { ICityKor } from "./index";
 
 export interface ICityGeolocation {
 	city: ICityKor;

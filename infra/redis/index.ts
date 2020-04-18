@@ -13,6 +13,7 @@ const redisOption = {
 let client: redis.RedisClient;
 export let redisGet;
 export let redisSet;
+export let redisKeys;
 
 export const connectRedis = (): void => {
 	client = redis.createClient(redisOption);
@@ -28,12 +29,6 @@ export const connectRedis = (): void => {
 	redisGet = promisify(client.get).bind(client);
 
 	redisSet = promisify(client.set).bind(client);
+
+	redisKeys = promisify(client.keys).bind(client);
 };
-
-// export const redisGet = (key): boolean => {
-// 	return client.get(key);
-// };
-
-// export const redisSet = (key, value): boolean => {
-// 	return client.set(key, value, "EX", 60 * 1);
-// };

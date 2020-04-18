@@ -1,4 +1,4 @@
-import { ICityKor } from "./location";
+import { ICityKor } from "./index";
 
 export type IItemCode = "pm10" | "pm25";
 

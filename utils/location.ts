@@ -1,4 +1,4 @@
-import { ICityGeolocation } from "../interface/weather";
+import { ICityGeolocation } from "../interface";
 
 export const cityEngToKorDictionary = {
 	seoul: "서울",

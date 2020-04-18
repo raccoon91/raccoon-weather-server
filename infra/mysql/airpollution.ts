@@ -1,7 +1,7 @@
 import { Model, DataTypes, BuildOptions } from "sequelize";
 import { sequelize } from "./index";
 
-import { IPollutionData } from "../../interface/air";
+import { IPollutionData } from "../../interface";
 
 interface IAirPollutionModel extends Model {
 	city: string;

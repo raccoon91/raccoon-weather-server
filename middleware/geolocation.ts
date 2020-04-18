@@ -91,7 +91,7 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
 	try {
 		const ip = req.query.ip as string;
 
-		const cache = await redisGet(ip);
+		const cache = await redisGet(`ip/${ip}`);
 
 		if (cache) {
 			console.log("cached ip", JSON.parse(cache));
@@ -99,7 +99,7 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
 		} else {
 			const geolocation = await getLocation(ip);
 
-			await redisSet(ip, JSON.stringify(geolocation), "EX", 60 * 5);
+			await redisSet(`ip/${ip}`, JSON.stringify(geolocation), "EX", 60 * 60);
 
 			req.body.location = geolocation;
 		}

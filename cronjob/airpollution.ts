@@ -3,7 +3,7 @@ import requestAirPollutionApi from "../lib/requestAirPollutionApi";
 
 import { bulkUpdateOrCreateAirPollution } from "../infra/mysql";
 
-import { IPollutionResponseData, IPollutionData } from "../interface/air";
+import { IPollutionResponseData, IPollutionData } from "../interface";
 
 import { cityEngToKorDictionary } from "../utils/location";
 import date from "../utils/date";
