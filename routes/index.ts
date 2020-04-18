@@ -1,11 +1,10 @@
 import express from "express";
-import { WeatherModel, AirPollutionModel } from "../infra/mysql";
 // import date from "../utils/date";
 // import { Op } from "sequelize";
 // import { IWeatherData } from "../interface/weather";
 // import { IPollutionData } from "../interface/air";
-import { redisGet, redisSet } from "../infra/redis";
 import geolocation from "../middleware/geolocation";
+import { weatherController } from "../controller";
 
 const router = express.Router();
 
@@ -13,37 +12,14 @@ router.use(geolocation);
 
 router.get("/weather", async (req, res) => {
 	const { location } = req.body;
-	const city = location.city;
-	const redisKey = `${city}/weather`;
-	let weather: any = {};
 
-	const cache = await redisGet(redisKey);
+	const weatherData = await weatherController(location);
 
-	if (cache) {
-		console.log("cached weather", JSON.parse(cache));
-		return res.json(JSON.parse(cache));
+	if (!weatherData) {
+		res.send({ message: "data not found" });
 	}
 
-	const weatherModel = await WeatherModel.findOne({
-		where: { city },
-		order: [["weather_date", "DESC"]],
-		attributes: ["city", "temp", "yesterday_temp", "sky", "pty", "pop", "rn1", "humidity", "hour", "weather_date"],
-	});
-
-	const airModel = await AirPollutionModel.findOne({
-		where: { city, type: "current" },
-		order: [["air_date", "DESC"]],
-	});
-
-	if (!weatherModel || !airModel) res.send({ message: "data not found", weatherModel, airModel });
-
-	weather = weatherModel;
-	weather.pm10 = airModel.pm10;
-	weather.pm25 = airModel.pm25;
-
-	await redisSet(redisKey, JSON.stringify({ weather, location }), "EX", 60 * 1);
-
-	res.json({ weather, location });
+	res.json(weatherData);
 });
 
 // router.get("/weather/forecast", async (req, res) => {
