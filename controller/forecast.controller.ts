@@ -1,20 +1,12 @@
 import { Op } from "sequelize";
 
 import { WeatherModel, ShortForecast, MidForecast } from "../infra/mysql";
-import { redisGet, redisSet } from "../infra/redis";
-import { IForecastRouteResponse, ILocation } from "../interface";
+import { redisSet } from "../infra/redis";
+import { IForecastRouteResponse } from "../interface";
 
-const forecastController = async (location: ILocation): Promise<IForecastRouteResponse> => {
-	const { city } = location;
+const forecastController = async (city: string): Promise<IForecastRouteResponse> => {
 	const redisKey = `forecast/${city}`;
 	let weatherCount = 7;
-
-	const cache = await redisGet(redisKey);
-
-	if (cache) {
-		console.log("cached forecast", JSON.parse(cache));
-		return JSON.parse(cache);
-	}
 
 	const currentWeather = await WeatherModel.findOne({
 		where: { city },
@@ -74,7 +66,7 @@ const forecastController = async (location: ILocation): Promise<IForecastRouteRe
 			condition,
 		}),
 		"EX",
-		60 * 30,
+		60 * 60,
 	);
 
 	return {

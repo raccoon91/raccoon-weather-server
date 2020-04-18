@@ -94,12 +94,12 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
 		const cache = await redisGet(`ip/${ip}`);
 
 		if (cache) {
-			console.log("cached ip", JSON.parse(cache));
+			console.log("cached ip", ip);
 			req.body.location = JSON.parse(cache);
 		} else {
 			const geolocation = await getLocation(ip);
 
-			await redisSet(`ip/${ip}`, JSON.stringify(geolocation), "EX", 60 * 60);
+			await redisSet(`ip/${ip}`, JSON.stringify(geolocation), "EX", 60 * 30);
 
 			req.body.location = geolocation;
 		}

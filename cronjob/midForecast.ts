@@ -4,8 +4,8 @@ import { updateOrCreateMidForecast } from "../infra/mysql";
 
 import { IMidForecastResponseData, IWeatherData, ICityGeolocation, ICityKor } from "../interface";
 
-import { cityGeolocationList } from "../utils/location";
 import date from "../utils/date";
+import { cityGeolocationList } from "../utils/location";
 
 const { OPEN_WEATHER_API_KEY } = config;
 

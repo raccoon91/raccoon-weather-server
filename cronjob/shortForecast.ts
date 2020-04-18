@@ -4,8 +4,10 @@ import { updateOrCreateShortForecast } from "../infra/mysql";
 
 import { IShortForecastResponseData, IShortForecastData, ICityGeolocation, ICityKor } from "../interface";
 
-import { cityGeolocationList } from "../utils/location";
 import date from "../utils/date";
+import { cityGeolocationList } from "../utils/location";
+import getCachedLocation from "../utils/getCachedLocation";
+import { forecastController, tomorrowController } from "../controller";
 
 const { OPEN_WEATHER_API_KEY } = config;
 
@@ -106,6 +108,15 @@ const saveShortForecast = async (): Promise<void> => {
 					date.format(`${fcstDate} ${fcstTime}`, "YYYY-MM-DD HH:00:00"),
 				);
 			}
+		}
+
+		const accessLocationList = await getCachedLocation();
+
+		for (let j = 0; j < accessLocationList.length; j++) {
+			const location = accessLocationList[j];
+
+			await forecastController(location.city);
+			await tomorrowController(location.city);
 		}
 	} catch (error) {
 		console.error(`[short forecast request FAIL ${date.dateLog()}][${error.message}]`);

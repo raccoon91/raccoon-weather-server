@@ -1,22 +1,14 @@
 import { Op } from "sequelize";
 
 import { ShortForecast, MidForecast } from "../infra/mysql";
-import { redisGet, redisSet } from "../infra/redis";
-import { IForecastRouteResponse, ILocation } from "../interface";
+import { redisSet } from "../infra/redis";
+import { IForecastRouteResponse } from "../interface";
 
 import date from "../utils/date";
 
-const tomorrowController = async (location: ILocation): Promise<IForecastRouteResponse> => {
-	const { city } = location;
+const tomorrowController = async (city: string): Promise<IForecastRouteResponse> => {
 	const redisKey = `tomorrow/${city}`;
 	let forecastCount = 8;
-
-	const cache = await redisGet(redisKey);
-
-	if (cache) {
-		console.log("cached tomorrow", JSON.parse(cache));
-		return JSON.parse(cache);
-	}
 
 	let tomorrowDate = date.format(date.tomorrow(date.today()), "YYYY-MM-DD HH:00:00");
 
@@ -73,7 +65,7 @@ const tomorrowController = async (location: ILocation): Promise<IForecastRouteRe
 			condition,
 		}),
 		"EX",
-		60 * 60,
+		60 * 60 * 3,
 	);
 
 	return {

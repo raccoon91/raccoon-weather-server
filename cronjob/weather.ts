@@ -4,8 +4,10 @@ import { updateOrCreateCurrentWeather } from "../infra/mysql";
 
 import { IWeatherResponseData, ICityGeolocation, IWeatherData, ICityKor } from "../interface";
 
-import { cityGeolocationList } from "../utils/location";
 import date from "../utils/date";
+import { cityGeolocationList } from "../utils/location";
+import getCachedLocation from "../utils/getCachedLocation";
+import { weatherController } from "../controller";
 
 const { OPEN_WEATHER_API_KEY } = config;
 
@@ -87,6 +89,16 @@ const getCurrentWeather = async (): Promise<void> => {
 			const currentWeather = await requestCurrentWeather(location, currentDate, currentTime, currentMinute);
 
 			await updateOrCreateCurrentWeather(currentWeather, currentDate, currentTime, currentMinute);
+		}
+
+		const accessLocationList = await getCachedLocation();
+
+		console.log(accessLocationList);
+
+		for (let j = 0; j < accessLocationList.length; j++) {
+			const location = accessLocationList[j];
+
+			await weatherController(location);
 		}
 	} catch (error) {
 		console.error(`[weather request FAIL ${date.dateLog()}][${error.message}]`);

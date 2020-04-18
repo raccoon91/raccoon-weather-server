@@ -1,21 +1,14 @@
 import { WeatherModel, AirPollutionModel } from "../infra/mysql";
-import { redisGet, redisSet } from "../infra/redis";
+import { redisSet } from "../infra/redis";
 
 import { IWeatherRouteResponse, ILocation } from "../interface";
 
 const weatherController = async (
 	location: ILocation,
 ): Promise<{ weather: IWeatherRouteResponse; location: ILocation }> => {
-	const city = location.city;
+	const { city } = location;
 	const redisKey = `weather/${city}`;
 	let weather: IWeatherRouteResponse = {};
-
-	const cache = await redisGet(redisKey);
-
-	if (cache) {
-		console.log("cached weather", JSON.parse(cache));
-		return JSON.parse(cache);
-	}
 
 	const weatherModel = await WeatherModel.findOne({
 		where: { city },
@@ -36,7 +29,7 @@ const weatherController = async (
 	weather.pm10 = airPollution.pm10;
 	weather.pm25 = airPollution.pm25;
 
-	await redisSet(redisKey, JSON.stringify({ weather, location }), "EX", 60 * 5);
+	await redisSet(redisKey, JSON.stringify({ weather, location }), "EX", 60 * 10);
 
 	return { weather, location };
 };
