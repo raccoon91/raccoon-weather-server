@@ -26,6 +26,7 @@ const forecastController = async (location): Promise<IForecastRouteResponse> => 
 	const shortForecast = await ShortForecast.findAll({
 		where: { city, weather_date: { [Op.gt]: currentWeather.weather_date } },
 		attributes: ["temp", "sky", "pty", "humidity", "hour", "weather_date"],
+		limit: 8,
 		raw: true,
 	});
 
@@ -33,13 +34,13 @@ const forecastController = async (location): Promise<IForecastRouteResponse> => 
 
 	const midForecast = await MidForecast.findAll({
 		where: { city, weather_date: { [Op.gt]: shortForecast[shortForecast.length - 1].weather_date } },
-		limit: weatherCount,
 		order: [["weather_date", "DESC"]],
 		attributes: ["t3h", "sky", "pty", "pop", "humidity", "hour", "weather_date"],
+		limit: weatherCount,
 		raw: true,
 	});
 
-	if (!currentWeather || !(shortForecast && shortForecast.length) || !(midForecast && midForecast.length)) return null;
+	if (!currentWeather || !(shortForecast || shortForecast.length) || !(midForecast || midForecast.length)) return null;
 
 	const categories = [currentWeather.hour];
 	const rainProbData = [currentWeather.pop];
