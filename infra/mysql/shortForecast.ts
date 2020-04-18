@@ -2,6 +2,7 @@ import { Model, DataTypes, BuildOptions } from "sequelize";
 import { sequelize } from "./index";
 
 import { IShortForecastData } from "../../interface/weather";
+import { response } from "express";
 
 interface IShortForecast extends Model {
 	city?: string;
@@ -63,6 +64,26 @@ export const ShortForecast = <IShortForecastStatic>sequelize.define(
 	{ updatedAt: false },
 );
 
+const fillShortForecastEmptyColumn = async (response: IShortForecastData): Promise<IShortForecastData> => {
+	const shortForecast = await ShortForecast.findOne({
+		where: {
+			city: response.city,
+		},
+		order: [["weather_date", "DESC"]],
+		attributes: ["temp", "pty", "rn1", "humidity", "sky", "lgt"],
+	});
+
+	Object.keys(response).forEach((key) => {
+		const weatherData = Number(response[key]);
+
+		if (weatherData < -900 || weatherData > 900) {
+			response[key] = shortForecast[key];
+		}
+	});
+
+	return response;
+};
+
 export const updateOrCreateShortForecast = async (response: IShortForecastData, weatherDate: string): Promise<void> => {
 	const shortForecast = await ShortForecast.findOne({
 		where: {
@@ -70,6 +91,14 @@ export const updateOrCreateShortForecast = async (response: IShortForecastData, 
 			weather_date: weatherDate,
 		},
 	});
+
+	const { temp, pty, rn1, humidity, sky, lgt } = response;
+
+	const validated = [temp, pty, rn1, humidity, sky, lgt].every((el) => Number(el) < 900 && Number(el) > -900);
+
+	if (!validated) {
+		response = await fillShortForecastEmptyColumn(response);
+	}
 
 	if (shortForecast) {
 		await shortForecast.update(response);

@@ -85,7 +85,7 @@ export const WeatherModel = <IWeatherModelStatic>sequelize.define(
 	{ updatedAt: false },
 );
 
-const fillCurrentWeatherColumn = async (
+const buildCurrentWeatherColumn = async (
 	response: IWeatherData,
 	currentDate: string,
 	currentTime: string,
@@ -169,6 +169,26 @@ const fillCurrentWeatherColumn = async (
 	return weather;
 };
 
+const fillCurrentWeatherEmptyColumn = async (response: IWeatherData): Promise<IWeatherData> => {
+	const weather = await WeatherModel.findOne({
+		where: {
+			city: response.city,
+		},
+		order: [["weather_date", "DESC"]],
+		attributes: ["temp", "pty", "humidity", "rn1"],
+	});
+
+	Object.keys(response).forEach((key) => {
+		const weatherData = Number(response[key]);
+
+		if (weatherData < -900 || weatherData > 900) {
+			response[key] = weather[key];
+		}
+	});
+
+	return response;
+};
+
 export const updateOrCreateCurrentWeather = async (
 	response: IWeatherData,
 	currentDate: string,
@@ -181,9 +201,18 @@ export const updateOrCreateCurrentWeather = async (
 			weather_date: response.weather_date,
 		},
 	});
-	const result = await fillCurrentWeatherColumn(response, currentDate, currentTime, currentMinute);
 
 	if (!weather) {
-		await WeatherModel.create(result);
+		const { temp, pty, rn1, humidity } = response;
+
+		const validated = [temp, pty, rn1, humidity].every((el) => Number(el) < 900 && Number(el) > -900);
+
+		if (!validated) {
+			response = await fillCurrentWeatherEmptyColumn(response);
+		}
+
+		response = await buildCurrentWeatherColumn(response, currentDate, currentTime, currentMinute);
+
+		await WeatherModel.create(response);
 	}
 };

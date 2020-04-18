@@ -68,6 +68,26 @@ export const MidForecast = <IMidForecastStatic>sequelize.define(
 	{ updatedAt: false },
 );
 
+const fillMidForecastEmptyColumn = async (response: IMidForecastData): Promise<IMidForecastData> => {
+	const midForecast = await MidForecast.findOne({
+		where: {
+			city: response.city,
+		},
+		order: [["weather_date", "DESC"]],
+		attributes: ["pop", "pty", "humidity", "sky", "t3h"],
+	});
+
+	Object.keys(response).forEach((key) => {
+		const weatherData = Number(response[key]);
+
+		if (weatherData < -900 || weatherData > 900) {
+			response[key] = midForecast[key];
+		}
+	});
+
+	return response;
+};
+
 export const updateOrCreateMidForecast = async (response: IMidForecastData, weatherDate: string): Promise<void> => {
 	const midForecast = await MidForecast.findOne({
 		where: {
@@ -75,6 +95,14 @@ export const updateOrCreateMidForecast = async (response: IMidForecastData, weat
 			weather_date: weatherDate,
 		},
 	});
+
+	const { pop, pty, humidity, sky, t3h } = response;
+
+	const validated = [pop, pty, humidity, sky, t3h].every((el) => Number(el) < 900 && Number(el) > -900);
+
+	if (!validated) {
+		response = await fillMidForecastEmptyColumn(response);
+	}
 
 	if (midForecast) {
 		await midForecast.update(response);

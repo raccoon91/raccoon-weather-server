@@ -27,7 +27,7 @@ router.get("/weather", async (req, res) => {
 	const weatherModel = await WeatherModel.findOne({
 		where: { city },
 		order: [["weather_date", "DESC"]],
-		attributes: ["city", "temp", "yesterday_temp", "sky", "pty", "pop", "humidity", "hour", "weather_date"],
+		attributes: ["city", "temp", "yesterday_temp", "sky", "pty", "pop", "rn1", "humidity", "hour", "weather_date"],
 	});
 
 	const airModel = await AirPollutionModel.findOne({
