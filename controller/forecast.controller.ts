@@ -2,9 +2,9 @@ import { Op } from "sequelize";
 
 import { WeatherModel, ShortForecast, MidForecast } from "../infra/mysql";
 import { redisGet, redisSet } from "../infra/redis";
-import { IForecastRouteResponse } from "../interface";
+import { IForecastRouteResponse, ILocation } from "../interface";
 
-const forecastController = async (location): Promise<IForecastRouteResponse> => {
+const forecastController = async (location: ILocation): Promise<IForecastRouteResponse> => {
 	const { city } = location;
 	const redisKey = `forecast/${city}`;
 	let weatherCount = 7;
@@ -73,6 +73,8 @@ const forecastController = async (location): Promise<IForecastRouteResponse> => 
 			tempData,
 			condition,
 		}),
+		"EX",
+		60 * 30,
 	);
 
 	return {

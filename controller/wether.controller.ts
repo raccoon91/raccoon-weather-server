@@ -3,7 +3,9 @@ import { redisGet, redisSet } from "../infra/redis";
 
 import { IWeatherRouteResponse, ILocation } from "../interface";
 
-const weatherController = async (location): Promise<{ weather: IWeatherRouteResponse; location: ILocation }> => {
+const weatherController = async (
+	location: ILocation,
+): Promise<{ weather: IWeatherRouteResponse; location: ILocation }> => {
 	const city = location.city;
 	const redisKey = `weather/${city}`;
 	let weather: IWeatherRouteResponse = {};
