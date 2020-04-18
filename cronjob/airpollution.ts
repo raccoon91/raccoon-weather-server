@@ -18,7 +18,7 @@ const combineData = (pm10: IPollutionResponseData, pm25: IPollutionResponseData)
 			city: cityEngToKorDictionary[city_en],
 			pm10: pm10[city_en],
 			pm25: pm25[city_en],
-			air_date: date.today(),
+			air_date: date.format(date.today(), "YYYY-MM-DD"),
 			type: "current",
 		};
 

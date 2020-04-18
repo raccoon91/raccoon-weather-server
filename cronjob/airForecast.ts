@@ -88,7 +88,7 @@ const requestAirForecast = async (itemCode: string, today: string): Promise<IFor
 
 const getAirForecast = async (): Promise<void> => {
 	try {
-		const today = date.today();
+		const today = date.format(date.today(), "YYYY-MM-DD");
 		const pm10Forecast = await requestAirForecast("PM10", today);
 		const pm25Forecast = await requestAirForecast("PM25", today);
 

@@ -104,7 +104,7 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
 			req.body.location = geolocation;
 		}
 	} catch (error) {
-		console.error(`[geolocation request FAIL ${date.today()}][${error.message}]`);
+		console.error(`[geolocation request FAIL ${date.dateLog()}][${error.message}]`);
 		console.error(error.stack);
 	} finally {
 		next();

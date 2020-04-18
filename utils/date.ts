@@ -2,7 +2,7 @@ import moment from "moment-timezone";
 
 export default {
 	today: (): string => {
-		return moment().tz("Asia/Seoul").format("YYYY-MM-DD");
+		return moment().tz("Asia/Seoul");
 	},
 	yesterday: (timestamp): string => {
 		return moment(timestamp).subtract(1, "days");
