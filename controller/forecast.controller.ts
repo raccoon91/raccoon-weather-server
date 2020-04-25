@@ -26,7 +26,6 @@ const forecastController = async (city: string): Promise<IForecastRouteResponse>
 
 	const midForecast = await MidForecast.findAll({
 		where: { city, weather_date: { [Op.gt]: shortForecast[shortForecast.length - 1].weather_date } },
-		order: [["weather_date", "DESC"]],
 		attributes: ["t3h", "sky", "pty", "pop", "humidity", "hour", "weather_date"],
 		limit: weatherCount,
 		raw: true,
