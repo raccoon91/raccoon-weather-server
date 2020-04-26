@@ -88,9 +88,9 @@ const getLocation = async (ip: string): Promise<IGeoResponseData["geoLocation"]>
 };
 
 export default async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-	try {
-		const ip = req.query.ip as string;
+	const ip = req.query.ip as string;
 
+	try {
 		const cache = await redisGet(`ip/${ip}`);
 
 		if (cache) {
@@ -103,10 +103,10 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
 
 			req.body.location = geolocation;
 		}
-	} catch (error) {
-		console.error(`[geolocation request FAIL ${date.dateLog()}][${error.message}]`);
-		console.error(error.stack);
-	} finally {
+
 		next();
+	} catch (error) {
+		console.error(`[geolocation request FAIL ip - ${ip} ${date.dateLog()}][${error.message}]`);
+		console.error(error);
 	}
 };
