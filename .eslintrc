@@ -1,23 +1,23 @@
 {
-	"env": {
-		"commonjs": true,
-		"es6": true,
-		"node": true
-	},
-	"parser": "@typescript-eslint/parser",
-	"plugins": ["@typescript-eslint", "prettier"],
-	"extends": ["plugin:@typescript-eslint/recommended", "prettier/@typescript-eslint", "plugin:prettier/recommended"],
-	"parserOptions": {
-		"sourceType": "module",
-		"ecmaVersion": 2018
-	},
-	"rules": {
-		"import/no-unresolved": 0,
-		"@typescript-eslint/no-inferrable-types": "off",
-		"@typescript-eslint/interface-name-prefix": "off",
-		"@typescript-eslint/consistent-type-assertions": "off",
-		"@typescript-eslint/camelcase": "off",
-		"@typescript-eslint/ban-ts-ignore": "off",
-		"@typescript-eslint/no-use-before-define": "off"
-	}
+  "env": {
+    "commonjs": true,
+    "es6": true,
+    "node": true
+  },
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint", "prettier"],
+  "extends": ["plugin:@typescript-eslint/recommended", "prettier/@typescript-eslint", "plugin:prettier/recommended"],
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaVersion": 2018
+  },
+  "rules": {
+    "import/no-unresolved": 0,
+    "@typescript-eslint/no-inferrable-types": "off",
+    "@typescript-eslint/interface-name-prefix": "off",
+    "@typescript-eslint/consistent-type-assertions": "off",
+    "@typescript-eslint/camelcase": "off",
+    "@typescript-eslint/ban-ts-ignore": "off",
+    "@typescript-eslint/no-use-before-define": "off"
+  }
 }

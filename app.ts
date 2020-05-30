@@ -13,7 +13,7 @@ const app = express();
 // sequelize connect & execute cron cronjob
 sequelizeConnect(cronjob);
 
-// // connect redis
+// connect redis
 connectRedis();
 
 app.use(cors());
