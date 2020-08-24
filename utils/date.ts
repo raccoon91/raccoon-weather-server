@@ -1,7 +1,14 @@
 import moment from "moment-timezone";
 
 export default {
-  today: (): string => {
+  moment: (timestamp?: string): any => {
+    if (timestamp) {
+      return moment(timestamp).tz("Asia/Seoul");
+    }
+
+    return moment().tz("Asia/Seoul");
+  },
+  today: (): any => {
     return moment().tz("Asia/Seoul");
   },
   yesterday: (timestamp): string => {
@@ -12,6 +19,9 @@ export default {
   },
   format: (timestamp: string, format: string): string => {
     return moment(timestamp).tz("Asia/Seoul").format(format);
+  },
+  numberFomatToString: (year: number, month: number, day: number): string => {
+    return `${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
   },
   getCurrentWeatherDate: (): { currentDate: string; currentTime: string; currentMinute: string } => {
     const current = moment().tz("Asia/Seoul");

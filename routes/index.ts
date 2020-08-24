@@ -2,6 +2,7 @@ import express from "express";
 import geolocation from "../middleware/geolocation";
 import { redisGet } from "../infra/redis";
 import { weatherController, forecastController, tomorrowController } from "../controller";
+import { CollectRoute } from "./CollectRoute";
 
 const router = express.Router();
 
@@ -73,5 +74,7 @@ router.get("/location", async (req, res) => {
 
   res.send(location);
 });
+
+router.get("/collect", new CollectRoute().getCollect);
 
 export default router;
