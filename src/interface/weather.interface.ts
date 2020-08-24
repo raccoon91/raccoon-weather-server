@@ -2,8 +2,9 @@ import { ICityKor } from "./index";
 
 export interface ICityGeolocation {
   city: ICityKor;
-  nx: number;
-  ny: number;
+  nx?: number;
+  ny?: number;
+  stn?: number;
 }
 
 export type IWeatherCategory =

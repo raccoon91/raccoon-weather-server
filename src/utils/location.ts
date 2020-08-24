@@ -40,6 +40,26 @@ export const cityGeolocationList: ICityGeolocation[] = [
   { city: "충북", nx: 69, ny: 107 },
 ];
 
+export const cityCollectionList: ICityGeolocation[] = [
+  { city: "서울", stn: 108 },
+  { city: "강원", stn: 93 },
+  { city: "경기", stn: 119 },
+  { city: "경남", stn: 155 },
+  { city: "경북", stn: 138 },
+  { city: "광주", stn: 156 },
+  { city: "대구", stn: 143 },
+  { city: "대전", stn: 133 },
+  { city: "부산", stn: 159 },
+  { city: "세종", stn: 239 },
+  { city: "울산", stn: 152 },
+  { city: "인천", stn: 112 },
+  { city: "전남", stn: 168 },
+  { city: "전북", stn: 146 },
+  { city: "제주", stn: 184 },
+  { city: "충남", stn: 232 },
+  { city: "충북", stn: 131 },
+];
+
 export const cityAbbreviations = {
   서울특별시: "서울",
   부산광역시: "부산",

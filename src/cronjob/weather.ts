@@ -93,8 +93,6 @@ const getCurrentWeather = async (): Promise<void> => {
 
     const accessLocationList = await getCachedLocation();
 
-    console.log(accessLocationList);
-
     for (let j = 0; j < accessLocationList.length; j++) {
       const location = accessLocationList[j];
 

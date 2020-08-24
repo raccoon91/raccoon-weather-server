@@ -56,7 +56,7 @@ const getLocation = async (ip: string): Promise<IGeoResponseData["geoLocation"]>
   const timeStamp = Math.floor(+new Date()).toString();
   const sortedSet: { ip?: string; ext?: string; responseFormatType?: "json" } = {};
 
-  sortedSet.ip = ip === "127.0.0.1" ? "211.36.142.207" : ip;
+  sortedSet.ip = ip === "127.0.0.1" || !ip ? "211.36.142.207" : ip;
   sortedSet.ext = "t";
   sortedSet.responseFormatType = "json";
 

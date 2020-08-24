@@ -40,3 +40,5 @@ export const sequelizeConnect = (cronJob: () => void): void => {
       console.error("Connection with mysql failed.", err);
     });
 };
+
+// export class

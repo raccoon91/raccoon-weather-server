@@ -22,9 +22,9 @@ const jobList = [
 // ];
 
 const cronjob = (): void => {
-  jobList.forEach((job) => {
-    new CronJob(job.cron, () => job.func(), null, false, "Asia/Seoul").start();
-  });
+  // jobList.forEach((job) => {
+  //   new CronJob(job.cron, () => job.func(), null, false, "Asia/Seoul").start();
+  // });
 };
 
 export default cronjob;
