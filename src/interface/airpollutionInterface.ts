@@ -1,10 +1,6 @@
 import { ICityKor } from "./index";
 
-export type IItemCode = "pm10" | "pm25";
-
-export type IAirDataType = "current" | "forecast";
-
-export interface IPollutionResponseData {
+export interface IAirPollutionResponseData {
   _returnType: "json";
   dataTime: string;
   busan: string;
@@ -26,15 +22,14 @@ export interface IPollutionResponseData {
   ulsan: string;
 }
 
-export interface IPollutionData {
-  city?: string;
-  pm10?: number;
-  pm25?: number;
-  air_date?: string;
-  type?: IAirDataType;
+export interface IAirPollutionData {
+  city: ICityKor;
+  pm10: number;
+  pm25: number;
+  air_date: string;
 }
 
-export interface IForecastResponseData {
+export interface IAirForecastResponseData {
   _returnType: "json";
   dataTime: string;
   f_data_time: string;
@@ -47,18 +42,9 @@ export interface IForecastResponseData {
   informGrade: string;
 }
 
-export type IForecast = {
-  [key in ICityKor]: { [key in IItemCode]: string };
+export type IAirForecastData = {
+  city: ICityKor;
+  pm10: string;
+  pm25: string;
+  air_date: string;
 };
-
-export type IForecastList = {
-  [key: string]: IForecast;
-};
-
-// export interface IForecastData {
-// 	city: ICityKor;
-// 	pm10: string;
-// 	pm25: string;
-// 	air_date: string;
-// 	type: IAirDataType;
-// }

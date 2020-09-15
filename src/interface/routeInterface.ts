@@ -28,8 +28,8 @@ export interface IWeatherRouteResponse {
 
 export interface IForecastRouteResponse {
   categories: string[];
-  rainProbData: number[];
-  humidityData: number[];
-  tempData: number[];
-  condition: number[][];
+  rainProbs: number[];
+  humidities: number[];
+  temperatures: number[];
+  conditions: number[][];
 }

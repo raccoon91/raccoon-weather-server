@@ -45,7 +45,7 @@ export type IMidForecastCategory =
   | "VEC" // 풍향
   | "WSD"; // 풍속
 
-export interface IWeatherResponseData {
+export interface ICurrentWeatherResponseData {
   baseDate: string;
   baseTime: string;
   category: IWeatherCategory;
@@ -54,19 +54,12 @@ export interface IWeatherResponseData {
   obsrValue: number;
 }
 
-export interface IWeatherData {
+export interface ICurrentWeatherData {
   city?: ICityKor;
-  temp?: number;
-  yesterday_temp?: number;
-  max_temp?: number;
-  min_temp?: number;
-  sky?: number;
+  t1h?: number;
   pty?: number;
-  pop?: number;
   rn1?: number;
-  humidity?: number;
-  lgt?: number;
-  hour?: string;
+  reh?: number;
   weather_date?: string;
 }
 
@@ -81,18 +74,6 @@ export interface IShortForecastResponseData {
   ny: number;
 }
 
-export interface IShortForecastData {
-  city?: ICityKor;
-  temp?: number;
-  sky?: number;
-  pty?: number;
-  rn1?: number;
-  lgt?: number;
-  humidity?: number;
-  hour?: string;
-  weather_date?: string;
-}
-
 export interface IMidForecastResponseData {
   baseDate: string;
   baseTime: string;
@@ -104,15 +85,17 @@ export interface IMidForecastResponseData {
   ny: number;
 }
 
-export interface IMidForecastData {
-  city?: ICityKor;
-  t3h?: number;
-  max_temp?: number;
-  min_temp?: number;
+export interface IForecastWeatherData {
+  city?: string;
+  temp?: number;
   sky?: number;
   pty?: number;
+  rn1?: number;
+  reh?: number;
+  lgt?: number;
   pop?: number;
-  humidity?: number;
+  tmx?: number;
+  tmn?: number;
   hour?: string;
   weather_date?: string;
 }
