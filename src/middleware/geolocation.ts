@@ -1,13 +1,11 @@
 // naver cloud flatform geolocation
 
 import { Request, Response, NextFunction } from "express";
-import moment from "moment-timezone";
 import axios, { AxiosResponse } from "axios";
 import CryptoJS from "crypto-js";
-import { RedisGet, RedisSet } from "../models";
-import { cityAbbreviations } from "../utils/location";
-import date from "../utils/date";
 import config from "../config";
+import { RedisGet, RedisSet } from "../models";
+import { momentKR, dateLog, cityAbbreviations } from "../utils";
 
 const { NAVER_HOST_NAME, NAVER_REQUEST_URL, NAVER_ACCESS_KEY, NAVER_SECRET_KEY } = config;
 
@@ -53,7 +51,7 @@ const makeSignature = (
 };
 
 const getLocation = async (ip: string | undefined): Promise<IGeoResponseData["geoLocation"]> => {
-  const timeStamp = Math.floor(moment.tz("Asia/Seoul").valueOf()).toString();
+  const timeStamp = Math.floor(momentKR().valueOf()).toString();
   const sortedSet: { ip?: string; ext?: string; responseFormatType?: "json" } = {};
 
   sortedSet.ip = ip === "127.0.0.1" || !ip ? "211.36.142.207" : ip;
@@ -106,7 +104,7 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
 
     next();
   } catch (error) {
-    console.error(`[geolocation request FAIL ip - ${ip} ${date.dateLog()}][${error.message}]`);
+    console.error(`[geolocation request FAIL ip - ${ip} ${dateLog()}][${error.message}]`);
     console.error(`${ip} ${error.message} ${JSON.stringify(error?.response?.data)}`);
   }
 };
