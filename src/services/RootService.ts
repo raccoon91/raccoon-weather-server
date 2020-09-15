@@ -1,10 +1,12 @@
+import { AxiosResponse } from "axios";
 import config from "../config";
-import { CurrentWeather, Forecast } from "../models";
-import requestWeatherApi from "../lib/requestWeatherApi";
+import { CurrentWeather, ForecastWeather, AirPollution } from "../models";
+import { IForecastWeatherData, IAirPollutionData, IAirForecastData } from "../interface";
+import { requestWeatherApi, requestAirPollutionApi } from "../lib";
 
 const { OPEN_WEATHER_API_KEY } = config;
 
-interface IRequestParams {
+interface IWeatherRequestParams {
   base_date: string;
   base_time: string;
   nx: number;
@@ -13,12 +15,16 @@ interface IRequestParams {
   pageNo?: number;
 }
 
+interface IAirpollutionRequestParams {
+  itemCode?: string;
+  informCode?: string;
+  dataGubun?: string;
+  searchDate?: string;
+}
+
 export class RootService {
-  static async requestWeather<T>(url: string, params: IRequestParams): Promise<T[]> {
-    const response: {
-      status?: number;
-      data?: { response?: { body?: { items?: { item?: T[] } } } };
-    } = await requestWeatherApi({
+  static async requestWeather<T>(url: string, params: IWeatherRequestParams): Promise<T[]> {
+    const response: AxiosResponse<{ response?: { body?: { items?: { item?: T[] } } } }> = await requestWeatherApi({
       method: "get",
       url,
       params: {
@@ -39,31 +45,76 @@ export class RootService {
     return data;
   }
 
-  static createWeather = async (weatherModel: typeof CurrentWeather, weatherData): Promise<void> => {
-    const weather = await weatherModel.findOne({
+  static async requestAirPollution<T>(url: string, params: IAirpollutionRequestParams): Promise<T[]> {
+    const response: AxiosResponse<{ list?: T[] }> = await requestAirPollutionApi({
+      method: "get",
+      url,
+      params: {
+        ServiceKey: decodeURIComponent(OPEN_WEATHER_API_KEY),
+        _returnType: "json",
+        ...params,
+      },
+    });
+
+    if (response.status !== 200) {
+      throw new Error(`open api request error. item: airpollution status: ${response.status}`);
+    }
+
+    if (!response.data.list) throw new Error(`open api response empty. item: airpollution`);
+
+    return response.data.list;
+  }
+
+  static createCurrentWeather = async (weatherModel: typeof CurrentWeather, weatherData): Promise<void> => {
+    const currentWeather = await weatherModel.findOne({
       where: {
         city: weatherData.city,
         weather_date: weatherData.weather_date,
       },
     });
 
-    if (!weather) {
+    if (!currentWeather) {
       await weatherModel.create(weatherData);
     }
   };
 
-  static updateOrCreateForecast = async (forecastModel: typeof Forecast, forecastData): Promise<void> => {
-    const forecast = await forecastModel.findOne({
+  static updateOrCreateForecastWeather = async (
+    forecastModel: typeof ForecastWeather,
+    forecastData: IForecastWeatherData,
+  ): Promise<void> => {
+    const forecastWeather = await forecastModel.findOne({
       where: {
         city: forecastData.city,
         weather_date: forecastData.weather_date,
       },
     });
 
-    if (forecast) {
-      await forecast.update(forecastData);
+    if (forecastWeather) {
+      await forecastWeather.update({ ...forecastData });
     } else {
       await forecastModel.create(forecastData);
+    }
+  };
+
+  static bulkUpdateOrCreateAirPollution = async (
+    airpollutionModel: typeof AirPollution,
+    airpollutionDataList: (IAirPollutionData | IAirForecastData)[],
+  ): Promise<void> => {
+    for (let i = 0; i < airpollutionDataList.length; i++) {
+      const airPollutionData = airpollutionDataList[i];
+
+      const airpollution = await airpollutionModel.findOne({
+        where: {
+          city: airPollutionData.city,
+          air_date: airPollutionData.air_date,
+        },
+      });
+
+      if (airpollution) {
+        await airpollution.update(airPollutionData);
+      } else {
+        await airpollutionModel.create(airPollutionData);
+      }
     }
   };
 }
