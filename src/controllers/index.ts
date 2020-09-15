@@ -1,2 +1,2 @@
-export * from "./weather";
-export * from "./forecast";
+export * from "./WeatherController";
+export * from "./ForecastController";
