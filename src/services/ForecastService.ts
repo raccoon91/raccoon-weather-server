@@ -1,17 +1,17 @@
 import { Op } from "sequelize";
 import { RootService } from "./RootService";
-import { CurrentWeather, Forecast, RedisGet, RedisSet } from "../models";
+import { CurrentWeather, ForecastWeather, RedisGet, RedisSet } from "../models";
 import {
-  IWeatherData,
+  IForecastRouteResponse,
   IShortForecastResponseData,
-  IShortForecastData,
   IMidForecastResponseData,
+  IForecastWeatherData,
   ICityKor,
 } from "../interface";
-import { cityGeolocationList, momentKR, tomorrow, dateLog, getMidForecastDate, getShortForecastDate } from "../utils";
+import { momentKR, tomorrow, dateLog, getMidForecastDate, getShortForecastDate, cityGeolocationList } from "../utils";
 
 export class ForecastService extends RootService {
-  static getForecast = async (city: string, isShortForecast?: boolean): Promise<{}> => {
+  static getForecast = async (city: string, isShortForecast?: boolean): Promise<IForecastRouteResponse> => {
     const redisKey = `forecast/${isShortForecast ? "short" : "mid"}/${city}`;
     let tragetDate: string;
 
@@ -36,7 +36,7 @@ export class ForecastService extends RootService {
       tragetDate = tomorrow(currentWeather.weather_date).format("YYYY-MM-DD 00:00:00");
     }
 
-    const forecast = await Forecast.findAll({
+    const forecast = await ForecastWeather.findAll({
       where: { city, weather_date: { [Op.gte]: tragetDate } },
       order: [["weather_date", "ASC"]],
       attributes: ["temp", "sky", "pty", "reh", "pop", "hour", "weather_date"],
@@ -76,8 +76,11 @@ export class ForecastService extends RootService {
     return { categories, rainProbs, humidities, temperatures, conditions };
   };
 
-  static parseShortForecastResponseData = (data: IShortForecastResponseData[], city: ICityKor): IShortForecastData => {
-    const result: IShortForecastData = {};
+  static parseShortForecastResponseData = (
+    data: IShortForecastResponseData[],
+    city: ICityKor,
+  ): { [key: string]: IForecastWeatherData } => {
+    const result: { [key: string]: IForecastWeatherData } = {};
 
     data.forEach((item) => {
       const { fcstDate, fcstTime, fcstValue, category } = item;
@@ -120,8 +123,11 @@ export class ForecastService extends RootService {
     return result;
   };
 
-  static parseMidForecastResponseData = (data: IMidForecastResponseData[], city: ICityKor): IWeatherData => {
-    const result: IWeatherData = {};
+  static parseMidForecastResponseData = (
+    data: IMidForecastResponseData[],
+    city: ICityKor,
+  ): { [key: string]: IForecastWeatherData } => {
+    const result: { [key: string]: IForecastWeatherData } = {};
 
     data.forEach((item) => {
       const { fcstDate, fcstTime, fcstValue, category } = item;
@@ -183,13 +189,12 @@ export class ForecastService extends RootService {
           "getUltraSrtFcst",
           requestParams,
         );
-        console.log("cron shortForecast", weatherData);
         const shortForecast = ForecastService.parseShortForecastResponseData(weatherData, location.city);
 
         const forecastDateTime = Object.keys(shortForecast);
 
         for (let i = 0; i < forecastDateTime.length; i++) {
-          await ForecastService.updateOrCreateForecast(Forecast, shortForecast[forecastDateTime[i]]);
+          await ForecastService.updateOrCreateForecastWeather(ForecastWeather, shortForecast[forecastDateTime[i]]);
         }
       }
 
@@ -219,17 +224,34 @@ export class ForecastService extends RootService {
           "getVilageFcst",
           requestParams,
         );
-        console.log("cron midForecast", weatherData);
         const midForecast = ForecastService.parseMidForecastResponseData(weatherData, location.city);
 
         const forecastDateTime = Object.keys(midForecast);
 
         for (let i = 0; i < forecastDateTime.length; i++) {
-          await ForecastService.updateOrCreateForecast(Forecast, midForecast[forecastDateTime[i]]);
+          if (i === 0) {
+            const { city, weather_date, pop } = midForecast[forecastDateTime[i]];
+            const after1Hour = momentKR(weather_date).add(1, "hours").format("YYYY-MM-DD HH:00:00");
+            const after2Hour = momentKR(weather_date).add(2, "hours").format("YYYY-MM-DD HH:00:00");
+
+            await ForecastService.updateOrCreateForecastWeather(ForecastWeather, {
+              city,
+              weather_date: after1Hour,
+              pop,
+            });
+
+            await ForecastService.updateOrCreateForecastWeather(ForecastWeather, {
+              city,
+              weather_date: after2Hour,
+              pop,
+            });
+          }
+
+          await ForecastService.updateOrCreateForecastWeather(ForecastWeather, midForecast[forecastDateTime[i]]);
         }
       }
 
-      console.log("success mid forecastDateTime job");
+      console.log("success mid forecast job");
     } catch (error) {
       console.error(`[mid forecastDateTime request FAIL ${dateLog()}][${error.message}]`);
       console.error(error.stack);
