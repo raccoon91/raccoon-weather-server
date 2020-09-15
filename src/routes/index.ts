@@ -1,80 +1,36 @@
-import express from "express";
+import express, { Request } from "express";
 import geolocation from "../middleware/geolocation";
-import { redisGet } from "../infra/redis";
-import { weatherController, forecastController, tomorrowController } from "../controller";
-import { CollectRoute } from "./CollectRoute";
+import { WeatherController, ForecastController } from "../controllers";
+
+// import { CollectRoute } from "./CollectRoute";
 
 const router = express.Router();
 
 router.use(geolocation);
 
-router.get("/weather", async (req, res) => {
-  const { location } = req.body;
-  const { city } = location;
-  const redisKey = `weather/${city}`;
+// extension
 
-  const cache = await redisGet(redisKey);
+// current
+router.get("/current", WeatherController.getWeather);
 
-  if (cache) {
-    console.log("cached weather", city);
-    return res.json(JSON.parse(cache));
-  }
+// forecast
+// short
+router.get("/forecast/short", ForecastController.getShortForecast);
 
-  const weatherData = await weatherController(location);
+// mid
+router.get("/forecast/mid", ForecastController.getMidForecast);
 
-  if (!weatherData) {
-    res.send({ message: "data not found" });
-  }
+// client
+// temp
+// rain
+// humidity
 
-  res.json(weatherData);
-});
-
-router.get("/forecast", async (req, res) => {
-  const { city } = req.body.location;
-  const redisKey = `forecast/${city}`;
-
-  const cache = await redisGet(redisKey);
-
-  if (cache) {
-    console.log("cached forecast", city);
-    return res.json(JSON.parse(cache));
-  }
-
-  const forecastData = await forecastController(city);
-
-  if (!forecastData) {
-    res.send({ message: "data not found" });
-  }
-
-  res.json(forecastData);
-});
-
-router.get("/tomorrow", async (req, res) => {
-  const { city } = req.body.location;
-  const redisKey = `tomorrow/${city}`;
-
-  const cache = await redisGet(redisKey);
-
-  if (cache) {
-    console.log("cached tomorrow", city);
-    return res.json(JSON.parse(cache));
-  }
-
-  const tomorrowData = await tomorrowController(city);
-
-  if (!tomorrowData) {
-    res.send({ message: "data not found" });
-  }
-
-  res.json(tomorrowData);
-});
-
-router.get("/location", async (req, res) => {
+router.get("/location", async (req: Request, res) => {
   const { location } = req.body;
 
   res.send(location);
 });
 
-router.get("/collect", new CollectRoute().getCollect);
+// router.get("/collect", new CollectRoute().getCollect);
 
 export default router;

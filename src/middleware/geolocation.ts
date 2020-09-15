@@ -1,13 +1,13 @@
 // naver cloud flatform geolocation
 
+import { Request, Response, NextFunction } from "express";
+import moment from "moment-timezone";
 import axios, { AxiosResponse } from "axios";
 import CryptoJS from "crypto-js";
-import { Request, Response, NextFunction } from "express";
-import config from "../config";
-import { redisGet, redisSet } from "../infra/redis";
-
+import { RedisGet, RedisSet } from "../models";
 import { cityAbbreviations } from "../utils/location";
 import date from "../utils/date";
+import config from "../config";
 
 const { NAVER_HOST_NAME, NAVER_REQUEST_URL, NAVER_ACCESS_KEY, NAVER_SECRET_KEY } = config;
 
@@ -52,8 +52,8 @@ const makeSignature = (
   return hash.toString(CryptoJS.enc.Base64);
 };
 
-const getLocation = async (ip: string): Promise<IGeoResponseData["geoLocation"]> => {
-  const timeStamp = Math.floor(+new Date()).toString();
+const getLocation = async (ip: string | undefined): Promise<IGeoResponseData["geoLocation"]> => {
+  const timeStamp = Math.floor(moment.tz("Asia/Seoul").valueOf()).toString();
   const sortedSet: { ip?: string; ext?: string; responseFormatType?: "json" } = {};
 
   sortedSet.ip = ip === "127.0.0.1" || !ip ? "211.36.142.207" : ip;
@@ -88,18 +88,18 @@ const getLocation = async (ip: string): Promise<IGeoResponseData["geoLocation"]>
 };
 
 export default async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const ip = req.query.ip as string;
+  const ip = req.headers["x-client-ip"] as string | undefined;
 
   try {
-    const cache = await redisGet(`ip/${ip}`);
+    const cachedIp = await RedisGet(`ip/${ip}`);
 
-    if (cache) {
+    if (cachedIp) {
       console.log("cached ip", ip);
-      req.body.location = JSON.parse(cache);
+      req.body.location = JSON.parse(cachedIp);
     } else {
       const geolocation = await getLocation(ip);
 
-      await redisSet(`ip/${ip}`, JSON.stringify(geolocation), "EX", 60 * 30);
+      await RedisSet(`ip/${ip}`, JSON.stringify(geolocation), "EX", 60 * 30);
 
       req.body.location = geolocation;
     }
@@ -107,6 +107,6 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
     next();
   } catch (error) {
     console.error(`[geolocation request FAIL ip - ${ip} ${date.dateLog()}][${error.message}]`);
-    console.error(error);
+    console.error(`${ip} ${error.message} ${JSON.stringify(error?.response?.data)}`);
   }
 };
