@@ -1,7 +1,5 @@
 import { CronJob } from "cron";
 import { WeatherService, ForecastService, AirpollutionService } from "../services";
-// import airpollution from "./airpollution";
-// import airForecast from "./airForecast";
 
 const jobList = [
   { func: WeatherService.cronCurrentWeather, cron: "40 00,10,20,30,40,50 * * * *" },
