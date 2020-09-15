@@ -50,3 +50,35 @@ yarn dev // localhost:3000
 - Mysql(sequelize), Redis
 - node-cron
 - Naver Geolocation API
+
+### Current Weather
+
+| 코드 | 설명         | 단위   |
+| ---- | ------------ | ------ |
+| T1H  | 기온         | ℃      |
+| RN1  | 1시간 강수량 | mm     |
+| REH  | 습도         | %      |
+| PTY  | 강수형태     | 코드값 |
+
+### Short Forecast
+
+| 코드 | 설명         | 단위   |
+| ---- | ------------ | ------ |
+| T1H  | 기온         | ℃      |
+| RN1  | 1시간 강수량 | mm     |
+| SKY  | 하늘상태     | 코드값 |
+| REH  | 습도         | %      |
+| PTY  | 강수형태     | 코드값 |
+| LGT  | 낙뢰         | 코드값 |
+
+### Mid Forecast
+
+| 코드 | 설명       | 단위   |
+| ---- | ---------- | ------ |
+| POP  | 강수확률   | %      |
+| PTY  | 강수형태   | 코드값 |
+| REH  | 습도       | %      |
+| SKY  | 하늘상태   | 코드값 |
+| T3H  | 3시간 기온 | ℃      |
+| TMX  | 최고기온   | ℃      |
+| TMN  | 최저기온   | ℃      |
