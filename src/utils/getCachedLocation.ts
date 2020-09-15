@@ -1,17 +1,17 @@
-import { redisKeys, redisGet } from "../infra/redis";
+import { RedisGet, RedisKeys } from "../models";
 import { ILocation } from "../interface";
 
-const getCachedLocation = async (): Promise<ILocation[]> => {
+export const getCachedLocation = async (): Promise<ILocation[]> => {
   const result = {};
 
-  const redisKeyList = await redisKeys("*");
+  const redisKeyList = await RedisKeys("*");
 
   for (let i = 0; i < redisKeyList.length; i++) {
     const key = redisKeyList[i];
     const category = key.split("/")[0];
 
     if (category === "ip") {
-      const location = await redisGet(key);
+      const location = await RedisGet(key);
 
       if (!result[location.city]) {
         result[location.city] = JSON.parse(location);
@@ -21,5 +21,3 @@ const getCachedLocation = async (): Promise<ILocation[]> => {
 
   return Object.values(result);
 };
-
-export default getCachedLocation;
