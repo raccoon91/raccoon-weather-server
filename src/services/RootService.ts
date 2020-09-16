@@ -23,7 +23,7 @@ interface IAirpollutionRequestParams {
 }
 
 export class RootService {
-  static async requestWeather<T>(url: string, params: IWeatherRequestParams): Promise<T[]> {
+  async requestWeather<T>(url: string, params: IWeatherRequestParams): Promise<T[]> {
     const response: AxiosResponse<{ response?: { body?: { items?: { item?: T[] } } } }> = await requestWeatherApi({
       method: "get",
       url,
@@ -45,7 +45,7 @@ export class RootService {
     return data;
   }
 
-  static async requestAirPollution<T>(url: string, params: IAirpollutionRequestParams): Promise<T[]> {
+  async requestAirPollution<T>(url: string, params: IAirpollutionRequestParams): Promise<T[]> {
     const response: AxiosResponse<{ list?: T[] }> = await requestAirPollutionApi({
       method: "get",
       url,
@@ -65,7 +65,7 @@ export class RootService {
     return response.data.list;
   }
 
-  static createCurrentWeather = async (weatherModel: typeof CurrentWeather, weatherData): Promise<void> => {
+  createCurrentWeather = async (weatherModel: typeof CurrentWeather, weatherData): Promise<void> => {
     const currentWeather = await weatherModel.findOne({
       where: {
         city: weatherData.city,
@@ -78,7 +78,7 @@ export class RootService {
     }
   };
 
-  static updateOrCreateForecastWeather = async (
+  updateOrCreateForecastWeather = async (
     forecastModel: typeof ForecastWeather,
     forecastData: IForecastWeatherData,
   ): Promise<void> => {
@@ -90,13 +90,13 @@ export class RootService {
     });
 
     if (forecastWeather) {
-      await forecastWeather.update({ ...forecastData });
-    } else {
+      await forecastWeather.update(Object.assign(forecastWeather, forecastData));
+    } else if (forecastData.hour) {
       await forecastModel.create(forecastData);
     }
   };
 
-  static bulkUpdateOrCreateAirPollution = async (
+  bulkUpdateOrCreateAirPollution = async (
     airpollutionModel: typeof AirPollution,
     airpollutionDataList: (IAirPollutionData | IAirForecastData)[],
   ): Promise<void> => {

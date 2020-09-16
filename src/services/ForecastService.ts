@@ -3,15 +3,15 @@ import { RootService } from "./RootService";
 import { CurrentWeather, ForecastWeather, RedisGet, RedisSet } from "../models";
 import {
   IForecastRouteResponse,
-  IShortForecastResponseData,
-  IMidForecastResponseData,
+  IShortForecastResData,
+  IMidForecastResData,
   IForecastWeatherData,
   ICityKor,
 } from "../interface";
 import { momentKR, tomorrow, dateLog, getMidForecastDate, getShortForecastDate, cityGeolocationList } from "../utils";
 
-export class ForecastService extends RootService {
-  static getForecast = async (city: string, isShortForecast?: boolean): Promise<IForecastRouteResponse> => {
+class ForecastService extends RootService {
+  getForecast = async (city: string, isShortForecast?: boolean): Promise<IForecastRouteResponse> => {
     const redisKey = `forecast/${isShortForecast ? "short" : "mid"}/${city}`;
     let tragetDate: string;
 
@@ -76,13 +76,13 @@ export class ForecastService extends RootService {
     return { categories, rainProbs, humidities, temperatures, conditions };
   };
 
-  static parseShortForecastResponseData = (
-    data: IShortForecastResponseData[],
+  parseShortForecastResponseData = (
+    responseData: IShortForecastResData[],
     city: ICityKor,
   ): { [key: string]: IForecastWeatherData } => {
     const result: { [key: string]: IForecastWeatherData } = {};
 
-    data.forEach((item) => {
+    responseData.forEach((item) => {
       const { fcstDate, fcstTime, fcstValue, category } = item;
 
       if (!result[`${fcstDate}:${fcstTime}`]) {
@@ -123,13 +123,13 @@ export class ForecastService extends RootService {
     return result;
   };
 
-  static parseMidForecastResponseData = (
-    data: IMidForecastResponseData[],
+  parseMidForecastResponseData = (
+    responseData: IMidForecastResData[],
     city: ICityKor,
   ): { [key: string]: IForecastWeatherData } => {
     const result: { [key: string]: IForecastWeatherData } = {};
 
-    data.forEach((item) => {
+    responseData.forEach((item) => {
       const { fcstDate, fcstTime, fcstValue, category } = item;
 
       if (!result[`${fcstDate}:${fcstTime}`]) {
@@ -170,7 +170,7 @@ export class ForecastService extends RootService {
     return result;
   };
 
-  static cronShortForecast = async (): Promise<void> => {
+  cronShortForecast = async (): Promise<void> => {
     try {
       const { currentDate, currentTime } = getShortForecastDate();
 
@@ -185,16 +185,13 @@ export class ForecastService extends RootService {
           pageNo: 1,
         };
 
-        const weatherData = await ForecastService.requestWeather<IShortForecastResponseData>(
-          "getUltraSrtFcst",
-          requestParams,
-        );
-        const shortForecast = ForecastService.parseShortForecastResponseData(weatherData, location.city);
+        const weatherData = await this.requestWeather<IShortForecastResData>("getUltraSrtFcst", requestParams);
+        const shortForecast = this.parseShortForecastResponseData(weatherData, location.city);
 
         const forecastDateTime = Object.keys(shortForecast);
 
         for (let i = 0; i < forecastDateTime.length; i++) {
-          await ForecastService.updateOrCreateForecastWeather(ForecastWeather, shortForecast[forecastDateTime[i]]);
+          await this.updateOrCreateForecastWeather(ForecastWeather, shortForecast[forecastDateTime[i]]);
         }
       }
 
@@ -205,7 +202,7 @@ export class ForecastService extends RootService {
     }
   };
 
-  static cronMidForecast = async (): Promise<void> => {
+  cronMidForecast = async (): Promise<void> => {
     try {
       const { forecastDate, forecastTime } = getMidForecastDate();
 
@@ -220,11 +217,8 @@ export class ForecastService extends RootService {
           pageNo: 1,
         };
 
-        const weatherData = await ForecastService.requestWeather<IMidForecastResponseData>(
-          "getVilageFcst",
-          requestParams,
-        );
-        const midForecast = ForecastService.parseMidForecastResponseData(weatherData, location.city);
+        const weatherData = await this.requestWeather<IMidForecastResData>("getVilageFcst", requestParams);
+        const midForecast = this.parseMidForecastResponseData(weatherData, location.city);
 
         const forecastDateTime = Object.keys(midForecast);
 
@@ -234,27 +228,29 @@ export class ForecastService extends RootService {
             const after1Hour = momentKR(weather_date).add(1, "hours").format("YYYY-MM-DD HH:00:00");
             const after2Hour = momentKR(weather_date).add(2, "hours").format("YYYY-MM-DD HH:00:00");
 
-            await ForecastService.updateOrCreateForecastWeather(ForecastWeather, {
+            await this.updateOrCreateForecastWeather(ForecastWeather, {
               city,
               weather_date: after1Hour,
               pop,
             });
 
-            await ForecastService.updateOrCreateForecastWeather(ForecastWeather, {
+            await this.updateOrCreateForecastWeather(ForecastWeather, {
               city,
               weather_date: after2Hour,
               pop,
             });
           }
 
-          await ForecastService.updateOrCreateForecastWeather(ForecastWeather, midForecast[forecastDateTime[i]]);
+          await this.updateOrCreateForecastWeather(ForecastWeather, midForecast[forecastDateTime[i]]);
         }
       }
 
       console.log("success mid forecast job");
     } catch (error) {
-      console.error(`[mid forecastDateTime request FAIL ${dateLog()}][${error.message}]`);
+      console.error(`[mid forecast request FAIL ${dateLog()}][${error.message}]`);
       console.error(error.stack);
     }
   };
 }
+
+export default new ForecastService();

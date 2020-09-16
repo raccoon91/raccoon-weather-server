@@ -1,21 +1,15 @@
 import { RootService } from "./RootService";
 import { AirPollution } from "../models";
-import {
-  IAirPollutionResponseData,
-  IAirPollutionData,
-  IAirForecastResponseData,
-  IAirForecastData,
-  ICityKor,
-} from "../interface";
+import { IAirPollutionResData, IAirPollutionData, IAirForecastResData, IAirForecastData, ICityKor } from "../interface";
 import { momentKR, dateLog, cityEngToKorDictionary } from "../utils";
 
 type IParsedForecastData = {
   [key in ICityKor]?: string;
 };
 
-export class AirpollutionService extends RootService {
-  static parseAirForecastResponseData = (
-    forecastData: IAirForecastResponseData,
+class AirpollutionService extends RootService {
+  parseAirForecastResponseData = (
+    forecastData: IAirForecastResData,
   ): { airForecastData: IParsedForecastData; airForecastDate: string } => {
     const { informData, informGrade } = forecastData;
     const airForecastData: IParsedForecastData = {};
@@ -41,9 +35,9 @@ export class AirpollutionService extends RootService {
     };
   };
 
-  static combineAirpollutionData = (
-    pm10CurrentData: IAirPollutionResponseData,
-    pm25CurrentData: IAirPollutionResponseData,
+  combineAirpollutionData = (
+    pm10CurrentData: IAirPollutionResData,
+    pm25CurrentData: IAirPollutionResData,
     currentDate: string,
   ): IAirPollutionData[] => {
     const result: IAirPollutionData[] = [];
@@ -62,7 +56,7 @@ export class AirpollutionService extends RootService {
     return result;
   };
 
-  static combineAirForecastData = (
+  combineAirForecastData = (
     pm10Forecast: IParsedForecastData,
     pm25Forecast: IParsedForecastData,
     forecastDate: string,
@@ -83,32 +77,22 @@ export class AirpollutionService extends RootService {
     return result;
   };
 
-  static cronAirpollution = async (): Promise<void> => {
+  cronAirpollution = async (): Promise<void> => {
     try {
-      const [pm10CurrentResponseData] = await AirpollutionService.requestAirPollution<IAirPollutionResponseData>(
-        "getCtprvnMesureLIst",
-        {
-          itemCode: "PM10",
-          dataGubun: "HOUR",
-        },
-      );
+      const [pm10CurrentResData] = await this.requestAirPollution<IAirPollutionResData>("getCtprvnMesureLIst", {
+        itemCode: "PM10",
+        dataGubun: "HOUR",
+      });
 
-      const [pm25CurrentResponseData] = await AirpollutionService.requestAirPollution<IAirPollutionResponseData>(
-        "getCtprvnMesureLIst",
-        {
-          itemCode: "PM25",
-          dataGubun: "HOUR",
-        },
-      );
+      const [pm25CurrentResData] = await this.requestAirPollution<IAirPollutionResData>("getCtprvnMesureLIst", {
+        itemCode: "PM25",
+        dataGubun: "HOUR",
+      });
 
-      const currentDate = momentKR(pm10CurrentResponseData.dataTime).format("YYYY-MM-DD HH:00:00");
-      const pollutionData = AirpollutionService.combineAirpollutionData(
-        pm10CurrentResponseData,
-        pm25CurrentResponseData,
-        currentDate,
-      );
+      const currentDate = momentKR(pm10CurrentResData.dataTime).format("YYYY-MM-DD HH:00:00");
+      const pollutionData = this.combineAirpollutionData(pm10CurrentResData, pm25CurrentResData, currentDate);
 
-      await AirpollutionService.bulkUpdateOrCreateAirPollution(AirPollution, pollutionData);
+      await this.bulkUpdateOrCreateAirPollution(AirPollution, pollutionData);
 
       console.log("success air pollution job");
     } catch (error) {
@@ -117,36 +101,30 @@ export class AirpollutionService extends RootService {
     }
   };
 
-  static cronAirForecast = async (): Promise<void> => {
+  cronAirForecast = async (): Promise<void> => {
     try {
       const currentDate = momentKR().format("YYYY-MM-DD");
 
-      const [, pm10ForecastResponseData] = await AirpollutionService.requestAirPollution<IAirForecastResponseData>(
-        "getMinuDustFrcstDspth",
-        {
-          searchDate: currentDate,
-          informCode: "PM10",
-        },
-      );
+      const [, pm10ForecastResData] = await this.requestAirPollution<IAirForecastResData>("getMinuDustFrcstDspth", {
+        searchDate: currentDate,
+        informCode: "PM10",
+      });
 
-      const [, pm25ForecastResponseData] = await AirpollutionService.requestAirPollution<IAirForecastResponseData>(
-        "getMinuDustFrcstDspth",
-        {
-          searchDate: currentDate,
-          informCode: "PM25",
-        },
-      );
+      const [, pm25ForecastResData] = await this.requestAirPollution<IAirForecastResData>("getMinuDustFrcstDspth", {
+        searchDate: currentDate,
+        informCode: "PM25",
+      });
 
-      const pm10ForecastData = AirpollutionService.parseAirForecastResponseData(pm10ForecastResponseData);
-      const pm25ForecastData = AirpollutionService.parseAirForecastResponseData(pm25ForecastResponseData);
+      const pm10ForecastData = this.parseAirForecastResponseData(pm10ForecastResData);
+      const pm25ForecastData = this.parseAirForecastResponseData(pm25ForecastResData);
 
-      const forecastDataList = AirpollutionService.combineAirForecastData(
+      const forecastDataList = this.combineAirForecastData(
         pm10ForecastData.airForecastData,
         pm25ForecastData.airForecastData,
         pm10ForecastData.airForecastDate,
       );
 
-      await AirpollutionService.bulkUpdateOrCreateAirPollution(AirPollution, forecastDataList);
+      await this.bulkUpdateOrCreateAirPollution(AirPollution, forecastDataList);
 
       console.log("success air forecast job");
     } catch (error) {
@@ -155,3 +133,5 @@ export class AirpollutionService extends RootService {
     }
   };
 }
+
+export default new AirpollutionService();

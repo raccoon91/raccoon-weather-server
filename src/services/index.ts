@@ -1,3 +1,3 @@
-export * from "./WeatherService";
-export * from "./ForecastService";
-export * from "./AirpollutionService";
+export { default as WeatherService } from "./WeatherService";
+export { default as ForecastService } from "./ForecastService";
+export { default as AirpollutionService } from "./AirpollutionService";

@@ -1,6 +1,6 @@
 import { ICityKor } from "./index";
 
-export interface IAirPollutionResponseData {
+export interface IAirPollutionResData {
   _returnType: "json";
   dataTime: string;
   busan: string;
@@ -29,7 +29,7 @@ export interface IAirPollutionData {
   air_date: string;
 }
 
-export interface IAirForecastResponseData {
+export interface IAirForecastResData {
   _returnType: "json";
   dataTime: string;
   f_data_time: string;

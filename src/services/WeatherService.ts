@@ -1,19 +1,11 @@
 import { Op } from "sequelize";
 import { RootService } from "./RootService";
 import { CurrentWeather, ForecastWeather, AirPollution, RedisGet, RedisSet } from "../models";
-import {
-  IWeatherRouteResponse,
-  ICurrentWeatherResponseData,
-  ICurrentWeatherData,
-  ICityKor,
-  ILocation,
-} from "../interface";
+import { IWeatherRouteResponse, ICurrentWeatherResData, ICurrentWeatherData, ICityKor, ILocation } from "../interface";
 import { cityGeolocationList, momentKR, yesterday, getCurrentWeatherDate, dateLog } from "../utils";
 
-export class WeatherService extends RootService {
-  static getCurrentWeather = async (
-    location: ILocation,
-  ): Promise<{ weather: IWeatherRouteResponse; location: ILocation }> => {
+class WeatherService extends RootService {
+  getCurrentWeather = async (location: ILocation): Promise<{ weather: IWeatherRouteResponse; location: ILocation }> => {
     const { city } = location;
     const redisKey = `weather/${city}`;
     let weather: IWeatherRouteResponse = {};
@@ -69,8 +61,8 @@ export class WeatherService extends RootService {
     return { weather, location };
   };
 
-  static parseResponseWeatherData = (
-    data: ICurrentWeatherResponseData[],
+  parseResponseWeatherData = (
+    data: ICurrentWeatherResData[],
     city: ICityKor,
     currentDate: string,
     currentTime: string,
@@ -81,7 +73,7 @@ export class WeatherService extends RootService {
       weather_date: momentKR(`${currentDate} ${currentTime.slice(0, 2)}${currentMinute}`).format("YYYY-MM-DD HH:mm:00"),
     };
 
-    data.forEach((item: ICurrentWeatherResponseData): void => {
+    data.forEach((item: ICurrentWeatherResData): void => {
       switch (item.category) {
         case "T1H":
           result.t1h = item.obsrValue;
@@ -103,7 +95,7 @@ export class WeatherService extends RootService {
     return result;
   };
 
-  static cronCurrentWeather = async (): Promise<void> => {
+  cronCurrentWeather = async (): Promise<void> => {
     try {
       const { currentDate, currentTime, currentMinute } = getCurrentWeatherDate();
 
@@ -116,11 +108,8 @@ export class WeatherService extends RootService {
           ny: location.ny,
         };
 
-        const weatherData = await WeatherService.requestWeather<ICurrentWeatherResponseData>(
-          "getUltraSrtNcst",
-          requestParams,
-        );
-        const currentWeather = WeatherService.parseResponseWeatherData(
+        const weatherData = await this.requestWeather<ICurrentWeatherResData>("getUltraSrtNcst", requestParams);
+        const currentWeather = this.parseResponseWeatherData(
           weatherData,
           location.city,
           currentDate,
@@ -128,7 +117,7 @@ export class WeatherService extends RootService {
           currentMinute,
         );
 
-        await WeatherService.createCurrentWeather(CurrentWeather, currentWeather);
+        await this.createCurrentWeather(CurrentWeather, currentWeather);
       }
 
       console.log("success weather job");
@@ -138,3 +127,5 @@ export class WeatherService extends RootService {
     }
   };
 }
+
+export default new WeatherService();

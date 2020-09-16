@@ -45,7 +45,7 @@ export type IMidForecastCategory =
   | "VEC" // 풍향
   | "WSD"; // 풍속
 
-export interface ICurrentWeatherResponseData {
+export interface ICurrentWeatherResData {
   baseDate: string;
   baseTime: string;
   category: IWeatherCategory;
@@ -63,7 +63,7 @@ export interface ICurrentWeatherData {
   weather_date?: string;
 }
 
-export interface IShortForecastResponseData {
+export interface IShortForecastResData {
   baseDate: string;
   baseTime: string;
   category: IShortForecastCategory;
@@ -74,7 +74,7 @@ export interface IShortForecastResponseData {
   ny: number;
 }
 
-export interface IMidForecastResponseData {
+export interface IMidForecastResData {
   baseDate: string;
   baseTime: string;
   category: IMidForecastCategory;

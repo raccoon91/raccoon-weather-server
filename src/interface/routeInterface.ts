@@ -13,7 +13,7 @@ export interface ILocation {
 
 export interface IWeatherRouteResponse {
   city?: string;
-  temp?: number;
+  t1h?: number;
   yesterday_temp?: number;
   sky?: number;
   pty?: number;
