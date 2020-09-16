@@ -45,8 +45,6 @@ class WeatherService extends RootService {
       raw: true,
     });
 
-    console.log(airPollution);
-
     if (!currentWeather || !airPollution) return null;
 
     weather = currentWeather;
@@ -120,7 +118,7 @@ class WeatherService extends RootService {
         await this.createCurrentWeather(CurrentWeather, currentWeather);
       }
 
-      console.log("success weather job");
+      console.log(`success weather job ${dateLog()}`);
     } catch (error) {
       console.error(`[weather request FAIL ${dateLog()}][${error.message}]`);
       console.error(error.stack);

@@ -94,7 +94,7 @@ class AirpollutionService extends RootService {
 
       await this.bulkUpdateOrCreateAirPollution(AirPollution, pollutionData);
 
-      console.log("success air pollution job");
+      console.log(`success air pollution job ${dateLog()}`);
     } catch (error) {
       console.error(`[airpollution request FAIL ${dateLog()}][${error.message}]`);
       console.error(error.stack);
@@ -126,7 +126,7 @@ class AirpollutionService extends RootService {
 
       await this.bulkUpdateOrCreateAirPollution(AirPollution, forecastDataList);
 
-      console.log("success air forecast job");
+      console.log(`success air forecast job ${dateLog()}`);
     } catch (error) {
       console.error(`[air forecast request FAIL ${dateLog()}][${error.message}]`);
       console.error(error.stack);

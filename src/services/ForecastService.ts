@@ -195,7 +195,7 @@ class ForecastService extends RootService {
         }
       }
 
-      console.log("success short forecast job");
+      console.log(`success short forecast job ${dateLog()}`);
     } catch (error) {
       console.error(`[short forecast request FAIL ${dateLog()}][${error.message}]`);
       console.error(error.stack);
@@ -245,7 +245,7 @@ class ForecastService extends RootService {
         }
       }
 
-      console.log("success mid forecast job");
+      console.log(`success mid forecast job ${dateLog()}`);
     } catch (error) {
       console.error(`[mid forecast request FAIL ${dateLog()}][${error.message}]`);
       console.error(error.stack);
