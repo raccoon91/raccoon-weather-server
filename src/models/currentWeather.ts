@@ -16,7 +16,7 @@ export const CurrentWeatherInit = (sequelize: Sequelize): typeof CurrentWeatherM
         type: DataTypes.STRING(20),
         allowNull: false,
       },
-      temp: {
+      t1h: {
         type: DataTypes.FLOAT,
         allowNull: false,
       },
