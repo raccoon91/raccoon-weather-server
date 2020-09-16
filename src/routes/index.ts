@@ -1,36 +1,32 @@
 import express, { Request } from "express";
 import geolocation from "../middleware/geolocation";
-import { WeatherController, ForecastController } from "../controllers";
-
-// import { CollectRoute } from "./CollectRoute";
+import { WeatherController, ForecastController, ClimateController } from "../controllers";
 
 const router = express.Router();
-
-router.use(geolocation);
 
 // extension
 
 // current
-router.get("/current", WeatherController.getWeather);
+router.get("/current", geolocation, WeatherController.getWeather);
 
 // forecast
 // short
-router.get("/forecast/short", ForecastController.getShortForecast);
+router.get("/forecast/short", geolocation, ForecastController.getShortForecast);
 
 // mid
-router.get("/forecast/mid", ForecastController.getMidForecast);
+router.get("/forecast/mid", geolocation, ForecastController.getMidForecast);
 
 // client
 // temp
 // rain
 // humidity
 
-router.get("/location", async (req: Request, res) => {
+router.get("/scrap", ClimateController.getScrapYearWeatherData);
+
+router.get("/location", geolocation, async (req: Request, res) => {
   const { location } = req.body;
 
   res.send(location);
 });
-
-// router.get("/collect", new CollectRoute().getCollect);
 
 export default router;
