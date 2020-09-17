@@ -47,14 +47,12 @@ class WeatherService extends RootService {
       raw: true,
     });
 
-    if (!airPollution) return null;
-
     weather = currentWeather;
     weather.yesterday_temp = yesterdayWeather ? yesterdayWeather.t1h : null;
     weather.sky = forecast ? forecast.sky : null;
     weather.pop = forecast ? forecast.pop : null;
-    weather.pm10 = airPollution.pm10;
-    weather.pm25 = airPollution.pm25;
+    weather.pm10 = airPollution ? airPollution.pm10 : null;
+    weather.pm25 = airPollution ? airPollution.pm25 : null;
 
     await RedisSet(redisKey, JSON.stringify(weather), "EX", 60 * 10);
 
