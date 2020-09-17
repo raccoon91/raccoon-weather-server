@@ -16,7 +16,7 @@ export const tomorrow = (timestamp: MomentInput): Moment => {
   return momentKR(timestamp).add(1, "days");
 };
 
-export const formatNumberToDateString = (year: number, month: number, day: number): string => {
+export const formatNumberToDateString = (year: number | string, month: number, day: number): string => {
   return momentKR([year, month - 1, day]).format("YYYY-MM-DD");
 };
 
