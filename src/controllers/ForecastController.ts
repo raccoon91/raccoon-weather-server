@@ -1,8 +1,8 @@
 import { Response, Request } from "express";
 import { ForecastService } from "../services";
 
-export class ForecastController {
-  static getShortForecast = async (req: Request, res: Response): Promise<Response> => {
+class ForecastController {
+  getShortForecast = async (req: Request, res: Response): Promise<Response> => {
     const { city } = req.body.location;
 
     const forecastData = await ForecastService.getForecast(city, true);
@@ -14,7 +14,7 @@ export class ForecastController {
     return res.json(forecastData);
   };
 
-  static getMidForecast = async (req: Request, res: Response): Promise<Response> => {
+  getMidForecast = async (req: Request, res: Response): Promise<Response> => {
     const { city } = req.body.location;
 
     const tomorrowData = await ForecastService.getForecast(city);
@@ -26,3 +26,5 @@ export class ForecastController {
     return res.json(tomorrowData);
   };
 }
+
+export default new ForecastController();
