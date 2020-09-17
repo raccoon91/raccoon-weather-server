@@ -1,8 +1,6 @@
 import { AxiosResponse } from "axios";
-import config from "../config";
-import { CurrentWeather, ForecastWeather, AirPollution } from "../models";
-import { IForecastWeatherData, IAirPollutionData, IAirForecastData } from "../interface";
 import { requestWeatherApi, requestAirPollutionApi } from "../lib";
+import config from "../config";
 
 const { OPEN_WEATHER_API_KEY } = config;
 
@@ -21,7 +19,6 @@ interface IAirpollutionRequestParams {
   dataGubun?: string;
   searchDate?: string;
 }
-
 export class RootService {
   async requestWeather<T>(url: string, params: IWeatherRequestParams): Promise<T[]> {
     const response: AxiosResponse<{ response?: { body?: { items?: { item?: T[] } } } }> = await requestWeatherApi({
@@ -64,57 +61,4 @@ export class RootService {
 
     return response.data.list;
   }
-
-  createCurrentWeather = async (weatherModel: typeof CurrentWeather, weatherData): Promise<void> => {
-    const currentWeather = await weatherModel.findOne({
-      where: {
-        city: weatherData.city,
-        weather_date: weatherData.weather_date,
-      },
-    });
-
-    if (!currentWeather) {
-      await weatherModel.create(weatherData);
-    }
-  };
-
-  updateOrCreateForecastWeather = async (
-    forecastModel: typeof ForecastWeather,
-    forecastData: IForecastWeatherData,
-  ): Promise<void> => {
-    const forecastWeather = await forecastModel.findOne({
-      where: {
-        city: forecastData.city,
-        weather_date: forecastData.weather_date,
-      },
-    });
-
-    if (forecastWeather) {
-      await forecastWeather.update(Object.assign(forecastWeather, forecastData));
-    } else if (forecastData.hour) {
-      await forecastModel.create(forecastData);
-    }
-  };
-
-  bulkUpdateOrCreateAirPollution = async (
-    airpollutionModel: typeof AirPollution,
-    airpollutionDataList: (IAirPollutionData | IAirForecastData)[],
-  ): Promise<void> => {
-    for (let i = 0; i < airpollutionDataList.length; i++) {
-      const airPollutionData = airpollutionDataList[i];
-
-      const airpollution = await airpollutionModel.findOne({
-        where: {
-          city: airPollutionData.city,
-          air_date: airPollutionData.air_date,
-        },
-      });
-
-      if (airpollution) {
-        await airpollution.update(airPollutionData);
-      } else {
-        await airpollutionModel.create(airPollutionData);
-      }
-    }
-  };
 }

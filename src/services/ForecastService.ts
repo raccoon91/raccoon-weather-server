@@ -84,36 +84,31 @@ class ForecastService extends RootService {
 
     responseData.forEach((item) => {
       const { fcstDate, fcstTime, fcstValue, category } = item;
+      const weather_date = momentKR(`${fcstDate} ${fcstTime}`).format("YYYY-MM-DD HH:00:00");
 
-      if (!result[`${fcstDate}:${fcstTime}`]) {
-        result[`${fcstDate}:${fcstTime}`] = {
+      if (!result[weather_date]) {
+        result[weather_date] = {
           city,
-          weather_date: momentKR(`${fcstDate} ${fcstTime}`).format("YYYY-MM-DD HH:00:00"),
+          weather_date,
           hour: String(fcstTime).slice(0, 2),
         };
       }
 
       switch (category) {
         case "T1H":
-          result[`${fcstDate}:${fcstTime}`].temp = fcstValue;
+          result[weather_date].temp = fcstValue;
           break;
         case "SKY":
-          result[`${fcstDate}:${fcstTime}`].sky = fcstValue;
+          result[weather_date].sky = fcstValue;
           break;
         case "PTY":
-          result[`${fcstDate}:${fcstTime}`].pty = fcstValue;
+          result[weather_date].pty = fcstValue;
           break;
         case "REH":
-          result[`${fcstDate}:${fcstTime}`].reh = fcstValue;
-          break;
-        case "RN1":
-          result[`${fcstDate}:${fcstTime}`].rn1 = fcstValue;
+          result[weather_date].reh = fcstValue;
           break;
         case "PTY":
-          result[`${fcstDate}:${fcstTime}`].pty = fcstValue;
-          break;
-        case "LGT":
-          result[`${fcstDate}:${fcstTime}`].lgt = fcstValue;
+          result[weather_date].pty = fcstValue;
           break;
         default:
           break;
@@ -131,36 +126,37 @@ class ForecastService extends RootService {
 
     responseData.forEach((item) => {
       const { fcstDate, fcstTime, fcstValue, category } = item;
+      const weather_date = momentKR(`${fcstDate} ${fcstTime}`).format("YYYY-MM-DD HH:00:00");
 
-      if (!result[`${fcstDate}:${fcstTime}`]) {
-        result[`${fcstDate}:${fcstTime}`] = {
+      if (!result[weather_date]) {
+        result[weather_date] = {
           city,
-          weather_date: momentKR(`${fcstDate} ${fcstTime}`).format("YYYY-MM-DD HH:00:00"),
+          weather_date,
           hour: fcstTime.slice(0, 2),
         };
       }
 
       switch (category) {
         case "POP":
-          result[`${fcstDate}:${fcstTime}`].pop = fcstValue;
+          result[weather_date].pop = fcstValue;
           break;
         case "SKY":
-          result[`${fcstDate}:${fcstTime}`].sky = fcstValue;
+          result[weather_date].sky = fcstValue;
           break;
         case "PTY":
-          result[`${fcstDate}:${fcstTime}`].pty = fcstValue;
+          result[weather_date].pty = fcstValue;
           break;
         case "REH":
-          result[`${fcstDate}:${fcstTime}`].reh = fcstValue;
+          result[weather_date].reh = fcstValue;
           break;
         case "T3H":
-          result[`${fcstDate}:${fcstTime}`].temp = fcstValue;
+          result[weather_date].temp = fcstValue;
           break;
         case "TMX":
-          result[`${fcstDate}:${fcstTime}`].tmx = fcstValue;
+          result[weather_date].tmx = fcstValue;
           break;
         case "TMN":
-          result[`${fcstDate}:${fcstTime}`].tmn = fcstValue;
+          result[weather_date].tmn = fcstValue;
           break;
         default:
           break;
@@ -190,8 +186,37 @@ class ForecastService extends RootService {
 
         const forecastDateTime = Object.keys(shortForecast);
 
+        let midForecast: IForecastWeatherData;
+
         for (let i = 0; i < forecastDateTime.length; i++) {
-          await this.updateOrCreateForecastWeather(ForecastWeather, shortForecast[forecastDateTime[i]]);
+          const hour = momentKR(forecastDateTime[i]).hour();
+          const forecastData = shortForecast[forecastDateTime[i]];
+
+          const forecastWeather = await ForecastWeather.findOne({
+            where: {
+              city: forecastData.city,
+              weather_date: forecastData.weather_date,
+            },
+          });
+
+          if (hour % 3 === 0) {
+            midForecast = await ForecastWeather.findOne({
+              where: {
+                city: forecastData.city,
+                weather_date: forecastData.weather_date,
+              },
+            });
+          }
+
+          if (midForecast) {
+            forecastData.pop = midForecast.pop;
+          }
+
+          if (forecastWeather) {
+            await forecastWeather.update(forecastData);
+          } else {
+            await ForecastWeather.create(forecastData);
+          }
         }
       }
 
@@ -223,25 +248,20 @@ class ForecastService extends RootService {
         const forecastDateTime = Object.keys(midForecast);
 
         for (let i = 0; i < forecastDateTime.length; i++) {
-          if (i === 0) {
-            const { city, weather_date, pop } = midForecast[forecastDateTime[i]];
-            const after1Hour = momentKR(weather_date).add(1, "hours").format("YYYY-MM-DD HH:00:00");
-            const after2Hour = momentKR(weather_date).add(2, "hours").format("YYYY-MM-DD HH:00:00");
+          const forecastData = midForecast[forecastDateTime[i]];
 
-            await this.updateOrCreateForecastWeather(ForecastWeather, {
-              city,
-              weather_date: after1Hour,
-              pop,
-            });
+          const forecastWeather = await ForecastWeather.findOne({
+            where: {
+              city: forecastData.city,
+              weather_date: forecastData.weather_date,
+            },
+          });
 
-            await this.updateOrCreateForecastWeather(ForecastWeather, {
-              city,
-              weather_date: after2Hour,
-              pop,
-            });
+          if (forecastWeather) {
+            await forecastWeather.update(forecastData);
+          } else {
+            await ForecastWeather.create(forecastData);
           }
-
-          await this.updateOrCreateForecastWeather(ForecastWeather, midForecast[forecastDateTime[i]]);
         }
       }
 

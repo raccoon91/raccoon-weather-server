@@ -90,9 +90,24 @@ class AirpollutionService extends RootService {
       });
 
       const currentDate = momentKR(pm10CurrentResData.dataTime).format("YYYY-MM-DD HH:00:00");
-      const pollutionData = this.combineAirpollutionData(pm10CurrentResData, pm25CurrentResData, currentDate);
+      const airpollutionDataList = this.combineAirpollutionData(pm10CurrentResData, pm25CurrentResData, currentDate);
 
-      await this.bulkUpdateOrCreateAirPollution(AirPollution, pollutionData);
+      for (let i = 0; i < airpollutionDataList.length; i++) {
+        const airPollutionData = airpollutionDataList[i];
+
+        const airpollution = await AirPollution.findOne({
+          where: {
+            city: airPollutionData.city,
+            air_date: airPollutionData.air_date,
+          },
+        });
+
+        if (airpollution) {
+          await airpollution.update(airPollutionData);
+        } else {
+          await AirPollution.create(airPollutionData);
+        }
+      }
 
       console.log(`success air pollution job ${dateLog()}`);
     } catch (error) {
@@ -118,13 +133,28 @@ class AirpollutionService extends RootService {
       const pm10ForecastData = this.parseAirForecastResponseData(pm10ForecastResData);
       const pm25ForecastData = this.parseAirForecastResponseData(pm25ForecastResData);
 
-      const forecastDataList = this.combineAirForecastData(
+      const airforecastDataList = this.combineAirForecastData(
         pm10ForecastData.airForecastData,
         pm25ForecastData.airForecastData,
         pm10ForecastData.airForecastDate,
       );
 
-      await this.bulkUpdateOrCreateAirPollution(AirPollution, forecastDataList);
+      for (let i = 0; i < airforecastDataList.length; i++) {
+        const airforecastData = airforecastDataList[i];
+
+        const airforecast = await AirPollution.findOne({
+          where: {
+            city: airforecastData.city,
+            air_date: airforecastData.air_date,
+          },
+        });
+
+        if (airforecast) {
+          await airforecast.update(airforecastData);
+        } else {
+          await AirPollution.create(airforecastData);
+        }
+      }
 
       console.log(`success air forecast job ${dateLog()}`);
     } catch (error) {

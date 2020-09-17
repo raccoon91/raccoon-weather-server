@@ -25,6 +25,8 @@ class WeatherService extends RootService {
       raw: true,
     });
 
+    if (!currentWeather) return null;
+
     const currentWeatherDate = currentWeather.weather_date;
 
     const yesterdayWeather = await CurrentWeather.findOne({
@@ -45,7 +47,7 @@ class WeatherService extends RootService {
       raw: true,
     });
 
-    if (!currentWeather || !airPollution) return null;
+    if (!airPollution) return null;
 
     weather = currentWeather;
     weather.yesterday_temp = yesterdayWeather ? yesterdayWeather.t1h : null;
@@ -115,7 +117,7 @@ class WeatherService extends RootService {
           currentMinute,
         );
 
-        await this.createCurrentWeather(CurrentWeather, currentWeather);
+        await CurrentWeather.create(currentWeather);
       }
 
       console.log(`success weather job ${dateLog()}`);
