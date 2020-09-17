@@ -27,7 +27,17 @@ export const AirPollutionInit = (sequelize: Sequelize): typeof AirPollutionModel
         allowNull: false,
       },
     },
-    { sequelize, tableName: "airpollutions" },
+    {
+      sequelize,
+      tableName: "airpollutions",
+      indexes: [
+        {
+          name: "air_city_air_date",
+          unique: true,
+          fields: ["city", "air_date"],
+        },
+      ],
+    },
   );
 
   return AirPollutionModel;

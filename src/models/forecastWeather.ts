@@ -5,9 +5,7 @@ class ForecastWeatherModel extends Model {
   public temp!: number | null;
   public sky!: number;
   public pty!: number;
-  public rn1!: number | null;
   public reh!: number;
-  public lgt!: number | null;
   public pop!: number | null;
   public tmx!: number | null;
   public tmn!: number | null;
@@ -34,17 +32,9 @@ export const ForecastWeatherInit = (sequelize: Sequelize): typeof ForecastWeathe
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      rn1: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-      },
       reh: {
         type: DataTypes.FLOAT,
         allowNull: false,
-      },
-      lgt: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
       },
       pop: {
         type: DataTypes.INTEGER,
@@ -68,7 +58,17 @@ export const ForecastWeatherInit = (sequelize: Sequelize): typeof ForecastWeathe
         unique: false,
       },
     },
-    { sequelize, tableName: "forecastWeathers", updatedAt: false },
+    {
+      sequelize,
+      tableName: "forecastWeathers",
+      indexes: [
+        {
+          name: "forecast_city_weather_date",
+          unique: true,
+          fields: ["city", "weather_date"],
+        },
+      ],
+    },
   );
 
   return ForecastWeatherModel;

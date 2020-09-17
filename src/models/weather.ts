@@ -43,7 +43,18 @@ export const WeatherInit = (sequelize: Sequelize): typeof WeatherModel => {
         unique: false,
       },
     },
-    { sequelize, tableName: "weathers", updatedAt: false },
+    {
+      sequelize,
+      tableName: "weathers",
+      updatedAt: false,
+      indexes: [
+        {
+          name: "weather_city_weather_date",
+          unique: true,
+          fields: ["city", "weather_date"],
+        },
+      ],
+    },
   );
 
   return WeatherModel;
