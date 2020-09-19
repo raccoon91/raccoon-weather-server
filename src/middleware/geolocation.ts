@@ -5,7 +5,7 @@ import axios, { AxiosResponse } from "axios";
 import CryptoJS from "crypto-js";
 import config from "../config";
 import { RedisGet, RedisSet } from "../models";
-import { momentKR, dateLog, cityAbbreviations } from "../utils";
+import { momentKR, dateLog, cityToAbbreviation } from "../utils";
 
 const { NAVER_HOST_NAME, NAVER_REQUEST_URL, NAVER_ACCESS_KEY, NAVER_SECRET_KEY } = config;
 
@@ -76,7 +76,7 @@ const getLocation = async (ip: string | undefined): Promise<IGeoResponseData["ge
 
   const response: AxiosResponse<IGeoResponseData> = await axios.get(`${NAVER_HOST_NAME}${baseString}`, options);
 
-  const city = cityAbbreviations[response.data.geoLocation.r1];
+  const city = cityToAbbreviation[response.data.geoLocation.r1];
 
   return {
     ip,
