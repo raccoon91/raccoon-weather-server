@@ -3,7 +3,7 @@ import { Model, DataTypes, Sequelize } from "sequelize";
 class ForecastWeatherModel extends Model {
   public city!: string;
   public temp!: number | null;
-  public sky!: number;
+  public sky!: number | null;
   public pty!: number;
   public reh!: number;
   public pop!: number | null;
@@ -26,7 +26,7 @@ export const ForecastWeatherInit = (sequelize: Sequelize): typeof ForecastWeathe
       },
       sky: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
       },
       pty: {
         type: DataTypes.INTEGER,

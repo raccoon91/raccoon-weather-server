@@ -40,7 +40,6 @@ export const WeatherInit = (sequelize: Sequelize): typeof WeatherModel => {
       weather_date: {
         type: DataTypes.DATEONLY,
         allowNull: false,
-        unique: false,
       },
     },
     {
