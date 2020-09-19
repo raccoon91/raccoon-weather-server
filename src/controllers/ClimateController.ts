@@ -12,6 +12,28 @@ function dateValidateYear(year: string): boolean {
 }
 
 class ClimateController {
+  getClimate = async (req: Request, res: Response): Promise<Response> => {
+    const { city } = req.params;
+
+    const climateDataList = await ClimateService.getClimate(city);
+
+    if (!climateDataList) {
+      return res.send({ message: "data not found" });
+    }
+
+    return res.send(climateDataList);
+  };
+
+  getGeoData = async (req: Request, res: Response): Promise<Response> => {
+    const geoData = await ClimateService.getGeoData();
+
+    if (!geoData) {
+      return res.send({ message: "data not found" });
+    }
+
+    return res.send(geoData);
+  };
+
   getScrapYearWeatherData = async (req: Request, res: Response): Promise<Response> => {
     const startYear = req.query.start as string;
     const endYear = req.query.end as string;

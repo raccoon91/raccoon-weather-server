@@ -10,16 +10,12 @@ const router = express.Router();
 router.get("/current", geolocation, WeatherController.getWeather);
 
 // forecast
-// short
-router.get("/forecast/short", geolocation, ForecastController.getShortForecast);
+router.get("/forecast/:term", geolocation, ForecastController.getForecast);
 
-// mid
-router.get("/forecast/mid", geolocation, ForecastController.getMidForecast);
+// climate
+router.get("/climate/geo", ClimateController.getGeoData);
 
-// client
-// temp
-// rain
-// humidity
+router.get("/climate/local/:city", ClimateController.getClimate);
 
 router.get("/scrap", ClimateController.getScrapYearWeatherData);
 
