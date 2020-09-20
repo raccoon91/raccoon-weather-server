@@ -50,7 +50,7 @@ export const cityCollectionList: ICityGeolocation[] = [
   { city: "대구", stn: 143 },
   { city: "대전", stn: 133 },
   { city: "부산", stn: 159 },
-  { city: "세종", stn: 239 },
+  { city: "세종", stn: 232 },
   { city: "울산", stn: 152 },
   { city: "인천", stn: 112 },
   { city: "전남", stn: 168 },
