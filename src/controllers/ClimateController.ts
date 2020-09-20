@@ -42,12 +42,12 @@ class ClimateController {
     const endYearValidated = dateValidateYear(endYear);
 
     if (!startYearValidated || !endYearValidated) {
-      return res.send("failed scrap check date");
+      return res.send("failed scrap. check date");
     } else {
       // node server request timeout
       req.setTimeout(50 * 60 * 1000);
 
-      await ClimateService.scrapPastWeatherData(startYear, endYear);
+      await ClimateService.scrapClimateData(startYear, endYear);
 
       return res.send("success scrap");
     }

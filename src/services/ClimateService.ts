@@ -1,21 +1,22 @@
 import sequelize from "sequelize";
+import { Op } from "sequelize";
 import cheerio from "cheerio";
 import iconv from "iconv-lite";
 import { AxiosPromise, AxiosResponse } from "axios";
 import { RootService } from "./RootService";
-import { Weather } from "../models";
+import { Climate } from "../models";
 import { requestScrapApi } from "../lib";
 import { ICityGeolocation } from "../interface";
-import { momentKR, formatNumberToDateString, dateLog, cityCollectionList } from "../utils";
+import { momentKR, dateLog, cityCollectionList, cityFromAbbreviation } from "../utils";
 
-interface IWeatherData {
+interface IClimateData {
   city: string;
-  weather_date: string;
-  temp: number;
-  max_temp: number;
-  min_temp: number;
-  rn1: number;
-  reh: number;
+  temp?: number;
+  max_temp?: number;
+  min_temp?: number;
+  rn1?: number;
+  reh?: number;
+  year: number;
 }
 
 interface IPastWeatherCategory {
@@ -26,8 +27,8 @@ interface IPastWeatherCategory {
 interface IPromisesResponseData {
   responseHtml: Buffer;
   city: string;
-  year: string;
   fieldName: string;
+  year: number;
 }
 
 const pastWeatherCategoryList: IPastWeatherCategory[] = [
@@ -38,11 +39,65 @@ const pastWeatherCategoryList: IPastWeatherCategory[] = [
   { fieldName: "reh", categoryNo: "12" },
 ];
 
+const averageOfArray = (numberArray: number[]): number => {
+  let total = 0;
+
+  for (let i = 0; i < numberArray.length; i++) {
+    total += numberArray[i];
+  }
+
+  return parseFloat((total / numberArray.length).toFixed(1));
+};
+
 class ClimateService extends RootService {
+  getLocalClimate = async (city: string): Promise<{ [key: string]: IClimateData[] }> => {
+    const findOption: { city?: string; year: {} } = {
+      year: { [Op.gte]: 2000 },
+    };
+
+    if (city !== "전국") {
+      findOption.city = city;
+    }
+
+    const climates = await Climate.findAll({
+      where: findOption,
+      raw: true,
+    });
+
+    const localClimateData: { [key: string]: IClimateData[] } = {};
+
+    climates.forEach((data) => {
+      if (!localClimateData[data.year]) {
+        localClimateData[data.year] = [data];
+      } else {
+        localClimateData[data.year].push(data);
+      }
+    });
+
+    return localClimateData;
+  };
+
+  getGeoClimate = async (): Promise<{ [key: string]: IClimateData }> => {
+    const climates = await Climate.findAll({
+      where: {
+        year: 2020,
+      },
+      raw: true,
+    });
+
+    const geoClimateData: { [key: string]: IClimateData } = {};
+
+    climates.forEach((data) => {
+      geoClimateData[cityFromAbbreviation[data.city]] = data;
+    });
+
+    return geoClimateData;
+  };
+
   buildScrapRequest = (
     cityCollection: ICityGeolocation,
     pastWeatherCategory: IPastWeatherCategory,
-    year: string,
+    year: number,
   ): AxiosPromise<IPromisesResponseData> => {
     const { city, stn } = cityCollection;
     const { fieldName, categoryNo } = pastWeatherCategory;
@@ -66,8 +121,8 @@ class ClimateService extends RootService {
     });
   };
 
-  parseHtmlToWeatherData = (promisesResponseData: AxiosResponse<IPromisesResponseData>[]): IWeatherData[] => {
-    const parsedPastWeatherData: { [key: string]: IWeatherData } = {};
+  parseHtmlToClimateData = (promisesResponseData: AxiosResponse<IPromisesResponseData>[]): IClimateData[] => {
+    const parsedPastWeatherData: { [key: string]: IClimateData } = {};
 
     promisesResponseData.forEach((response) => {
       const { responseHtml, city, year, fieldName } = response.data;
@@ -76,57 +131,58 @@ class ClimateService extends RootService {
       const $ = cheerio.load(htmlDoc);
 
       const tableRow = $("table.table_develop > tbody > tr");
+      const avgData = $(tableRow[31]).find("td");
 
-      for (let day = 0; day <= 30; day++) {
-        const tableData = $(tableRow[day]).find("td");
+      const climateDataList = [];
 
-        for (let month = 1; month <= 12; month++) {
-          const weather_date = formatNumberToDateString(year, month, day + 1);
-          const value = $(tableData[month]).text();
+      for (let month = 1; month <= 12; month++) {
+        const value = $(avgData[month]).text();
 
-          if (value.trim().length) {
-            if (!parsedPastWeatherData[`${weather_date}/${city}`]) {
-              parsedPastWeatherData[`${weather_date}/${city}`] = {
-                city,
-                weather_date,
-                temp: null,
-                max_temp: null,
-                min_temp: null,
-                rn1: null,
-                reh: null,
-              };
-            }
-
-            parsedPastWeatherData[`${weather_date}/${city}`][fieldName] = Number(value);
-          }
+        if (value.trim().length) {
+          climateDataList.push(Number(value));
         }
       }
+
+      if (!parsedPastWeatherData[`${year}/${city}`]) {
+        parsedPastWeatherData[`${year}/${city}`] = {
+          city,
+          year,
+        };
+      }
+
+      parsedPastWeatherData[`${year}/${city}`][fieldName] = averageOfArray(climateDataList);
     });
 
-    return Object.values(parsedPastWeatherData).filter((pastWeatherData) => pastWeatherData.temp !== null);
+    const pastWeatherDataList = Object.values(parsedPastWeatherData).filter(
+      (pastWeatherData) => pastWeatherData.temp !== null,
+    );
+
+    return pastWeatherDataList;
   };
 
-  scrapPastWeatherData = async (startDate: string, endDate: string): Promise<void> => {
+  scrapClimateData = async (startDate: string, endDate: string): Promise<void> => {
     const startYear = momentKR(startDate).year();
     const endYear = momentKR(endDate).year();
     const yearCalibrate = endYear - startYear + 1;
 
     for (let i = 0; i < yearCalibrate; i++) {
-      const year = String(startYear + i);
+      const year = startYear + i;
 
-      const yearWeatherData = await Weather.findOne({
-        where: sequelize.where(sequelize.fn("YEAR", sequelize.col("weather_date")), year),
+      const yearWeatherData = await Climate.findOne({
+        where: {
+          year,
+        },
       });
 
       if (yearWeatherData) {
         console.log(`skip scrap ${year} weather data`);
       } else {
-        await this.scrapYearWeatherData(year);
+        await this.scrapYearClimateData(year);
       }
     }
   };
 
-  scrapYearWeatherData = async (year: string): Promise<void> => {
+  scrapYearClimateData = async (year: number): Promise<void> => {
     try {
       const promises: AxiosPromise<IPromisesResponseData>[] = [];
 
@@ -138,9 +194,9 @@ class ClimateService extends RootService {
 
       const promisesResponseData = await Promise.all(promises);
 
-      const pastWeatherDataList = this.parseHtmlToWeatherData(promisesResponseData);
+      const pastWeatherDataList = this.parseHtmlToClimateData(promisesResponseData);
 
-      await Weather.bulkCreate(pastWeatherDataList);
+      await Climate.bulkCreate(pastWeatherDataList);
 
       console.log(`success weather scrap ${year} data ${dateLog()}`);
     } catch (err) {
