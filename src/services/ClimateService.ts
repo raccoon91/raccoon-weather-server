@@ -52,7 +52,7 @@ const averageOfArray = (numberArray: number[]): number => {
 class ClimateService extends RootService {
   getLocalClimate = async (city: string): Promise<{ [key: string]: IClimateData[] }> => {
     const findOption: { city?: string; year: {} } = {
-      year: { [Op.gte]: 2000 },
+      year: { [Op.between]: [1985, 2019] },
     };
 
     if (city !== "전국") {
