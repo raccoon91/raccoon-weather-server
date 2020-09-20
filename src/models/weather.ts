@@ -2,11 +2,10 @@ import { Model, DataTypes, Sequelize } from "sequelize";
 
 class WeatherModel extends Model {
   public city!: string;
-  public temp!: number | null;
-  public max_temp!: number | null;
-  public min_tamp!: number | null;
-  public rn1!: number | null;
-  public reh!: number | null;
+  public t1h!: number;
+  public pty!: number;
+  public rn1!: number;
+  public reh!: number;
   public weather_date!: string;
 }
 
@@ -17,29 +16,26 @@ export const WeatherInit = (sequelize: Sequelize): typeof WeatherModel => {
         type: DataTypes.STRING(20),
         allowNull: false,
       },
-      temp: {
+      t1h: {
         type: DataTypes.FLOAT,
-        allowNull: true,
+        allowNull: false,
       },
-      max_temp: {
-        type: DataTypes.FLOAT,
-        allowNull: true,
-      },
-      min_temp: {
-        type: DataTypes.FLOAT,
-        allowNull: true,
+      pty: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
       },
       rn1: {
         type: DataTypes.FLOAT,
-        allowNull: true,
+        allowNull: false,
       },
       reh: {
         type: DataTypes.FLOAT,
-        allowNull: true,
+        allowNull: false,
       },
       weather_date: {
-        type: DataTypes.DATEONLY,
+        type: DataTypes.DATE,
         allowNull: false,
+        unique: false,
       },
     },
     {

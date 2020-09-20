@@ -1,6 +1,6 @@
 import { Model, DataTypes, Sequelize } from "sequelize";
 
-class ForecastWeatherModel extends Model {
+class ForecastModel extends Model {
   public city!: string;
   public temp!: number | null;
   public sky!: number | null;
@@ -13,8 +13,8 @@ class ForecastWeatherModel extends Model {
   public weather_date!: string;
 }
 
-export const ForecastWeatherInit = (sequelize: Sequelize): typeof ForecastWeatherModel => {
-  ForecastWeatherModel.init(
+export const ForecastInit = (sequelize: Sequelize): typeof ForecastModel => {
+  ForecastModel.init(
     {
       city: {
         type: DataTypes.STRING(20),
@@ -60,7 +60,7 @@ export const ForecastWeatherInit = (sequelize: Sequelize): typeof ForecastWeathe
     },
     {
       sequelize,
-      tableName: "forecastWeathers",
+      tableName: "forecasts",
       indexes: [
         {
           name: "forecast_city_weather_date",
@@ -71,5 +71,5 @@ export const ForecastWeatherInit = (sequelize: Sequelize): typeof ForecastWeathe
     },
   );
 
-  return ForecastWeatherModel;
+  return ForecastModel;
 };

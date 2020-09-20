@@ -1,6 +1,6 @@
 import { Op } from "sequelize";
 import { RootService } from "./RootService";
-import { CurrentWeather, ForecastWeather, RedisGet, RedisSet } from "../models";
+import { Weather, Forecast, RedisGet, RedisSet } from "../models";
 import {
   IForecastRouteResponse,
   IShortForecastResData,
@@ -23,7 +23,7 @@ class ForecastService extends RootService {
       return JSON.parse(cachedShorForecast);
     }
 
-    const currentWeather = await CurrentWeather.findOne({
+    const currentWeather = await Weather.findOne({
       where: { city },
       order: [["weather_date", "DESC"]],
       attributes: ["weather_date"],
@@ -36,7 +36,7 @@ class ForecastService extends RootService {
       tragetDate = tomorrow(currentWeather.weather_date).format("YYYY-MM-DD 00:00:00");
     }
 
-    const forecast = await ForecastWeather.findAll({
+    const forecast = await Forecast.findAll({
       where: { city, weather_date: { [Op.gte]: tragetDate } },
       order: [["weather_date", "ASC"]],
       attributes: ["temp", "sky", "pty", "reh", "pop", "hour", "weather_date"],
@@ -192,7 +192,7 @@ class ForecastService extends RootService {
           const hour = momentKR(forecastDateTime[i]).hour();
           const forecastData = shortForecast[forecastDateTime[i]];
 
-          const forecastWeather = await ForecastWeather.findOne({
+          const forecastWeather = await Forecast.findOne({
             where: {
               city: forecastData.city,
               weather_date: forecastData.weather_date,
@@ -200,7 +200,7 @@ class ForecastService extends RootService {
           });
 
           if (hour % 3 === 0) {
-            midForecast = await ForecastWeather.findOne({
+            midForecast = await Forecast.findOne({
               where: {
                 city: forecastData.city,
                 weather_date: forecastData.weather_date,
@@ -215,7 +215,7 @@ class ForecastService extends RootService {
           if (forecastWeather) {
             await forecastWeather.update(forecastData);
           } else {
-            await ForecastWeather.create(forecastData);
+            await Forecast.create(forecastData);
           }
         }
       }
@@ -250,7 +250,7 @@ class ForecastService extends RootService {
         for (let i = 0; i < forecastDateTime.length; i++) {
           const forecastData = midForecast[forecastDateTime[i]];
 
-          const forecastWeather = await ForecastWeather.findOne({
+          const forecastWeather = await Forecast.findOne({
             where: {
               city: forecastData.city,
               weather_date: forecastData.weather_date,
@@ -260,7 +260,7 @@ class ForecastService extends RootService {
           if (forecastWeather) {
             await forecastWeather.update(forecastData);
           } else {
-            await ForecastWeather.create(forecastData);
+            await Forecast.create(forecastData);
           }
         }
       }

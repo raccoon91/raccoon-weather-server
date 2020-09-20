@@ -1,6 +1,6 @@
 import { Op } from "sequelize";
 import { RootService } from "./RootService";
-import { CurrentWeather, ForecastWeather, AirPollution, RedisGet, RedisSet } from "../models";
+import { Weather, Forecast, AirPollution, RedisGet, RedisSet } from "../models";
 import { IWeatherRouteResponse, ICurrentWeatherResData, ICurrentWeatherData, ICityKor, ILocation } from "../interface";
 import { cityGeolocationList, momentKR, yesterday, getCurrentWeatherDate, dateLog } from "../utils";
 
@@ -19,7 +19,7 @@ class WeatherService extends RootService {
       return { weather, location };
     }
 
-    const currentWeather = await CurrentWeather.findOne({
+    const currentWeather = await Weather.findOne({
       where: { city },
       order: [["weather_date", "DESC"]],
       raw: true,
@@ -29,12 +29,12 @@ class WeatherService extends RootService {
 
     const currentWeatherDate = currentWeather.weather_date;
 
-    const yesterdayWeather = await CurrentWeather.findOne({
+    const yesterdayWeather = await Weather.findOne({
       where: { city, weather_date: yesterday(currentWeatherDate).format("YYYY-MM-DD HH:mm:00") },
       raw: true,
     });
 
-    const forecast = await ForecastWeather.findOne({
+    const forecast = await Forecast.findOne({
       where: { city, weather_date: { [Op.lte]: currentWeather.weather_date } },
       order: [["weather_date", "DESC"]],
       attributes: ["sky", "pop", "weather_date"],
@@ -115,7 +115,7 @@ class WeatherService extends RootService {
           currentMinute,
         );
 
-        await CurrentWeather.create(currentWeather);
+        await Weather.create(currentWeather);
       }
 
       console.log(`success weather job ${dateLog()}`);
