@@ -42,7 +42,7 @@ export const cityGeolocationList: ICityGeolocation[] = [
 
 export const cityCollectionList: ICityGeolocation[] = [
   { city: "서울", stn: 108 },
-  { city: "강원", stn: 93 },
+  { city: "강원", stn: 90 },
   { city: "경기", stn: 119 },
   { city: "경남", stn: 155 },
   { city: "경북", stn: 138 },
