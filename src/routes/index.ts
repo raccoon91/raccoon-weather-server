@@ -6,11 +6,6 @@ const router = express.Router();
 
 // extension
 
-// route test
-router.get("/test", (req, res) => {
-  res.send("hello raccon weather server");
-});
-
 // weather
 router.get("/weather", geolocation, WeatherController.getWeather);
 
