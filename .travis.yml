@@ -8,9 +8,9 @@ after_success:
   - npm run build
 before_deploy:
   - rm -rf node_modules
-  - zip -r raccoon-weather-server.zip build/
+  - zip -r weather-server.zip build/
   - mkdir -p deploy
-  - mv raccoon-weather-server.zip deploy/raccoon-weather-server.zip
+  - mv weather-server.zip deploy/weather-server.zip
 deploy:
   - provider: s3
     access_key_id: $AWS_ACCESS_ID
@@ -27,7 +27,7 @@ deploy:
     access_key_id: $AWS_ACCESS_ID
     secret_access_key: $AWS_SECRET_KEY
     bucket: raccoon-weather-server
-    key: raccoon-weather-server.zip
+    key: weather-server.zip
     bundle_type: zip
     application: raccoon-weather-server-codedeploy
     deployment_group: raccoon-weather-server-deploy-group
