@@ -8,7 +8,7 @@ after_success:
   - npm run build
 before_deploy:
   - rm -rf node_modules
-  - zip -r weather-server.zip build/ appspec.yml execute-deploy.sh
+  - zip -r weather-server.zip build/ package.json appspec.yml execute-deploy.sh
   - mkdir -p deploy
   - mv weather-server.zip deploy/weather-server.zip
 deploy:

@@ -3,7 +3,7 @@ os: linux
 files:
   - source: /
     destination: /home/ubuntu/deploy/weather-server
-# hooks:
-#   AfterInstall:
-#     - location: execute-deploy.sh
-#       timeout: 180
+hooks:
+  AfterInstall:
+    - location: execute-deploy.sh
+      timeout: 180
