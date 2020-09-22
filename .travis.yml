@@ -1,11 +1,41 @@
 language: node_js
 node_js:
   - "10.14"
-before_install:
-  - npm install -g yarn
 branches:
   only:
     - master
+after_success:
+  - npm run build
+before_deploy:
+  - cd build
+  - zip -r raccoon-weather-server.zip *
+  - mkdir -p deploy
+  - mv raccoon-weather-server.zip deploy/raccoon-weather-server.zip
+deploy:
+  - provider: s3
+    access_key_id: $AWS_ACCESS_ID
+    secret_access_key: $AWS_SECRET_KEY
+    bucket: raccoon-weather-server
+    region: ap-northeast-2
+    skip_cleanup: true
+    local_dir: deploy
+    wait-until-deployed: true
+    on:
+      repo: raccoon91/raccoon-weather-server
+      branch: master
+  - provider: codedeploy
+    access_key_id: $AWS_ACCESS_ID
+    secret_access_key: $AWS_SECRET_KEY
+    bucket: raccoon-weather-server
+    key: raccoon-weather-server.zip
+    bundle_type: zip
+    application: raccoon-weather-server-codedeploy
+    deployment_group: raccoon-weather-server-deploy-group
+    region: ap-northeast-2
+    wait-until-deployed: true
+    on:
+      repo: raccoon91/raccoon-weather-server
+      branch: master
 notifications:
   email:
     recipients:
