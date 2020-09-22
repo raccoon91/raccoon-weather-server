@@ -3,11 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "node_modules/.bin/tsc -w",
+    "build": "rm -rf build && node_modules/.bin/tsc -w",
     "start": "node build/bin/www",
     "dev:build": "node_modules/.bin/tsc -w",
     "dev:run": "nodemon build/bin/www",
-    "dev": "concurrently npm:dev:*"
+    "dev": "concurrently npm:dev:*",
+    "test": "exit"
   },
   "dependencies": {
     "axios": "^0.19.0",
