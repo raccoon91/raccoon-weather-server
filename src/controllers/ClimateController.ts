@@ -45,7 +45,7 @@ class ClimateController {
       return res.send("failed scrap. check date");
     } else {
       // node server request timeout
-      req.setTimeout(50 * 60 * 1000);
+      req.setTimeout(3 * 60 * 1000);
 
       await ClimateService.scrapClimateData(startYear, endYear);
 
