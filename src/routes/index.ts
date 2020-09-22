@@ -7,7 +7,7 @@ const router = express.Router();
 // extension
 
 // route test
-router.get("/", (req, res) => {
+router.get("/test", (req, res) => {
   res.send("hello raccon weather server");
 });
 
