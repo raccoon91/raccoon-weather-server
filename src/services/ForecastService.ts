@@ -1,6 +1,6 @@
 import { Op } from "sequelize";
 import { RootService } from "./RootService";
-import { Weather, Forecast, RedisGet, RedisSet } from "../models";
+import { Weather, Forecast } from "../models";
 import {
   IForecastRouteResponse,
   IShortForecastResData,
@@ -12,16 +12,7 @@ import { momentKR, tomorrow, dateLog, getMidForecastDate, getShortForecastDate, 
 
 class ForecastService extends RootService {
   getForecast = async (city: string, isShortForecast?: boolean): Promise<IForecastRouteResponse> => {
-    const redisKey = `forecast/${isShortForecast ? "short" : "mid"}/${city}`;
     let tragetDate: string;
-
-    const cachedShorForecast = await RedisGet(redisKey);
-
-    if (cachedShorForecast) {
-      console.log("cached", redisKey);
-
-      return JSON.parse(cachedShorForecast);
-    }
 
     const currentWeather = await Weather.findOne({
       where: { city },
@@ -59,19 +50,6 @@ class ForecastService extends RootService {
       rainProbs.push(item.pop);
       temperatures.push(item.temp);
     });
-
-    await RedisSet(
-      redisKey,
-      JSON.stringify({
-        categories,
-        rainProbs,
-        humidities,
-        temperatures,
-        conditions,
-      }),
-      "EX",
-      60 * 60,
-    );
 
     return { categories, rainProbs, humidities, temperatures, conditions };
   };

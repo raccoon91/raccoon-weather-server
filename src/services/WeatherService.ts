@@ -1,23 +1,13 @@
 import { Op } from "sequelize";
 import { RootService } from "./RootService";
-import { Weather, Forecast, AirPollution, RedisGet, RedisSet } from "../models";
+import { Weather, Forecast, AirPollution } from "../models";
 import { IWeatherRouteResponse, ICurrentWeatherResData, ICurrentWeatherData, ICityKor, ILocation } from "../interface";
 import { cityGeolocationList, momentKR, yesterday, getCurrentWeatherDate, dateLog } from "../utils";
 
 class WeatherService extends RootService {
   getCurrentWeather = async (location: ILocation): Promise<{ weather: IWeatherRouteResponse; location: ILocation }> => {
     const { city } = location;
-    const redisKey = `weather/${city}`;
     let weather: IWeatherRouteResponse = {};
-
-    const cachedWeather = await RedisGet(redisKey);
-
-    if (cachedWeather) {
-      console.log("cached weather", city);
-      weather = JSON.parse(cachedWeather);
-
-      return { weather, location };
-    }
 
     const currentWeather = await Weather.findOne({
       where: { city },
@@ -53,8 +43,6 @@ class WeatherService extends RootService {
     weather.pop = forecast ? forecast.pop : null;
     weather.pm10 = airPollution ? airPollution.pm10 : null;
     weather.pm25 = airPollution ? airPollution.pm25 : null;
-
-    await RedisSet(redisKey, JSON.stringify(weather), "EX", 60 * 10);
 
     return { weather, location };
   };

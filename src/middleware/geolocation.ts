@@ -4,7 +4,7 @@ import { Request, Response, NextFunction } from "express";
 import axios, { AxiosResponse } from "axios";
 import CryptoJS from "crypto-js";
 import config from "../config";
-import { RedisGet, RedisSet } from "../models";
+import { Location } from "../models";
 import { momentKR, dateLog, cityToAbbreviation } from "../utils";
 
 const { NAVER_HOST_NAME, NAVER_REQUEST_URL, NAVER_ACCESS_KEY, NAVER_SECRET_KEY } = config;
@@ -89,15 +89,21 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
   const ip = req.headers["x-client-ip"] as string | undefined;
 
   try {
-    const cachedIp = await RedisGet(`ip/${ip}`);
+    const user = await Location.findOne({
+      where: {
+        ip,
+      },
+      attributes: ["ip", "city", "r1", "r2", "r3"],
+      raw: true,
+    });
 
-    if (cachedIp) {
-      console.log("cached ip", ip);
-      req.body.location = JSON.parse(cachedIp);
+    if (user) {
+      console.log("cached location", user.ip);
+      req.body.location = user;
     } else {
       const geolocation = await getLocation(ip);
 
-      await RedisSet(`ip/${ip}`, JSON.stringify(geolocation), "EX", 60 * 30);
+      await Location.create(geolocation);
 
       req.body.location = geolocation;
     }

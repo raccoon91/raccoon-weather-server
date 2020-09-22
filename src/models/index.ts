@@ -1,6 +1,5 @@
 import { Sequelize, Options } from "sequelize";
-import { promisify } from "util";
-import { client } from "./redis";
+import { LocationInit } from "./location";
 import { ClimateInit } from "./climate";
 import { WeatherInit } from "./weather";
 import { ForecastInit } from "./forecast";
@@ -48,13 +47,10 @@ const databaseConnect = (): void => {
     });
 };
 
+const Location = LocationInit(sequelize);
 const Climate = ClimateInit(sequelize);
 const Weather = WeatherInit(sequelize);
 const Forecast = ForecastInit(sequelize);
 const AirPollution = AirPollutionInit(sequelize);
 
-const RedisGet = promisify(client.get).bind(client);
-const RedisSet = promisify(client.set).bind(client);
-const RedisKeys = promisify(client.keys).bind(client);
-
-export { databaseConnect, Climate, Weather, Forecast, AirPollution, RedisGet, RedisSet, RedisKeys };
+export { databaseConnect, Location, Climate, Weather, Forecast, AirPollution };
