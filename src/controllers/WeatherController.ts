@@ -5,6 +5,8 @@ class WeatherController {
   getWeather = async (req: Request, res: Response): Promise<Response> => {
     const { location } = req.body;
 
+    console.log("get weather request");
+
     const weatherData = await WeatherService.getCurrentWeather(location);
 
     if (!weatherData) {

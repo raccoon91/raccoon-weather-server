@@ -13,6 +13,8 @@ function dateValidateYear(year: string): boolean {
 
 class ClimateController {
   getLocalClimate = async (req: Request, res: Response): Promise<Response> => {
+    console.log("get local climate request");
+
     const { city } = req.params;
 
     const climateDataList = await ClimateService.getLocalClimate(city);
@@ -25,6 +27,8 @@ class ClimateController {
   };
 
   getGeoClimate = async (req: Request, res: Response): Promise<Response> => {
+    console.log("get geo climate request");
+
     const geoData = await ClimateService.getGeoClimate();
 
     if (!geoData) {

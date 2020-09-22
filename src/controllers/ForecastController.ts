@@ -7,6 +7,8 @@ class ForecastController {
     const { city } = req.body.location;
     const { term } = req.params;
 
+    console.log(`get ${term} forecast request`);
+
     let forecastData: IForecastRouteResponse;
 
     if (term === "short") {
