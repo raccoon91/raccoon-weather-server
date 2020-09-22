@@ -34,11 +34,11 @@ export const LocationInit = (sequelize: Sequelize): typeof LocationModel => {
     },
     {
       sequelize,
-      tableName: "users",
+      tableName: "locations",
       updatedAt: false,
       indexes: [
         {
-          name: "user",
+          name: "location",
           unique: true,
           fields: ["ip"],
         },
