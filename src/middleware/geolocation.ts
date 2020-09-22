@@ -89,17 +89,23 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
   const ip = req.headers["x-client-ip"] as string | undefined;
 
   try {
-    const user = await Location.findOne({
-      where: {
-        ip,
-      },
+    const option: { ip?: string; city?: string } = {};
+
+    if (ip) {
+      option.ip = ip;
+    } else {
+      option.city = "서울";
+    }
+
+    const location = await Location.findOne({
+      where: option,
       attributes: ["ip", "city", "r1", "r2", "r3"],
       raw: true,
     });
 
-    if (user) {
-      console.log("cached location", user.ip);
-      req.body.location = user;
+    if (location) {
+      console.log("cached location", location.ip);
+      req.body.location = location;
     } else {
       const geolocation = await getLocation(ip);
 
