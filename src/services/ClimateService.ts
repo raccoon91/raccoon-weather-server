@@ -4,9 +4,9 @@ import iconv from "iconv-lite";
 import { AxiosPromise, AxiosResponse } from "axios";
 import { RootService } from "./RootService";
 import { Climate } from "../models";
-import { requestScrapApi } from "../lib";
+import { errorLog, infoLog, requestScrapApi } from "../lib";
 import { ICityGeolocation } from "../interface";
-import { momentKR, dateLog, cityCollectionList, cityFromAbbreviation } from "../utils";
+import { momentKR, cityCollectionList, cityFromAbbreviation } from "../utils";
 
 interface IClimateData {
   city: string;
@@ -50,47 +50,55 @@ const averageOfArray = (numberArray: number[]): number => {
 
 class ClimateService extends RootService {
   getLocalClimate = async (city: string): Promise<{ [key: string]: IClimateData[] }> => {
-    const findOption: { city?: string; year: {} } = {
-      year: { [Op.between]: [1985, 2019] },
-    };
+    try {
+      const findOption: { city?: string; year: {} } = {
+        year: { [Op.between]: [1985, 2019] },
+      };
 
-    if (city !== "전국") {
-      findOption.city = city;
-    }
-
-    const climates = await Climate.findAll({
-      where: findOption,
-      raw: true,
-    });
-
-    const localClimateData: { [key: string]: IClimateData[] } = {};
-
-    climates.forEach((data) => {
-      if (!localClimateData[data.year]) {
-        localClimateData[data.year] = [data];
-      } else {
-        localClimateData[data.year].push(data);
+      if (city !== "전국") {
+        findOption.city = city;
       }
-    });
 
-    return localClimateData;
+      const climates = await Climate.findAll({
+        where: findOption,
+        raw: true,
+      });
+
+      const localClimateData: { [key: string]: IClimateData[] } = {};
+
+      climates.forEach((data) => {
+        if (!localClimateData[data.year]) {
+          localClimateData[data.year] = [data];
+        } else {
+          localClimateData[data.year].push(data);
+        }
+      });
+
+      return localClimateData;
+    } catch (error) {
+      errorLog(`city - ${city} / ${error.message}`, "ClimateService - getLocalClimate");
+    }
   };
 
   getGeoClimate = async (): Promise<{ [key: string]: IClimateData }> => {
-    const climates = await Climate.findAll({
-      where: {
-        year: 2020,
-      },
-      raw: true,
-    });
+    try {
+      const climates = await Climate.findAll({
+        where: {
+          year: 2020,
+        },
+        raw: true,
+      });
 
-    const geoClimateData: { [key: string]: IClimateData } = {};
+      const geoClimateData: { [key: string]: IClimateData } = {};
 
-    climates.forEach((data) => {
-      geoClimateData[cityFromAbbreviation[data.city]] = data;
-    });
+      climates.forEach((data) => {
+        geoClimateData[cityFromAbbreviation[data.city]] = data;
+      });
 
-    return geoClimateData;
+      return geoClimateData;
+    } catch (error) {
+      errorLog(`${error.message}`, "ClimateService - getGeoClimate");
+    }
   };
 
   buildScrapRequest = (
@@ -160,24 +168,28 @@ class ClimateService extends RootService {
   };
 
   scrapClimateData = async (startDate: string, endDate: string): Promise<void> => {
-    const startYear = momentKR(startDate).year();
-    const endYear = momentKR(endDate).year();
-    const yearCalibrate = endYear - startYear + 1;
+    try {
+      const startYear = momentKR(startDate).year();
+      const endYear = momentKR(endDate).year();
+      const yearCalibrate = endYear - startYear + 1;
 
-    for (let i = 0; i < yearCalibrate; i++) {
-      const year = startYear + i;
+      for (let i = 0; i < yearCalibrate; i++) {
+        const year = startYear + i;
 
-      const yearWeatherData = await Climate.findOne({
-        where: {
-          year,
-        },
-      });
+        const yearWeatherData = await Climate.findOne({
+          where: {
+            year,
+          },
+        });
 
-      if (yearWeatherData) {
-        console.log(`skip scrap ${year} weather data`);
-      } else {
-        await this.scrapYearClimateData(year);
+        if (yearWeatherData) {
+          console.log(`skip scrap ${year} weather data`);
+        } else {
+          await this.scrapYearClimateData(year);
+        }
       }
+    } catch (error) {
+      errorLog(`${error.message}`, "ClimateService - scrapClimateData");
     }
   };
 
@@ -197,9 +209,9 @@ class ClimateService extends RootService {
 
       await Climate.bulkCreate(pastWeatherDataList);
 
-      console.log(`success weather scrap ${year} data ${dateLog()}`);
-    } catch (err) {
-      console.error(err.message);
+      infoLog("scrap", `${year} climate`, "scrapYearClimateData");
+    } catch (error) {
+      errorLog(`year - ${year} / ${error.message}`, "ClimateService - scrapYearClimateData");
     }
   };
 }

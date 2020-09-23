@@ -1,19 +1,22 @@
 import { Request, Response } from "express";
 import { WeatherService } from "../services";
+import { errorLog } from "../lib";
 
 class WeatherController {
   getWeather = async (req: Request, res: Response): Promise<Response> => {
-    const { location } = req.body;
+    try {
+      const { location } = req.body;
 
-    console.log("get weather request");
+      const weatherData = await WeatherService.getCurrentWeather(location);
 
-    const weatherData = await WeatherService.getCurrentWeather(location);
+      if (!weatherData) {
+        return res.send({ message: "data not found" });
+      }
 
-    if (!weatherData) {
-      return res.send({ message: "data not found" });
+      return res.json(weatherData);
+    } catch (error) {
+      errorLog(`${error.message}`, "WeatherController - getWeather");
     }
-
-    return res.json(weatherData);
   };
 }
 

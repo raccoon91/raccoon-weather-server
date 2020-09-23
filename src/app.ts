@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import path from "path";
 import cors from "cors";
@@ -6,7 +7,7 @@ import indexRouter from "./routes/index";
 
 const app = express();
 
-//  connect sequelize, redis & execute cron cronjob
+//  connect sequelize execute cron cronjob
 databaseConnect();
 
 app.use(cors());

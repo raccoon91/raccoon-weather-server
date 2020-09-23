@@ -5,9 +5,9 @@ import { WeatherInit } from "./weather";
 import { ForecastInit } from "./forecast";
 import { AirPollutionInit } from "./airpollution";
 import { cronJob } from "../jobs";
-import config from "../config";
+import { errorLog } from "../lib";
 
-const { MYSQL_HOST, MYSQL_PORT, MYSQL_DB, MYSQL_USER, MYSQL_PASSWORD } = config;
+const { MYSQL_HOST, MYSQL_PORT, MYSQL_DB, MYSQL_USER, MYSQL_PASSWORD } = process.env;
 
 const mysqlOption: Options = {
   host: MYSQL_HOST,
@@ -42,8 +42,8 @@ const databaseConnect = (): void => {
       cronJob();
       console.log("execute cron job");
     })
-    .catch((err) => {
-      console.error("Connection with mysql failed.", err);
+    .catch((error) => {
+      errorLog(`mysql connection failed ${error.message}`, "sequelize");
     });
 };
 

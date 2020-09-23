@@ -1,8 +1,7 @@
 import { AxiosResponse } from "axios";
 import { requestWeatherApi, requestAirPollutionApi } from "../lib";
-import config from "../config";
 
-const { OPEN_WEATHER_API_KEY } = config;
+const { OPEN_WEATHER_API_KEY } = process.env;
 
 interface IWeatherRequestParams {
   base_date: string;

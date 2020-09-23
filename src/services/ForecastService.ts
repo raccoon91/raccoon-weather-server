@@ -8,50 +8,55 @@ import {
   IForecastWeatherData,
   ICityKor,
 } from "../interface";
-import { momentKR, tomorrow, dateLog, getMidForecastDate, getShortForecastDate, cityGeolocationList } from "../utils";
+import { momentKR, tomorrow, getMidForecastDate, getShortForecastDate, cityGeolocationList } from "../utils";
+import { errorLog, infoLog } from "../lib";
 
 class ForecastService extends RootService {
-  getForecast = async (city: string, isShortForecast?: boolean): Promise<IForecastRouteResponse> => {
-    let tragetDate: string;
+  getForecast = async (city: string, term: string): Promise<IForecastRouteResponse> => {
+    try {
+      let tragetDate: string;
 
-    const currentWeather = await Weather.findOne({
-      where: { city },
-      order: [["weather_date", "DESC"]],
-      attributes: ["weather_date"],
-      raw: true,
-    });
+      const currentWeather = await Weather.findOne({
+        where: { city },
+        order: [["weather_date", "DESC"]],
+        attributes: ["weather_date"],
+        raw: true,
+      });
 
-    if (isShortForecast) {
-      tragetDate = `${currentWeather.weather_date.slice(0, 13)}:00:00`;
-    } else {
-      tragetDate = tomorrow(currentWeather.weather_date).format("YYYY-MM-DD 00:00:00");
+      if (term === "short") {
+        tragetDate = `${currentWeather.weather_date.slice(0, 13)}:00:00`;
+      } else {
+        tragetDate = tomorrow(currentWeather.weather_date).format("YYYY-MM-DD 00:00:00");
+      }
+
+      const forecast = await Forecast.findAll({
+        where: { city, weather_date: { [Op.gte]: tragetDate } },
+        order: [["weather_date", "ASC"]],
+        attributes: ["temp", "sky", "pty", "reh", "pop", "hour", "weather_date"],
+        limit: 8,
+        raw: true,
+      });
+
+      if (!currentWeather || !(forecast || forecast.length)) return null;
+
+      const categories = [];
+      const rainProbs = [];
+      const humidities = [];
+      const temperatures = [];
+      const conditions = [];
+
+      forecast.forEach((item) => {
+        categories.push(item.hour);
+        humidities.push(item.reh);
+        conditions.push([item.pty, item.sky]);
+        rainProbs.push(item.pop);
+        temperatures.push(item.temp);
+      });
+
+      return { categories, rainProbs, humidities, temperatures, conditions };
+    } catch (error) {
+      errorLog(`term - ${term} / ${error.message}`, "ForecastService - getForecast");
     }
-
-    const forecast = await Forecast.findAll({
-      where: { city, weather_date: { [Op.gte]: tragetDate } },
-      order: [["weather_date", "ASC"]],
-      attributes: ["temp", "sky", "pty", "reh", "pop", "hour", "weather_date"],
-      limit: 8,
-      raw: true,
-    });
-
-    if (!currentWeather || !(forecast || forecast.length)) return null;
-
-    const categories = [];
-    const rainProbs = [];
-    const humidities = [];
-    const temperatures = [];
-    const conditions = [];
-
-    forecast.forEach((item) => {
-      categories.push(item.hour);
-      humidities.push(item.reh);
-      conditions.push([item.pty, item.sky]);
-      rainProbs.push(item.pop);
-      temperatures.push(item.temp);
-    });
-
-    return { categories, rainProbs, humidities, temperatures, conditions };
   };
 
   parseShortForecastResponseData = (
@@ -198,9 +203,9 @@ class ForecastService extends RootService {
         }
       }
 
-      console.log(`success short forecast job ${dateLog()}`);
+      infoLog("Cron", "short forecast", "cronShortForecast");
     } catch (error) {
-      console.error(`[short forecast request FAIL ${dateLog()}][${error.message}]`);
+      errorLog(`short forecast ${error.message}`, "ForecastService - cronShortForecast");
       console.error(error.stack);
     }
   };
@@ -243,9 +248,10 @@ class ForecastService extends RootService {
         }
       }
 
-      console.log(`success mid forecast job ${dateLog()}`);
+      infoLog("Cron", "mid forecast", "cronMidForecast");
     } catch (error) {
-      console.error(`[mid forecast request FAIL ${dateLog()}][${error.message}]`);
+      errorLog(`short forecast ${error.message}`, "ForecastService - cronMidForecast");
+
       console.error(error.stack);
     }
   };

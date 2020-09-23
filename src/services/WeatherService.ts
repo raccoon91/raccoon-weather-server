@@ -2,49 +2,55 @@ import { Op } from "sequelize";
 import { RootService } from "./RootService";
 import { Weather, Forecast, AirPollution } from "../models";
 import { IWeatherRouteResponse, ICurrentWeatherResData, ICurrentWeatherData, ICityKor, ILocation } from "../interface";
-import { cityGeolocationList, momentKR, yesterday, getCurrentWeatherDate, dateLog } from "../utils";
+import { cityGeolocationList, momentKR, yesterday, getCurrentWeatherDate } from "../utils";
+import { errorLog, infoLog } from "../lib";
 
 class WeatherService extends RootService {
   getCurrentWeather = async (location: ILocation): Promise<{ weather: IWeatherRouteResponse; location: ILocation }> => {
     const { city } = location;
-    let weather: IWeatherRouteResponse = {};
 
-    const currentWeather = await Weather.findOne({
-      where: { city },
-      order: [["weather_date", "DESC"]],
-      raw: true,
-    });
+    try {
+      let weather: IWeatherRouteResponse = {};
 
-    if (!currentWeather) return null;
+      const currentWeather = await Weather.findOne({
+        where: { city },
+        order: [["weather_date", "DESC"]],
+        raw: true,
+      });
 
-    const currentWeatherDate = currentWeather.weather_date;
+      if (!currentWeather) return null;
 
-    const yesterdayWeather = await Weather.findOne({
-      where: { city, weather_date: yesterday(currentWeatherDate).format("YYYY-MM-DD HH:mm:00") },
-      raw: true,
-    });
+      const currentWeatherDate = currentWeather.weather_date;
 
-    const forecast = await Forecast.findOne({
-      where: { city, weather_date: { [Op.lte]: currentWeather.weather_date } },
-      order: [["weather_date", "DESC"]],
-      attributes: ["sky", "pop", "weather_date"],
-      raw: true,
-    });
+      const yesterdayWeather = await Weather.findOne({
+        where: { city, weather_date: yesterday(currentWeatherDate).format("YYYY-MM-DD HH:mm:00") },
+        raw: true,
+      });
 
-    const airPollution = await AirPollution.findOne({
-      where: { city },
-      order: [["air_date", "ASC"]],
-      raw: true,
-    });
+      const forecast = await Forecast.findOne({
+        where: { city, weather_date: { [Op.lte]: currentWeather.weather_date } },
+        order: [["weather_date", "DESC"]],
+        attributes: ["sky", "pop", "weather_date"],
+        raw: true,
+      });
 
-    weather = currentWeather;
-    weather.yesterday_temp = yesterdayWeather ? yesterdayWeather.t1h : null;
-    weather.sky = forecast ? forecast.sky : null;
-    weather.pop = forecast ? forecast.pop : null;
-    weather.pm10 = airPollution ? airPollution.pm10 : null;
-    weather.pm25 = airPollution ? airPollution.pm25 : null;
+      const airPollution = await AirPollution.findOne({
+        where: { city },
+        order: [["air_date", "ASC"]],
+        raw: true,
+      });
 
-    return { weather, location };
+      weather = currentWeather;
+      weather.yesterday_temp = yesterdayWeather ? yesterdayWeather.t1h : null;
+      weather.sky = forecast ? forecast.sky : null;
+      weather.pop = forecast ? forecast.pop : null;
+      weather.pm10 = airPollution ? airPollution.pm10 : null;
+      weather.pm25 = airPollution ? airPollution.pm25 : null;
+
+      return { weather, location };
+    } catch (error) {
+      errorLog(`city - ${city} / ${error.message}`, "WeatherService - getCurrentWeather");
+    }
   };
 
   parseResponseWeatherData = (
@@ -106,9 +112,11 @@ class WeatherService extends RootService {
         await Weather.create(currentWeather);
       }
 
-      console.log(`success weather job ${dateLog()}`);
+      if (currentMinute === "00") {
+        infoLog("Cron", "weather", "WeatherService");
+      }
     } catch (error) {
-      console.error(`[weather request FAIL ${dateLog()}][${error.message}]`);
+      errorLog(`weather ${error.message}`, "WeatherService - cronCurrentWeather");
       console.error(error.stack);
     }
   };
