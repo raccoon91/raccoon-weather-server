@@ -110,7 +110,7 @@ class AirpollutionService extends RootService {
         }
       }
 
-      infoLog("cron", `air pollution`, "cronAirpollution");
+      infoLog("Cron", `air pollution`, "cronAirpollution");
     } catch (error) {
       errorLog(`air pollution ${error.message}`, "AirpollutionService - cronAirpollution");
       console.error(error.stack);
@@ -157,7 +157,7 @@ class AirpollutionService extends RootService {
         }
       }
 
-      infoLog("cron", `air forecast`, "cronAirForecast");
+      infoLog("Cron", `air forecast`, "cronAirForecast");
     } catch (error) {
       errorLog(`air pollution ${error.message}`, "AirpollutionService - cronAirForecast");
       console.error(error.stack);

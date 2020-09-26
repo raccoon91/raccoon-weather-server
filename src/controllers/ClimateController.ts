@@ -1,6 +1,5 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { ClimateService } from "../services";
-import { errorLog } from "../lib";
 
 function dateValidateYear(year: string): boolean {
   if (!year || year.length !== 4) return false;
@@ -13,7 +12,7 @@ function dateValidateYear(year: string): boolean {
 }
 
 class ClimateController {
-  getLocalClimate = async (req: Request, res: Response): Promise<Response> => {
+  getLocalClimate = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
     const { city } = req.params;
 
     try {
@@ -25,11 +24,11 @@ class ClimateController {
 
       return res.send(climateDataList);
     } catch (error) {
-      errorLog(`city - ${city} / ${error.message}`, "ClimateController - getLocalClimate");
+      next(error);
     }
   };
 
-  getGeoClimate = async (req: Request, res: Response): Promise<Response> => {
+  getGeoClimate = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
     try {
       const geoData = await ClimateService.getGeoClimate();
 
@@ -39,11 +38,11 @@ class ClimateController {
 
       return res.send(geoData);
     } catch (error) {
-      errorLog(`${error.message}`, "ClimateController - getGeoClimate");
+      next(error);
     }
   };
 
-  scrapClimate = async (req: Request, res: Response): Promise<Response> => {
+  scrapClimate = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
     const startYear = req.query.start as string;
     const endYear = req.query.end as string;
 
@@ -62,7 +61,7 @@ class ClimateController {
         return res.send("success scrap");
       }
     } catch (error) {
-      errorLog(`${startYear} - ${endYear} / ${error.message}`, "ClimateController - scrapClimate");
+      next(error);
     }
   };
 }

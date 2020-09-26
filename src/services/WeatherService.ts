@@ -36,7 +36,7 @@ class WeatherService extends RootService {
 
       const airPollution = await AirPollution.findOne({
         where: { city },
-        order: [["air_date", "ASC"]],
+        order: [["air_date", "DESC"]],
         raw: true,
       });
 
@@ -50,6 +50,8 @@ class WeatherService extends RootService {
       return { weather, location };
     } catch (error) {
       errorLog(`city - ${city} / ${error.message}`, "WeatherService - getCurrentWeather");
+
+      throw error;
     }
   };
 

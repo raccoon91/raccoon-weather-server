@@ -56,6 +56,8 @@ class ForecastService extends RootService {
       return { categories, rainProbs, humidities, temperatures, conditions };
     } catch (error) {
       errorLog(`term - ${term} / ${error.message}`, "ForecastService - getForecast");
+
+      throw error;
     }
   };
 

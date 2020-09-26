@@ -77,6 +77,8 @@ class ClimateService extends RootService {
       return localClimateData;
     } catch (error) {
       errorLog(`city - ${city} / ${error.message}`, "ClimateService - getLocalClimate");
+
+      throw error;
     }
   };
 
@@ -84,7 +86,7 @@ class ClimateService extends RootService {
     try {
       const climates = await Climate.findAll({
         where: {
-          year: 2020,
+          year: 2019,
         },
         raw: true,
       });
@@ -98,6 +100,8 @@ class ClimateService extends RootService {
       return geoClimateData;
     } catch (error) {
       errorLog(`${error.message}`, "ClimateService - getGeoClimate");
+
+      throw error;
     }
   };
 
@@ -189,7 +193,7 @@ class ClimateService extends RootService {
         }
       }
     } catch (error) {
-      errorLog(`${error.message}`, "ClimateService - scrapClimateData");
+      throw error;
     }
   };
 

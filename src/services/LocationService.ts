@@ -78,9 +78,7 @@ export class LocationService {
     } catch (error) {
       const message = error?.response?.data?.error?.details || error.message;
 
-      errorLog(`${message} / ip - ${ip}`, "LocationService - requestLocation");
-
-      return null;
+      throw error;
     }
   };
 
@@ -122,6 +120,8 @@ export class LocationService {
       const message = error?.response?.data?.error?.details || error.message;
 
       errorLog(`${message} / ip - ${ip}`, "LocationService - getLocation");
+
+      throw error;
     }
   };
 }

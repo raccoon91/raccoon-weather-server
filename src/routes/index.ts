@@ -17,10 +17,20 @@ router.get("/climate/local/:city", ClimateController.getLocalClimate);
 
 router.get("/scrap", ClimateController.scrapClimate);
 
-router.get("/location", locationMiddleware, async (req: Request, res) => {
+router.get("/location", locationMiddleware, (req: Request, res) => {
   const { location } = req.body;
 
   res.send(location);
+});
+
+router.use((req, res) => {
+  res.status(404).send({ message: "Not Found" });
+});
+
+router.use((error, req, res, next) => {
+  const { message, stack } = error;
+
+  res.status(500).send({ message, stack });
 });
 
 export default router;

@@ -1,10 +1,9 @@
-import { Response, Request } from "express";
+import { Response, Request, NextFunction } from "express";
 import { IForecastRouteResponse } from "../interface";
 import { ForecastService } from "../services";
-import { errorLog } from "../lib";
 
 class ForecastController {
-  getForecast = async (req: Request, res: Response): Promise<Response> => {
+  getForecast = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
     const { term } = req.params;
 
     try {
@@ -26,7 +25,7 @@ class ForecastController {
 
       return res.json(forecastData);
     } catch (error) {
-      errorLog(`term - ${term} / ${error.message}`, "ForecastController - getForecast");
+      next(error);
     }
   };
 }

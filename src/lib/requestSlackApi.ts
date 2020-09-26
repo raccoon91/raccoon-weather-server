@@ -58,6 +58,6 @@ export const infoLog = async (title: string, text: string, where: string): Promi
       });
     }
   } catch (err) {
-    console.error(`slack error post failed ${dateLog()}`);
+    console.error(`slack info post failed ${dateLog()}`);
   }
 };
