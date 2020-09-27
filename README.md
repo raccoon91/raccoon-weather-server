@@ -2,13 +2,13 @@
 
 <a href="https://weather.dev-raccoon.site" target="_blank">Raccoon Weather 바로가기</a>
 
-### Introduction
-
-- 날씨 정보 수집 서버
-
 <div style="display: flex;">
   <img src="./main-image.png" alt="main image" width="400"/>
 </div>
+
+### Introduction
+
+- 날씨 정보 수집 서버
 
 ### Features
 
