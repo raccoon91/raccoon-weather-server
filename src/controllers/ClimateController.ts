@@ -30,13 +30,13 @@ class ClimateController {
 
   getGeoClimate = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
     try {
-      const geoData = await ClimateService.getGeoClimate();
+      const { yearList, geoClimateData } = await ClimateService.getGeoClimate();
 
-      if (!geoData) {
+      if (!geoClimateData) {
         return res.send({ message: "data not found" });
       }
 
-      return res.send(geoData);
+      return res.json({ yearList, geoClimateData });
     } catch (error) {
       next(error);
     }

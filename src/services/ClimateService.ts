@@ -1,3 +1,4 @@
+import sequelize from "sequelize";
 import { Op } from "sequelize";
 import cheerio from "cheerio";
 import iconv from "iconv-lite";
@@ -82,22 +83,35 @@ class ClimateService extends RootService {
     }
   };
 
-  getGeoClimate = async (): Promise<{ [key: string]: IClimateData }> => {
+  getGeoClimate = async (): Promise<{
+    yearList: number[];
+    geoClimateData: { [key: string]: { [key: string]: IClimateData } };
+  }> => {
     try {
       const climates = await Climate.findAll({
         where: {
-          year: 2019,
+          year: { [Op.between]: [2010, 2019] },
         },
         raw: true,
       });
 
-      const geoClimateData: { [key: string]: IClimateData } = {};
+      const yearList = [];
+      const geoClimateData: {
+        [key: string]: {
+          [key: string]: IClimateData;
+        };
+      } = {};
 
       climates.forEach((data) => {
-        geoClimateData[cityFromAbbreviation[data.city]] = data;
+        if (!geoClimateData[data.year]) {
+          yearList.push(data.year);
+          geoClimateData[data.year] = {};
+        }
+
+        geoClimateData[data.year][cityFromAbbreviation[data.city]] = data;
       });
 
-      return geoClimateData;
+      return { yearList, geoClimateData };
     } catch (error) {
       errorLog(`${error.message}`, "ClimateService - getGeoClimate");
 
