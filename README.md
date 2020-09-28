@@ -3,7 +3,7 @@
 <a href="https://weather.dev-raccoon.site" target="_blank">Raccoon Weather 바로가기</a>
 
 <div style="display: flex;">
-  <img src="./main-image.png" alt="main image" width="400"/>
+  <img src="./main-image.png" alt="main image" width="500"/>
 </div>
 
 ### Introduction
