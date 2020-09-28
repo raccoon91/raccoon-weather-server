@@ -45,19 +45,21 @@ export const errorLog = async (text: string, where: string): Promise<void> => {
 };
 
 export const infoLog = async (title: string, text: string, where: string): Promise<void> => {
-  try {
-    if (NODE_ENV === "development") {
-      console.log(where, title, text);
-    } else {
-      const notification = createNotification(title, text, ":circle_success:", "#b4ee40", where);
+  console.log(where, title, text, dateLog());
 
-      await axios({
-        method: "post",
-        url: SLACK_WEB_HOOK_URL,
-        data: notification,
-      });
-    }
-  } catch (err) {
-    console.error(`slack info post failed ${dateLog()}`);
-  }
+  // try {
+  //   if (NODE_ENV === "development") {
+  //     console.log(where, title, text);
+  //   } else {
+  //     const notification = createNotification(title, text, ":circle_success:", "#b4ee40", where);
+
+  //     await axios({
+  //       method: "post",
+  //       url: SLACK_WEB_HOOK_URL,
+  //       data: notification,
+  //     });
+  //   }
+  // } catch (err) {
+  //   console.error(`slack info post failed ${dateLog()}`);
+  // }
 };
