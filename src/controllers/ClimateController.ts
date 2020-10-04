@@ -22,7 +22,7 @@ class ClimateController {
         return res.send({ message: "data not found" });
       }
 
-      return res.send(climateDataList);
+      return res.set("Cache-Control", "public, max-age=43200").send(climateDataList);
     } catch (error) {
       next(error);
     }
@@ -36,7 +36,7 @@ class ClimateController {
         return res.send({ message: "data not found" });
       }
 
-      return res.json({ yearList, geoClimateData });
+      return res.set("Cache-Control", "public, max-age=43200").json({ yearList, geoClimateData });
     } catch (error) {
       next(error);
     }
