@@ -11,9 +11,10 @@ class WeatherService extends RootService {
 
     try {
       let weather: IWeatherRouteResponse = {};
+      const currentDate = momentKR();
 
       const currentWeather = await Weather.findOne({
-        where: { city },
+        where: { city, weather_date: { [Op.lte]: currentDate.format("YYYY-MM-DD HH:mm:00") } },
         order: [["weather_date", "DESC"]],
         raw: true,
       });
@@ -28,14 +29,14 @@ class WeatherService extends RootService {
       });
 
       const forecast = await Forecast.findOne({
-        where: { city, weather_date: { [Op.lte]: currentWeather.weather_date } },
+        where: { city, weather_date: { [Op.lte]: currentWeatherDate } },
         order: [["weather_date", "DESC"]],
         attributes: ["sky", "pop", "weather_date"],
         raw: true,
       });
 
       const airPollution = await AirPollution.findOne({
-        where: { city },
+        where: { city, air_date: currentWeatherDate },
         order: [["air_date", "DESC"]],
         raw: true,
       });
@@ -119,7 +120,6 @@ class WeatherService extends RootService {
       }
     } catch (error) {
       errorLog(`weather ${error.message}`, "WeatherService - cronCurrentWeather");
-      console.error(error.stack);
     }
   };
 }
