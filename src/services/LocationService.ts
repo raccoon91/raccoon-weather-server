@@ -2,7 +2,7 @@ import { AxiosResponse } from "axios";
 import CryptoJS from "crypto-js";
 import { Location } from "../models";
 import { requestNaverGeoApi, errorLog, infoLog } from "../lib";
-import { momentKR, cityToAbbreviation } from "../utils";
+import { momentKST, cityToAbbreviation } from "../utils";
 
 const { NAVER_REQUEST_URL, NAVER_ACCESS_KEY, NAVER_SECRET_KEY } = process.env;
 
@@ -52,7 +52,7 @@ const makeSignature = (
 export class LocationService {
   requestLocation = async (ip: string): Promise<ILocationData> => {
     try {
-      const timeStamp = momentKR().valueOf().toString();
+      const timeStamp = momentKST().valueOf().toString();
       const baseString = `${NAVER_REQUEST_URL}?ip=${ip}&ext=t&responseFormatType=json`;
       const signature = makeSignature(NAVER_SECRET_KEY, "GET", baseString, timeStamp, NAVER_ACCESS_KEY);
 

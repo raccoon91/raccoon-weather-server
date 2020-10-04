@@ -7,7 +7,7 @@ import { AirPollutionInit } from "./airpollution";
 import { cronJob } from "../jobs";
 import { errorLog } from "../lib";
 
-const { MYSQL_HOST, MYSQL_PORT, MYSQL_DB, MYSQL_USER, MYSQL_PASSWORD, NODE_ENV } = process.env;
+const { MYSQL_HOST, MYSQL_PORT, MYSQL_DB, MYSQL_USER, MYSQL_PASSWORD } = process.env;
 
 const mysqlOption: Options = {
   host: MYSQL_HOST,

@@ -1,4 +1,3 @@
-import sequelize from "sequelize";
 import { Op } from "sequelize";
 import cheerio from "cheerio";
 import iconv from "iconv-lite";
@@ -7,7 +6,7 @@ import { RootService } from "./RootService";
 import { Climate } from "../models";
 import { errorLog, infoLog, requestScrapApi } from "../lib";
 import { ICityGeolocation } from "../interface";
-import { momentKR, cityCollectionList, cityFromAbbreviation } from "../utils";
+import { momentKST, cityCollectionList, cityFromAbbreviation } from "../utils";
 
 interface IClimateData {
   city: string;
@@ -187,8 +186,8 @@ class ClimateService extends RootService {
 
   scrapClimateData = async (startDate: string, endDate: string): Promise<void> => {
     try {
-      const startYear = momentKR(startDate).year();
-      const endYear = momentKR(endDate).year();
+      const startYear = momentKST(startDate).year();
+      const endYear = momentKST(endDate).year();
       const yearCalibrate = endYear - startYear + 1;
 
       for (let i = 0; i < yearCalibrate; i++) {

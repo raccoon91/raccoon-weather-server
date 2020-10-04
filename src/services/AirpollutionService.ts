@@ -1,7 +1,7 @@
 import { RootService } from "./RootService";
 import { AirPollution } from "../models";
 import { IAirPollutionResData, IAirPollutionData, IAirForecastResData, IAirForecastData, ICityKor } from "../interface";
-import { momentKR, cityEngToKorDictionary } from "../utils";
+import { momentKST, momentFormat, cityEngToKorDictionary } from "../utils";
 import { errorLog, infoLog } from "../lib";
 
 type IParsedForecastData = {
@@ -32,7 +32,7 @@ class AirpollutionService extends RootService {
 
     return {
       airForecastData,
-      airForecastDate: momentKR(informData).format("YYYY-MM-DD 00:00:00"),
+      airForecastDate: momentFormat(informData, "YYYY-MM-DD 00:00:00"),
     };
   };
 
@@ -90,7 +90,7 @@ class AirpollutionService extends RootService {
         dataGubun: "HOUR",
       });
 
-      const currentDate = momentKR(pm10CurrentResData.dataTime).format("YYYY-MM-DD HH:00:00");
+      const currentDate = momentFormat(pm10CurrentResData.dataTime, "YYYY-MM-DD HH:00:00");
       const airpollutionDataList = this.combineAirpollutionData(pm10CurrentResData, pm25CurrentResData, currentDate);
 
       for (let i = 0; i < airpollutionDataList.length; i++) {
@@ -119,7 +119,7 @@ class AirpollutionService extends RootService {
 
   cronAirForecast = async (): Promise<void> => {
     try {
-      const currentDate = momentKR().format("YYYY-MM-DD");
+      const currentDate = momentKST().format("YYYY-MM-DD");
 
       const [, pm10ForecastResData] = await this.requestAirPollution<IAirForecastResData>("getMinuDustFrcstDspth", {
         searchDate: currentDate,

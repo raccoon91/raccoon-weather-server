@@ -8,7 +8,14 @@ import {
   IForecastWeatherData,
   ICityKor,
 } from "../interface";
-import { momentKR, tomorrow, getMidForecastDate, getShortForecastDate, cityGeolocationList } from "../utils";
+import {
+  momentTimezone,
+  momentFormat,
+  tomorrow,
+  getMidForecastDate,
+  getShortForecastDate,
+  cityGeolocationList,
+} from "../utils";
 import { errorLog, infoLog } from "../lib";
 
 class ForecastService extends RootService {
@@ -69,7 +76,7 @@ class ForecastService extends RootService {
 
     responseData.forEach((item) => {
       const { fcstDate, fcstTime, fcstValue, category } = item;
-      const weather_date = momentKR(`${fcstDate} ${fcstTime}`).format("YYYY-MM-DD HH:00:00");
+      const weather_date = momentFormat(`${fcstDate} ${fcstTime}`, "YYYY-MM-DD HH:00:00");
 
       if (!result[weather_date]) {
         result[weather_date] = {
@@ -111,7 +118,7 @@ class ForecastService extends RootService {
 
     responseData.forEach((item) => {
       const { fcstDate, fcstTime, fcstValue, category } = item;
-      const weather_date = momentKR(`${fcstDate} ${fcstTime}`).format("YYYY-MM-DD HH:00:00");
+      const weather_date = momentFormat(`${fcstDate} ${fcstTime}`, "YYYY-MM-DD HH:00:00");
 
       if (!result[weather_date]) {
         result[weather_date] = {
@@ -174,7 +181,7 @@ class ForecastService extends RootService {
         let midForecast: IForecastWeatherData;
 
         for (let i = 0; i < forecastDateTime.length; i++) {
-          const hour = momentKR(forecastDateTime[i]).hour();
+          const hour = momentTimezone(0, forecastDateTime[i]).hour();
           const forecastData = shortForecast[forecastDateTime[i]];
 
           const forecastWeather = await Forecast.findOne({

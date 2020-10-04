@@ -1,6 +1,6 @@
 import moment, { Moment, MomentInput } from "moment";
 
-export const momentKR = (timestamp?: MomentInput): Moment => {
+export const momentKST = (timestamp?: MomentInput): Moment => {
   if (timestamp) {
     return moment(timestamp).utcOffset(9);
   }
@@ -8,24 +8,32 @@ export const momentKR = (timestamp?: MomentInput): Moment => {
   return moment().utcOffset(9);
 };
 
+export const momentTimezone = (timezone: number, timestamp?: MomentInput): Moment => {
+  if (timestamp) {
+    return moment(timestamp).utcOffset(timezone);
+  }
+
+  return moment().utcOffset(timezone);
+};
+
 export const yesterday = (timestamp: MomentInput): Moment => {
-  return momentKR(timestamp).subtract(1, "days");
+  return momentTimezone(0, timestamp).subtract(1, "days");
 };
 
 export const tomorrow = (timestamp: MomentInput): Moment => {
-  return momentKR(timestamp).add(1, "days");
+  return momentTimezone(0, timestamp).add(1, "days");
 };
 
-export const formatNumberToDate = (year: number | string, month: number): Moment => {
-  return momentKR([year, month - 1]);
+export const momentFormat = (timestamp: MomentInput, formatString: string): string => {
+  return moment(timestamp).format(formatString);
 };
 
 export const dateLog = (): string => {
-  return momentKR().format("YYYY-MM-DD HH:mm:ss");
+  return momentKST().format("YYYY-MM-DD HH:mm:ss");
 };
 
 export const getCurrentWeatherDate = (): { currentDate: string; currentTime: string; currentMinute: string } => {
-  const current = momentKR();
+  const current = momentKST();
   let hour = current.hour();
   const minute = current.minute();
   const currentMinute = Math.floor(minute / 10) * 10;
@@ -51,7 +59,7 @@ export const getShortForecastDate = (): {
   currentDate: string;
   currentTime: string;
 } => {
-  const current = momentKR();
+  const current = momentKST();
   let hour = current.hour();
   const minute = current.minute();
   let dayCalibrate = 0;
@@ -75,7 +83,7 @@ export const getMidForecastDate = (): {
   forecastDate: string;
   forecastTime: string;
 } => {
-  const current = momentKR();
+  const current = momentKST();
   let hour = current.hour();
   const minute = current.minute();
   let dayCalibrate = 0;

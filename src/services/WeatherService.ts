@@ -2,7 +2,7 @@ import { Op } from "sequelize";
 import { RootService } from "./RootService";
 import { Weather, Forecast, AirPollution } from "../models";
 import { IWeatherRouteResponse, ICurrentWeatherResData, ICurrentWeatherData, ICityKor, ILocation } from "../interface";
-import { cityGeolocationList, momentKR, yesterday, getCurrentWeatherDate } from "../utils";
+import { cityGeolocationList, momentKST, yesterday, getCurrentWeatherDate, momentFormat } from "../utils";
 import { errorLog, infoLog } from "../lib";
 
 class WeatherService extends RootService {
@@ -11,7 +11,7 @@ class WeatherService extends RootService {
 
     try {
       let weather: IWeatherRouteResponse = {};
-      const currentDate = momentKR();
+      const currentDate = momentKST();
 
       const currentWeather = await Weather.findOne({
         where: { city, weather_date: { [Op.lte]: currentDate.format("YYYY-MM-DD HH:mm:00") } },
@@ -65,7 +65,7 @@ class WeatherService extends RootService {
   ): ICurrentWeatherData => {
     const result: ICurrentWeatherData = {
       city,
-      weather_date: momentKR(`${currentDate} ${currentTime.slice(0, 2)}${currentMinute}`).format("YYYY-MM-DD HH:mm:00"),
+      weather_date: momentFormat(`${currentDate} ${currentTime.slice(0, 2)}${currentMinute}`, "YYYY-MM-DD HH:mm:00"),
     };
 
     data.forEach((item: ICurrentWeatherResData): void => {
