@@ -76,16 +76,14 @@ export class LocationService {
         ...geoLocation,
       };
     } catch (error) {
-      const message = error?.response?.data?.error?.details || error.message;
-
       throw error;
     }
   };
 
   getLocation = async (ip?: string): Promise<ILocationData> => {
-    try {
-      let location: ILocationData;
+    let location: ILocationData;
 
+    try {
       if (ip) {
         location = await Location.findOne({
           where: {
@@ -105,16 +103,6 @@ export class LocationService {
         }
       }
 
-      if (!location) {
-        location = await Location.findOne({
-          where: {
-            city: "서울",
-          },
-          attributes: ["ip", "city", "r1", "r2", "r3"],
-          raw: true,
-        });
-      }
-
       return location;
     } catch (error) {
       const message = error?.response?.data?.error?.details || error.message;
@@ -122,6 +110,24 @@ export class LocationService {
       errorLog(`${message} / ip - ${ip}`, "LocationService - getLocation");
 
       throw error;
+    } finally {
+      if (!location) {
+        try {
+          location = await Location.findOne({
+            where: {
+              city: "서울",
+            },
+            attributes: ["ip", "city", "r1", "r2", "r3"],
+            raw: true,
+          });
+
+          return location;
+        } catch (error) {
+          errorLog(`${error.message}`, "LocationService - getLocation");
+
+          throw error;
+        }
+      }
     }
   };
 }
