@@ -17,7 +17,6 @@ const mysqlOption: Options = {
     dateStrings: true,
     typeCast: true,
   },
-  timezone: NODE_ENV === "development" ? "+09:00" : "+00:00",
   define: {
     charset: "utf8mb4",
   },
