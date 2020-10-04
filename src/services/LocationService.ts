@@ -1,7 +1,7 @@
 import { AxiosResponse } from "axios";
 import CryptoJS from "crypto-js";
 import { Location } from "../models";
-import { requestNaverGeoApi, errorLog, infoLog } from "../lib";
+import { requestNaverGeoApi, errorLog, infoLog } from "../api";
 import { momentKST, cityToAbbreviation } from "../utils";
 
 const { NAVER_REQUEST_URL, NAVER_ACCESS_KEY, NAVER_SECRET_KEY } = process.env;

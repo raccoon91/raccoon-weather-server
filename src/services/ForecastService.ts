@@ -16,7 +16,7 @@ import {
   getShortForecastDate,
   cityGeolocationList,
 } from "../utils";
-import { errorLog, infoLog } from "../lib";
+import { errorLog, infoLog } from "../api";
 
 class ForecastService extends RootService {
   getForecast = async (city: string, term: string): Promise<IForecastRouteResponse> => {

@@ -4,7 +4,7 @@ import iconv from "iconv-lite";
 import { AxiosPromise, AxiosResponse } from "axios";
 import { RootService } from "./RootService";
 import { Climate } from "../models";
-import { errorLog, infoLog, requestScrapApi } from "../lib";
+import { errorLog, infoLog, requestScrapApi } from "../api";
 import { ICityGeolocation } from "../interface";
 import { momentKST, cityCollectionList, cityFromAbbreviation } from "../utils";
 

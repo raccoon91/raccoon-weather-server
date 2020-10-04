@@ -1,5 +1,5 @@
 import { AxiosResponse } from "axios";
-import { requestWeatherApi, requestAirPollutionApi } from "../lib";
+import { requestWeatherApi, requestAirPollutionApi } from "../api";
 
 const { OPEN_WEATHER_API_KEY } = process.env;
 

@@ -2,7 +2,7 @@ import { RootService } from "./RootService";
 import { AirPollution } from "../models";
 import { IAirPollutionResData, IAirPollutionData, IAirForecastResData, IAirForecastData, ICityKor } from "../interface";
 import { momentKST, momentFormat, cityEngToKorDictionary } from "../utils";
-import { errorLog, infoLog } from "../lib";
+import { errorLog, infoLog } from "../api";
 
 type IParsedForecastData = {
   [key in ICityKor]?: string;

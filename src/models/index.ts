@@ -5,7 +5,7 @@ import { WeatherInit } from "./weather";
 import { ForecastInit } from "./forecast";
 import { AirPollutionInit } from "./airpollution";
 import { cronJob } from "../jobs";
-import { errorLog } from "../lib";
+import { errorLog } from "../api";
 
 const { MYSQL_HOST, MYSQL_PORT, MYSQL_DB, MYSQL_USER, MYSQL_PASSWORD } = process.env;
 

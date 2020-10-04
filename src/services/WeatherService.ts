@@ -3,7 +3,7 @@ import { RootService } from "./RootService";
 import { Weather, Forecast, AirPollution } from "../models";
 import { IWeatherRouteResponse, ICurrentWeatherResData, ICurrentWeatherData, ICityKor, ILocation } from "../interface";
 import { cityGeolocationList, momentKST, yesterday, getCurrentWeatherDate, momentFormat } from "../utils";
-import { errorLog, infoLog } from "../lib";
+import { errorLog, infoLog } from "../api";
 
 class WeatherService extends RootService {
   getCurrentWeather = async (location: ILocation): Promise<{ weather: IWeatherRouteResponse; location: ILocation }> => {
