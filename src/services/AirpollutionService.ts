@@ -99,7 +99,7 @@ class AirpollutionService extends RootService {
         const airpollution = await AirPollution.findOne({
           where: {
             city: airPollutionData.city,
-            air_date: airPollutionData.air_date,
+            air_date: currentDate,
           },
         });
 

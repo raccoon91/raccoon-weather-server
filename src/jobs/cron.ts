@@ -6,7 +6,7 @@ const jobList = [
   { func: ForecastService.cronShortForecast, cron: "30 45 * * * *" },
   { func: ForecastService.cronMidForecast, cron: "00 10 02,05,08,11,14,17,20,23 * * *" },
   { func: AirpollutionService.cronAirpollution, cron: "00 10 * * * *" },
-  { func: AirpollutionService.cronAirForecast, cron: "00 05 05,11,17,23 * * *" },
+  { func: AirpollutionService.cronAirForecast, cron: "00 05 11,17,23 * * *" },
 ];
 
 // const testList = [
