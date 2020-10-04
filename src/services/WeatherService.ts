@@ -36,7 +36,7 @@ class WeatherService extends RootService {
       });
 
       const airPollution = await AirPollution.findOne({
-        where: { city, air_date: currentWeatherDate },
+        where: { city, air_date: { [Op.lte]: currentWeatherDate } },
         order: [["air_date", "DESC"]],
         raw: true,
       });
