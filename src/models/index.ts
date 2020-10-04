@@ -7,7 +7,7 @@ import { AirPollutionInit } from "./airpollution";
 import { cronJob } from "../jobs";
 import { errorLog } from "../lib";
 
-const { MYSQL_HOST, MYSQL_PORT, MYSQL_DB, MYSQL_USER, MYSQL_PASSWORD } = process.env;
+const { MYSQL_HOST, MYSQL_PORT, MYSQL_DB, MYSQL_USER, MYSQL_PASSWORD, NODE_ENV } = process.env;
 
 const mysqlOption: Options = {
   host: MYSQL_HOST,
@@ -17,7 +17,7 @@ const mysqlOption: Options = {
     dateStrings: true,
     typeCast: true,
   },
-  timezone: "+09:00",
+  timezone: NODE_ENV === "development" ? "+09:00" : "+00:00",
   define: {
     charset: "utf8mb4",
   },
