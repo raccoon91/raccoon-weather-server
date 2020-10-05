@@ -102,6 +102,8 @@ export class LocationService {
           infoLog("Create", `new location ${ip}`, "getLocation");
         }
       }
+
+      return location;
     } catch (error) {
       const message = error?.response?.data?.error?.details || error.message;
 
