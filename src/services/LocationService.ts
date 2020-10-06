@@ -1,7 +1,7 @@
 import { AxiosResponse } from "axios";
 import CryptoJS from "crypto-js";
 import { Location } from "../models";
-import { requestNaverGeoApi, errorLog, infoLog } from "../api";
+import { requestNaverGeoApi, infoLog, errorLog } from "../api";
 import { momentKST, cityToAbbreviation } from "../utils";
 
 const { NAVER_REQUEST_URL, NAVER_ACCESS_KEY, NAVER_SECRET_KEY } = process.env;
@@ -76,6 +76,8 @@ export class LocationService {
         ...geoLocation,
       };
     } catch (error) {
+      error.message = error?.response?.data?.error?.details || error.message;
+
       throw error;
     }
   };
@@ -99,35 +101,13 @@ export class LocationService {
 
         if (location) {
           Location.create(location);
-          infoLog("Create", `new location ${ip}`, "getLocation");
+          infoLog(`New Location ${ip}`);
         }
       }
-
-      return location;
     } catch (error) {
-      const message = error?.response?.data?.error?.details || error.message;
-
-      errorLog(`${message} / ip - ${ip}`, "LocationService - getLocation");
-
-      throw error;
+      errorLog(error);
     } finally {
-      if (!location) {
-        try {
-          location = await Location.findOne({
-            where: {
-              city: "서울",
-            },
-            attributes: ["ip", "city", "r1", "r2", "r3"],
-            raw: true,
-          });
-
-          return location;
-        } catch (error) {
-          errorLog(`${error.message}`, "LocationService - getLocation");
-
-          throw error;
-        }
-      }
+      return location || { city: "서울" };
     }
   };
 }
