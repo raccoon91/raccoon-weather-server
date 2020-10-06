@@ -16,7 +16,7 @@ import {
   getShortForecastDate,
   cityGeolocationList,
 } from "../utils";
-import { errorLog, infoLog } from "../api";
+import { errorLog } from "../api";
 
 class ForecastService extends RootService {
   getForecast = async (city: string, term: string): Promise<IForecastRouteResponse> => {
@@ -62,8 +62,6 @@ class ForecastService extends RootService {
 
       return { categories, rainProbs, humidities, temperatures, conditions };
     } catch (error) {
-      errorLog(`term - ${term} / ${error.message}`, "ForecastService - getForecast");
-
       throw error;
     }
   };
@@ -211,11 +209,8 @@ class ForecastService extends RootService {
           }
         }
       }
-
-      infoLog("Cron", "short forecast", "cronShortForecast");
     } catch (error) {
-      errorLog(`short forecast ${error.message}`, "ForecastService - cronShortForecast");
-      console.error(error.stack);
+      errorLog(error);
     }
   };
 
@@ -256,12 +251,8 @@ class ForecastService extends RootService {
           }
         }
       }
-
-      infoLog("Cron", "mid forecast", "cronMidForecast");
     } catch (error) {
-      errorLog(`short forecast ${error.message}`, "ForecastService - cronMidForecast");
-
-      console.error(error.stack);
+      errorLog(error);
     }
   };
 }

@@ -41,9 +41,7 @@ const databaseConnect = (): void => {
       cronJob();
       console.log("execute cron job");
     })
-    .catch((error) => {
-      errorLog(`mysql connection failed ${error.message}`, "sequelize");
-    });
+    .catch(errorLog);
 };
 
 const Location = LocationInit(sequelize);

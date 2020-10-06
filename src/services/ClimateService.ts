@@ -4,7 +4,7 @@ import iconv from "iconv-lite";
 import { AxiosPromise, AxiosResponse } from "axios";
 import { RootService } from "./RootService";
 import { Climate } from "../models";
-import { errorLog, infoLog, requestScrapApi } from "../api";
+import { requestScrapApi } from "../api";
 import { ICityGeolocation } from "../interface";
 import { momentKST, cityCollectionList, cityFromAbbreviation } from "../utils";
 
@@ -76,8 +76,6 @@ class ClimateService extends RootService {
 
       return localClimateData;
     } catch (error) {
-      errorLog(`city - ${city} / ${error.message}`, "ClimateService - getLocalClimate");
-
       throw error;
     }
   };
@@ -112,8 +110,6 @@ class ClimateService extends RootService {
 
       return { yearList, geoClimateData };
     } catch (error) {
-      errorLog(`${error.message}`, "ClimateService - getGeoClimate");
-
       throw error;
     }
   };
@@ -225,10 +221,8 @@ class ClimateService extends RootService {
       const pastWeatherDataList = this.parseHtmlToClimateData(promisesResponseData);
 
       await Climate.bulkCreate(pastWeatherDataList);
-
-      infoLog("scrap", `${year} climate`, "scrapYearClimateData");
     } catch (error) {
-      errorLog(`year - ${year} / ${error.message}`, "ClimateService - scrapYearClimateData");
+      throw error;
     }
   };
 }

@@ -3,7 +3,7 @@ import { RootService } from "./RootService";
 import { Weather, Forecast, AirPollution } from "../models";
 import { IWeatherRouteResponse, ICurrentWeatherResData, ICurrentWeatherData, ICityKor, ILocation } from "../interface";
 import { cityGeolocationList, momentKST, yesterday, getCurrentWeatherDate, momentFormat } from "../utils";
-import { errorLog, infoLog } from "../api";
+import { errorLog } from "../api";
 
 class WeatherService extends RootService {
   getCurrentWeather = async (location: ILocation): Promise<{ weather: IWeatherRouteResponse; location: ILocation }> => {
@@ -50,8 +50,6 @@ class WeatherService extends RootService {
 
       return { weather, location };
     } catch (error) {
-      errorLog(`city - ${city} / ${error.message}`, "WeatherService - getCurrentWeather");
-
       throw error;
     }
   };
@@ -114,12 +112,8 @@ class WeatherService extends RootService {
 
         await Weather.create(currentWeather);
       }
-
-      if (currentMinute === "00") {
-        infoLog("Cron", "weather", "WeatherService");
-      }
     } catch (error) {
-      errorLog(`weather ${error.message}`, "WeatherService - cronCurrentWeather");
+      errorLog(error);
     }
   };
 }

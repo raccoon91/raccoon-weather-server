@@ -2,7 +2,7 @@ import { RootService } from "./RootService";
 import { AirPollution } from "../models";
 import { IAirPollutionResData, IAirPollutionData, IAirForecastResData, IAirForecastData, ICityKor } from "../interface";
 import { momentKST, momentFormat, cityEngToKorDictionary } from "../utils";
-import { errorLog, infoLog } from "../api";
+import { errorLog } from "../api";
 
 type IParsedForecastData = {
   [key in ICityKor]?: string;
@@ -109,11 +109,8 @@ class AirpollutionService extends RootService {
           await AirPollution.create(airPollutionData);
         }
       }
-
-      infoLog("Cron", `air pollution`, "cronAirpollution");
     } catch (error) {
-      errorLog(`air pollution ${error.message}`, "AirpollutionService - cronAirpollution");
-      console.error(error.stack);
+      errorLog(error);
     }
   };
 
@@ -156,11 +153,8 @@ class AirpollutionService extends RootService {
           await AirPollution.create(airforecastData);
         }
       }
-
-      infoLog("Cron", `air forecast`, "cronAirForecast");
     } catch (error) {
-      errorLog(`air pollution ${error.message}`, "AirpollutionService - cronAirForecast");
-      console.error(error.stack);
+      errorLog(error);
     }
   };
 }
