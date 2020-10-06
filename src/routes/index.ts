@@ -1,5 +1,5 @@
 import express, { Request } from "express";
-import { locationMiddleware } from "../middleware";
+import { locationMiddleware, notFoundError, serverError } from "../middleware";
 import { WeatherController, ForecastController, ClimateController } from "../controllers";
 
 const router = express.Router();
@@ -23,14 +23,8 @@ router.get("/location", locationMiddleware, (req: Request, res) => {
   res.send(location);
 });
 
-router.use((req, res) => {
-  res.status(404).send({ message: "Not Found" });
-});
+router.use(notFoundError);
 
-router.use((error, req, res, next) => {
-  const { message, stack } = error;
-
-  res.status(500).send({ message, stack });
-});
+router.use(serverError);
 
 export default router;
