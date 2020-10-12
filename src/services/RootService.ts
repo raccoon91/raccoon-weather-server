@@ -20,44 +20,52 @@ interface IAirpollutionRequestParams {
 }
 export class RootService {
   async requestWeather<T>(url: string, params: IWeatherRequestParams): Promise<T[]> {
-    const response: AxiosResponse<{ response?: { body?: { items?: { item?: T[] } } } }> = await requestWeatherApi({
-      method: "get",
-      url,
-      params: {
-        serviceKey: decodeURIComponent(OPEN_WEATHER_API_KEY),
-        dataType: "JSON",
-        ...params,
-      },
-    });
+    try {
+      const response: AxiosResponse<{ response?: { body?: { items?: { item?: T[] } } } }> = await requestWeatherApi({
+        method: "get",
+        url,
+        params: {
+          serviceKey: decodeURIComponent(OPEN_WEATHER_API_KEY),
+          dataType: "JSON",
+          ...params,
+        },
+      });
 
-    if (response.status !== 200) {
-      throw new Error(`open api request error. item: weather status: ${response.status}`);
+      if (response.status !== 200) {
+        throw new Error(`weather open api request error. status: ${response.status}`);
+      }
+
+      if (!response.data.response) throw new Error(`weather open api response empty`);
+
+      const data = response.data.response.body.items.item;
+
+      return data;
+    } catch (error) {
+      throw error;
     }
-
-    if (!response.data.response.body) throw new Error(`open api response empty. item: weather`);
-
-    const data = response.data.response.body.items.item;
-
-    return data;
   }
 
   async requestAirPollution<T>(url: string, params: IAirpollutionRequestParams): Promise<T[]> {
-    const response: AxiosResponse<{ list?: T[] }> = await requestAirPollutionApi({
-      method: "get",
-      url,
-      params: {
-        ServiceKey: decodeURIComponent(OPEN_WEATHER_API_KEY),
-        _returnType: "json",
-        ...params,
-      },
-    });
+    try {
+      const response: AxiosResponse<{ list?: T[] }> = await requestAirPollutionApi({
+        method: "get",
+        url,
+        params: {
+          ServiceKey: decodeURIComponent(OPEN_WEATHER_API_KEY),
+          _returnType: "json",
+          ...params,
+        },
+      });
 
-    if (response.status !== 200) {
-      throw new Error(`open api request error. item: airpollution status: ${response.status}`);
+      if (response.status !== 200) {
+        throw new Error(` airpollution open api request error. status: ${response.status}`);
+      }
+
+      if (!response.data.list) throw new Error(`airpollution open api response empty`);
+
+      return response.data.list;
+    } catch (error) {
+      throw error;
     }
-
-    if (!response.data.list) throw new Error(`open api response empty. item: airpollution`);
-
-    return response.data.list;
   }
 }
