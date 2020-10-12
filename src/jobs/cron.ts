@@ -10,11 +10,11 @@ const jobList = [
 ];
 
 // const testList = [
-//   { func: WeatherJob.saveCurrentWeather, cron: "*/5 * * * * *" },
-//   { func: ShortForecastJob.saveShortForecast, cron: "*/5 * * * * *" },
-//   { func: MidForecastJob.saveMidForecast, cron: "*/5 * * * * *" },
-//   { func: AirpollutionService.cronAirpollution, cron: "*/5 * * * * *" },
-//   { func: AirpollutionService.cronAirForecast, cron: "*/5 * * * * *" },
+//   { func: WeatherService.cronCurrentWeather, cron: "*/20 * * * * *" },
+//   { func: ForecastService.cronShortForecast, cron: "*/20 * * * * *" },
+//   { func: ForecastService.cronMidForecast, cron: "*/20 * * * * *" },
+//   { func: AirpollutionService.cronAirpollution, cron: "*/20 * * * * *" },
+//   { func: AirpollutionService.cronAirForecast, cron: "*/20 * * * * *" },
 // ];
 
 export const cronJob = (): void => {
