@@ -23,13 +23,6 @@ router.get("/location", locationMiddleware, (req: Request, res) => {
   res.send(location);
 });
 
-router.get("/ip", (req: Request, res) => {
-  const headerAddr = req.header("x-forwarded-for");
-  const remoteAddr = req.connection.remoteAddress;
-
-  res.send({ headerAddr, remoteAddr });
-});
-
 router.use(notFoundError);
 
 router.use(serverError);

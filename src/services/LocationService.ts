@@ -94,14 +94,14 @@ export class LocationService {
           attributes: ["ip", "city", "r1", "r2", "r3"],
           raw: true,
         });
-      }
 
-      if (!location) {
-        location = await this.requestLocation(ip);
+        if (!location) {
+          location = await this.requestLocation(ip);
 
-        if (location) {
-          Location.create(location);
-          infoLog(`New Location ${ip}`);
+          if (location) {
+            Location.create(location);
+            infoLog(`New Location ${ip}`);
+          }
         }
       }
     } catch (error) {
