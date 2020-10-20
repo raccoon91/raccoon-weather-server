@@ -103,6 +103,8 @@ export class LocationService {
 
             Location.create(location);
             infoLog(`New Location ${ip}`);
+          } else {
+            errorLog(new Error(`New Location ${geoLocation.ip}, ${geoLocation.country}`));
           }
         }
       }
