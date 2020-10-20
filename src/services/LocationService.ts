@@ -96,9 +96,11 @@ export class LocationService {
         });
 
         if (!location) {
-          location = await this.requestLocation(ip);
+          const geoLocation = await this.requestLocation(ip);
 
-          if (location) {
+          if (geoLocation && geoLocation.city) {
+            location = geoLocation;
+
             Location.create(location);
             infoLog(`New Location ${ip}`);
           }
