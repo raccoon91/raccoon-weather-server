@@ -90,6 +90,8 @@ class AirpollutionService extends RootService {
         dataGubun: "HOUR",
       });
 
+      if (!pm10CurrentResData || !pm25CurrentResData) return;
+
       const currentDate = momentFormat(pm10CurrentResData.dataTime, "YYYY-MM-DD HH:00:00");
       const airpollutionDataList = this.combineAirpollutionData(pm10CurrentResData, pm25CurrentResData, currentDate);
 
@@ -127,6 +129,8 @@ class AirpollutionService extends RootService {
         searchDate: currentDate,
         informCode: "PM25",
       });
+
+      if (!pm10ForecastResData || !pm25ForecastResData) return;
 
       const pm10ForecastData = this.parseAirForecastResponseData(pm10ForecastResData);
       const pm25ForecastData = this.parseAirForecastResponseData(pm25ForecastResData);
