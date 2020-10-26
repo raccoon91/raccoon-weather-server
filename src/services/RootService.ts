@@ -32,10 +32,10 @@ export class RootService {
       });
 
       if (response.status !== 200) {
-        throw new Error(`weather open api request error. status: ${response.status}`);
+        throw new Error(`weather open api request error. url: ${url}, status: ${response.status}`);
       }
 
-      if (!response.data.response) throw new Error(`weather open api response empty`);
+      if (!response.data.response) throw new Error(`weather open api response empty. url: ${url}`);
 
       const data = response.data.response.body.items.item;
 
@@ -58,10 +58,10 @@ export class RootService {
       });
 
       if (response.status !== 200) {
-        throw new Error(` airpollution open api request error. status: ${response.status}`);
+        throw new Error(` airpollution open api request error. url: ${url}, status: ${response.status}`);
       }
 
-      if (!response.data.list) throw new Error(`airpollution open api response empty`);
+      if (!response.data.list) throw new Error(`airpollution open api response empty. url: ${url}`);
 
       return response.data.list;
     } catch (error) {
