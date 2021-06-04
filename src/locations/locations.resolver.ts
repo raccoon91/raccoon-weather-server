@@ -2,7 +2,6 @@ import { Resolver, Query, Mutation, Args } from "@nestjs/graphql";
 import { LocationsService } from "./locations.service";
 import { Location } from "./location.entity";
 import { CreateLocationInput, UpdateLocationInput } from "./location.dto";
-import { Weather } from "src/weathers/weather.entity";
 
 @Resolver(() => Location)
 export class LocationsResolver {
@@ -21,8 +20,8 @@ export class LocationsResolver {
   }
 
   @Query(() => Location, { name: "location" })
-  findOne(@Args("name", { type: () => String }) name: string) {
-    return this.locationsService.findOne(name);
+  findOne(@Args("city", { type: () => String }) city: string) {
+    return this.locationsService.findOne(city);
   }
 
   @Mutation(() => Location)
@@ -30,13 +29,13 @@ export class LocationsResolver {
     @Args("updateLocationInput") updateLocationInput: UpdateLocationInput,
   ) {
     return this.locationsService.update(
-      updateLocationInput.name,
+      updateLocationInput.city,
       updateLocationInput,
     );
   }
 
   @Mutation(() => Location)
-  removeLocation(@Args("name", { type: () => String }) name: string) {
-    return this.locationsService.remove(name);
+  removeLocation(@Args("city", { type: () => String }) city: string) {
+    return this.locationsService.remove(city);
   }
 }

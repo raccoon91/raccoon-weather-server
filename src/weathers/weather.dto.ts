@@ -6,7 +6,7 @@ export class CreateWeatherInput {
   temp: number;
 
   @Field()
-  locationName: string;
+  city: string;
 }
 
 @InputType()

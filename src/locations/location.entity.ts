@@ -9,9 +9,13 @@ export class Location {
   @Field(() => Int)
   id: number;
 
+  @Column()
+  @Field()
+  countryCode: string;
+
   @Column({ unique: true })
   @Field()
-  name: string;
+  city: string;
 
   @OneToMany(() => Weather, (weather) => weather.location)
   @Field(() => [Weather], { nullable: true })

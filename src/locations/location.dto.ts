@@ -3,7 +3,10 @@ import { InputType, Field, PartialType, Int } from "@nestjs/graphql";
 @InputType()
 export class CreateLocationInput {
   @Field()
-  name: string;
+  countryCode: string;
+
+  @Field()
+  city: string;
 }
 
 @InputType()

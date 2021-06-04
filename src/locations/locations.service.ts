@@ -21,21 +21,21 @@ export class LocationsService {
     return this.locationRepository.find({ relations: ["weathers"] });
   }
 
-  findOne(name: string) {
+  findOne(city: string) {
     return this.locationRepository.findOneOrFail(
-      { name },
+      { city },
       { relations: ["weathers"] },
     );
   }
 
-  update(name: string, updateLocationInput: UpdateLocationInput) {
+  update(city: string, updateLocationInput: UpdateLocationInput) {
     return this.locationRepository.save({
-      name,
+      city,
       ...updateLocationInput,
     });
   }
 
-  async remove(name: string) {
-    return this.locationRepository.delete({ name });
+  async remove(city: string) {
+    return this.locationRepository.delete({ city });
   }
 }

@@ -1,10 +1,9 @@
 import { ObjectType, Field, Int } from "@nestjs/graphql";
 import {
-  Column,
   Entity,
   PrimaryGeneratedColumn,
+  Column,
   ManyToOne,
-  JoinTable,
   JoinColumn,
 } from "typeorm";
 import { Location } from "src/locations/location.entity";
@@ -22,10 +21,10 @@ export class Weather {
 
   @Column()
   @Field()
-  locationName: string;
+  city: string;
 
   @ManyToOne(() => Location, (location) => location.weathers)
-  @JoinColumn({ name: "locationName", referencedColumnName: "name" })
+  @JoinColumn({ name: "city", referencedColumnName: "city" })
   @Field(() => Location)
   location: Location;
 }

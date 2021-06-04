@@ -5,47 +5,50 @@
 type Weather {
   id: Int!
   temp: Int!
-  locationName: String!
+  city: String!
   location: Location!
 }
 
 type Location {
   id: Int!
-  name: String!
+  countryCode: String!
+  city: String!
   weathers: [Weather!]
 }
 
 type Query {
   locations: [Location!]!
-  location(name: String!): Location!
+  location(city: String!): Location!
   weathers: [Weather!]!
 }
 
 type Mutation {
   createLocation(createLocationInput: CreateLocationInput!): Location!
   updateLocation(updateLocationInput: UpdateLocationInput!): Location!
-  removeLocation(name: String!): Location!
+  removeLocation(city: String!): Location!
   createWeather(createWeatherInput: CreateWeatherInput!): Weather!
   updateWeather(updateWeatherInput: UpdateWeatherInput!): Weather!
   removeWeather(id: Int!): Weather!
 }
 
 input CreateLocationInput {
-  name: String!
+  countryCode: String!
+  city: String!
 }
 
 input UpdateLocationInput {
-  name: String
+  countryCode: String
+  city: String
   id: Int!
 }
 
 input CreateWeatherInput {
   temp: Int!
-  locationName: String!
+  city: String!
 }
 
 input UpdateWeatherInput {
   temp: Int
-  locationName: String
+  city: String
   id: Int!
 }
