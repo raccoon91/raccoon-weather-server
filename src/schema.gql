@@ -1,0 +1,51 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Weather {
+  id: Int!
+  temp: Int!
+  locationName: String!
+  location: Location!
+}
+
+type Location {
+  id: Int!
+  name: String!
+  weathers: [Weather!]
+}
+
+type Query {
+  locations: [Location!]!
+  location(name: String!): Location!
+  weathers: [Weather!]!
+}
+
+type Mutation {
+  createLocation(createLocationInput: CreateLocationInput!): Location!
+  updateLocation(updateLocationInput: UpdateLocationInput!): Location!
+  removeLocation(name: String!): Location!
+  createWeather(createWeatherInput: CreateWeatherInput!): Weather!
+  updateWeather(updateWeatherInput: UpdateWeatherInput!): Weather!
+  removeWeather(id: Int!): Weather!
+}
+
+input CreateLocationInput {
+  name: String!
+}
+
+input UpdateLocationInput {
+  name: String
+  id: Int!
+}
+
+input CreateWeatherInput {
+  temp: Int!
+  locationName: String!
+}
+
+input UpdateWeatherInput {
+  temp: Int
+  locationName: String
+  id: Int!
+}
