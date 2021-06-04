@@ -8,9 +8,7 @@ export class WeathersResolver {
   constructor(private readonly weathersService: WeathersService) {}
 
   @Mutation(() => Weather)
-  createWeather(
-    @Args("createWeatherInput") createWeatherInput: CreateWeatherInput,
-  ) {
+  createWeather(@Args("createWeatherInput") createWeatherInput: CreateWeatherInput) {
     return this.weathersService.create(createWeatherInput);
   }
 
@@ -20,13 +18,8 @@ export class WeathersResolver {
   }
 
   @Mutation(() => Weather)
-  updateWeather(
-    @Args("updateWeatherInput") updateWeatherInput: UpdateWeatherInput,
-  ) {
-    return this.weathersService.update(
-      updateWeatherInput.id,
-      updateWeatherInput,
-    );
+  updateWeather(@Args("updateWeatherInput") updateWeatherInput: UpdateWeatherInput) {
+    return this.weathersService.update(updateWeatherInput.id, updateWeatherInput);
   }
 
   @Mutation(() => Weather)

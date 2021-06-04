@@ -22,10 +22,7 @@ export class LocationsService {
   }
 
   findOne(city: string) {
-    return this.locationRepository.findOneOrFail(
-      { city },
-      { relations: ["weathers"] },
-    );
+    return this.locationRepository.findOneOrFail({ city }, { relations: ["weathers"] });
   }
 
   update(city: string, updateLocationInput: UpdateLocationInput) {
