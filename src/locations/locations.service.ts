@@ -11,14 +11,18 @@ export class LocationsService {
     private locationRepository: Repository<Location>,
   ) {}
 
-  create(createLocationInput: CreateLocationInput) {
+  async create(createLocationInput: CreateLocationInput) {
     const location = this.locationRepository.create(createLocationInput);
 
     return this.locationRepository.save(location);
   }
 
   findAll() {
-    return this.locationRepository.find({ relations: ["weathers"] });
+    return this.locationRepository
+      .createQueryBuilder("locations")
+      .leftJoinAndSelect("locations.weathers", "weathers")
+      .orderBy("date", "ASC")
+      .getMany();
   }
 
   findOne(city: string) {

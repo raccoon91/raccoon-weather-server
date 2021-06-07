@@ -1,5 +1,6 @@
-import { Module } from "@nestjs/common";
 import { join } from "path";
+import { Module } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
 import { GraphQLModule } from "@nestjs/graphql";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AppController } from "./app.controller";
@@ -9,9 +10,8 @@ import { WeathersModule } from "./weathers/weathers.module";
 
 @Module({
   imports: [
-    GraphQLModule.forRoot({
-      autoSchemaFile: join(process.cwd(), "src/schema.gql"),
-    }),
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: [".env"] }),
+    GraphQLModule.forRoot({ autoSchemaFile: join(process.cwd(), "src/schema.gql") }),
     TypeOrmModule.forRoot({
       type: "sqlite",
       database: ":memory:",

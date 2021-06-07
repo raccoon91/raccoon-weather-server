@@ -7,6 +7,9 @@ export class CreateLocationInput {
 
   @Field()
   city: string;
+
+  @Field()
+  stnId: string;
 }
 
 @InputType()

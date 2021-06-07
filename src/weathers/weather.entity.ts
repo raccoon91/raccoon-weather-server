@@ -1,4 +1,4 @@
-import { ObjectType, Field, Int } from "@nestjs/graphql";
+import { ObjectType, Field, Int, Float, GraphQLISODateTime } from "@nestjs/graphql";
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
 import { Location } from "src/locations/location.entity";
 
@@ -10,12 +10,24 @@ export class Weather {
   id: number;
 
   @Column()
-  @Field(() => Int)
-  temp: number;
-
-  @Column()
   @Field()
   city: string;
+
+  @Column()
+  @Field(() => Float)
+  temp: number;
+
+  @Column({ nullable: true })
+  @Field(() => Float, { nullable: true })
+  rain: number | null;
+
+  @Column({ nullable: true })
+  @Field(() => Float, { nullable: true })
+  humid: number | null;
+
+  @Column()
+  @Field(() => GraphQLISODateTime)
+  date: Date;
 
   @ManyToOne(() => Location, (location) => location.weathers)
   @JoinColumn({ name: "city", referencedColumnName: "city" })

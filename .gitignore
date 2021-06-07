@@ -5,6 +5,9 @@
 # Yarn
 yarn.lock
 
+# Env
+.env
+
 # Logs
 logs
 *.log

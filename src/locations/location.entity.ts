@@ -17,6 +17,10 @@ export class Location {
   @Field()
   city: string;
 
+  @Column({ unique: true })
+  @Field()
+  stnId: string;
+
   @OneToMany(() => Weather, (weather) => weather.location)
   @Field(() => [Weather], { nullable: true })
   weathers?: Weather[];

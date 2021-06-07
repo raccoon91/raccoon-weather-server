@@ -1,12 +1,21 @@
-import { InputType, Field, Int, PartialType } from "@nestjs/graphql";
+import { InputType, Field, Float, Int, GraphQLISODateTime, PartialType } from "@nestjs/graphql";
 
 @InputType()
 export class CreateWeatherInput {
-  @Field(() => Int)
-  temp: number;
-
   @Field()
   city: string;
+
+  @Field(() => Float)
+  temp: number;
+
+  @Field(() => Float, { nullable: true })
+  rain: number | null;
+
+  @Field(() => Float, { nullable: true })
+  humid: number | null;
+
+  @Field(() => GraphQLISODateTime)
+  date: Date;
 }
 
 @InputType()

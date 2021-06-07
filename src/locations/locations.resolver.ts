@@ -2,14 +2,19 @@ import { Resolver, Query, Mutation, Args } from "@nestjs/graphql";
 import { LocationsService } from "./locations.service";
 import { Location } from "./location.entity";
 import { CreateLocationInput, UpdateLocationInput } from "./location.dto";
+import { WeathersService } from "src/weathers/weathers.service";
 
 @Resolver(() => Location)
 export class LocationsResolver {
-  constructor(private readonly locationsService: LocationsService) {}
+  constructor(private readonly locationsService: LocationsService, private readonly weathersService: WeathersService) {}
 
   @Mutation(() => Location)
-  createLocation(@Args("createLocationInput") createLocationInput: CreateLocationInput) {
-    return this.locationsService.create(createLocationInput);
+  async createLocation(@Args("createLocationInput") createLocationInput: CreateLocationInput) {
+    const location = await this.locationsService.create(createLocationInput);
+
+    await this.weathersService.createLocationWeathers(location);
+
+    return location;
   }
 
   @Query(() => [Location], { name: "locations" })
