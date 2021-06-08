@@ -6,6 +6,8 @@ type Weather {
   id: Int!
   city: String!
   temp: Float!
+  maxTemp: Float!
+  minTemp: Float!
   rain: Float
   humid: Float
   date: DateTime!
@@ -25,9 +27,34 @@ type Location {
   weathers: [Weather!]
 }
 
+type Temp {
+  date: DateTime!
+  temp: Float!
+}
+
+type Rain {
+  date: DateTime!
+  rain: Float
+}
+
+type Humid {
+  date: DateTime!
+  humid: Float
+}
+
+type LocationOutput {
+  countryCode: String!
+  city: String!
+  stnId: String!
+  length: Int!
+  tempData: [Temp!]!
+  rainData: [Rain!]!
+  humidData: [Humid!]!
+}
+
 type Query {
-  locations: [Location!]!
-  location(city: String!): Location!
+  locations: [LocationOutput!]!
+  location(city: String!): LocationOutput!
   weathers: [Weather!]!
 }
 
@@ -56,6 +83,8 @@ input UpdateLocationInput {
 input CreateWeatherInput {
   city: String!
   temp: Float!
+  maxTemp: Float!
+  minTemp: Float!
   rain: Float
   humid: Float
   date: DateTime!
@@ -64,6 +93,8 @@ input CreateWeatherInput {
 input UpdateWeatherInput {
   city: String
   temp: Float
+  maxTemp: Float
+  minTemp: Float
   rain: Float
   humid: Float
   date: DateTime

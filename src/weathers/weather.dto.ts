@@ -8,6 +8,12 @@ export class CreateWeatherInput {
   @Field(() => Float)
   temp: number;
 
+  @Field(() => Float)
+  maxTemp: number;
+
+  @Field(() => Float)
+  minTemp: number;
+
   @Field(() => Float, { nullable: true })
   rain: number | null;
 

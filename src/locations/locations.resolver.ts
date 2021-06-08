@@ -1,7 +1,7 @@
 import { Resolver, Query, Mutation, Args } from "@nestjs/graphql";
 import { LocationsService } from "./locations.service";
 import { Location } from "./location.entity";
-import { CreateLocationInput, UpdateLocationInput } from "./location.dto";
+import { CreateLocationInput, UpdateLocationInput, LocationOutput } from "./location.dto";
 import { WeathersService } from "src/weathers/weathers.service";
 
 @Resolver(() => Location)
@@ -17,12 +17,12 @@ export class LocationsResolver {
     return location;
   }
 
-  @Query(() => [Location], { name: "locations" })
+  @Query(() => [LocationOutput], { name: "locations" })
   findAll() {
     return this.locationsService.findAll();
   }
 
-  @Query(() => Location, { name: "location" })
+  @Query(() => LocationOutput, { name: "location" })
   findOne(@Args("city", { type: () => String }) city: string) {
     return this.locationsService.findOne(city);
   }

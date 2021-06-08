@@ -17,6 +17,14 @@ export class Weather {
   @Field(() => Float)
   temp: number;
 
+  @Column()
+  @Field(() => Float)
+  maxTemp: number;
+
+  @Column()
+  @Field(() => Float)
+  minTemp: number;
+
   @Column({ nullable: true })
   @Field(() => Float, { nullable: true })
   rain: number | null;
