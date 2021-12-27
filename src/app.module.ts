@@ -1,27 +1,22 @@
-import { join } from "path";
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-import { GraphQLModule } from "@nestjs/graphql";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { AppController } from "./app.controller";
-import { AppService } from "./app.service";
-import { LocationsModule } from "./locations/locations.module";
-import { WeathersModule } from "./weathers/weathers.module";
+import { CitiesModule } from "./cities/cities.module";
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: [".env"] }),
-    GraphQLModule.forRoot({ autoSchemaFile: join(process.cwd(), "src/schema.gql") }),
+    ConfigModule.forRoot({ envFilePath: ".env", isGlobal: true }),
     TypeOrmModule.forRoot({
-      type: "sqlite",
-      database: ":memory:",
-      entities: ["dist/**/*.entity{.ts,.js}"],
-      synchronize: true,
+      type: "postgres",
+      host: process.env.DB_HOSTNAME,
+      port: parseInt(process.env.DB_PORT),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_DATABASE,
+      entities: [__dirname + "/**/*.entity.{js,ts}"],
+      synchronize: process.env.DB_SYNC === "true",
     }),
-    LocationsModule,
-    WeathersModule,
+    CitiesModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
