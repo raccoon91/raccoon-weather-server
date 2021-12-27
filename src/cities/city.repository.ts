@@ -5,6 +5,18 @@ import { CreateCityDto, UpdateCityDto } from "./dto";
 
 @EntityRepository(City)
 export class CityRepository extends Repository<City> {
+  async getAllCities() {
+    const cities = await this.find();
+
+    return cities;
+  }
+
+  async getCity(id: number) {
+    const city = this.findOne({ id });
+
+    return city;
+  }
+
   async createCity(createCityDto: CreateCityDto): Promise<City> {
     const city = this.create(createCityDto);
 
