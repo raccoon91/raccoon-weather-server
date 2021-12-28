@@ -1,22 +1,9 @@
-import {
-  Controller,
-  Logger,
-  Body,
-  Param,
-  Get,
-  Post,
-  Patch,
-  Delete,
-  ParseIntPipe,
-  ValidationPipe,
-} from "@nestjs/common";
+import { Controller, Body, Param, Get, Post, Patch, Delete, ParseIntPipe, ValidationPipe } from "@nestjs/common";
 import { CreateCityDto, UpdateCityDto } from "./dto";
 import { CitiesService } from "./cities.service";
 
 @Controller("cities")
 export class CitiesController {
-  private logger = new Logger("CitiesController");
-
   constructor(private citiesService: CitiesService) {}
 
   @Get()
@@ -30,8 +17,8 @@ export class CitiesController {
   }
 
   @Post()
-  createCity(@Body(ValidationPipe) createCityDto: CreateCityDto) {
-    return this.citiesService.createCity(createCityDto);
+  createCities(@Body(ValidationPipe) createCityDto: CreateCityDto[]) {
+    return this.citiesService.createCities(createCityDto);
   }
 
   @Patch("/:id")

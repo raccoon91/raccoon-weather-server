@@ -2,7 +2,8 @@ import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { CitiesModule } from "./cities/cities.module";
-import { SchedulesModule } from "./schedules/schedules.module";
+import { ClimatesModule } from "./climates/climates.module";
+import { TasksModule } from "./tasks/tasks.module";
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { SchedulesModule } from "./schedules/schedules.module";
       synchronize: process.env.DB_SYNC === "true",
     }),
     CitiesModule,
-    SchedulesModule,
+    ClimatesModule,
+    TasksModule,
   ],
 })
 export class AppModule {}

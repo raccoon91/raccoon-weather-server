@@ -15,8 +15,8 @@ export class CitiesService {
     return this.cityRepository.getCity(id);
   }
 
-  createCity(createCityDto: CreateCityDto) {
-    return this.cityRepository.createCity(createCityDto);
+  createCities(createCityDto: CreateCityDto[]) {
+    return this.cityRepository.bulkCreateCities(createCityDto);
   }
 
   updateCity(id: number, updateCityDto: UpdateCityDto) {
