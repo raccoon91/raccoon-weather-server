@@ -1,104 +1,43 @@
 import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { ConfigService } from "@nestjs/config";
-import { City } from "src/cities/city.entity";
+import { ApisService } from "src/apis/apis.service";
+import { UtilsService } from "src/utils/utils.service";
 import { CityRepository } from "src/cities/city.repository";
+import { WeatherRepository } from "src/weathers/weather.repository";
 import { ClimateRepository } from "src/climates/climate.repository";
-import axios, { AxiosInstance, AxiosResponse } from "axios";
-import dayjs from "dayjs";
 
 @Injectable()
 export class TasksService {
   private logger = new Logger("TasksService");
-  private openASOSApi: AxiosInstance;
-
-  private generateASOSPromises(cities: City[], year: number) {
-    const promises: Promise<{ city: City; dailyInfos: IASOSDailyInfo[] }>[] = [];
-    const currentDate = dayjs();
-    const date = dayjs().year(year);
-    const startDate = date.month(0).date(1).format("YYYYMMDD");
-    let endDate: string;
-
-    if (year === currentDate.year()) {
-      endDate = currentDate.subtract(1, "day").format("YYYYMMDD");
-    } else {
-      endDate = date.month(11).date(31).format("YYYYMMDD");
-    }
-
-    for (const city of cities) {
-      promises.push(
-        this.openASOSApi({
-          params: {
-            stnIds: city.stn,
-            startDt: startDate,
-            endDt: endDate,
-          },
-        })
-          .then((res: AxiosResponse<IASOSDailyInfoResponse>) => ({
-            city,
-            dailyInfos: res?.data?.response?.body?.items?.item || [],
-          }))
-          .catch((error) => {
-            const message = `Failed to request ASOS city ${city.name} date ${startDate} / ${endDate}`;
-            this.logger.error(message);
-            this.logger.error(error);
-
-            throw new InternalServerErrorException(message);
-          }),
-      );
-    }
-
-    return promises;
-  }
 
   constructor(
-    private config: ConfigService,
+    private api: ApisService,
+    private utils: UtilsService,
     @InjectRepository(CityRepository) private cityRepository: CityRepository,
+    @InjectRepository(WeatherRepository) private weatherRepository: WeatherRepository,
     @InjectRepository(ClimateRepository) private climateRepository: ClimateRepository,
-  ) {
-    this.openASOSApi = axios.create({
-      baseURL: this.config.get("OPEN_DATA_ASOS_DAILY_API"),
-      method: "get",
-      params: {
-        serviceKey: decodeURIComponent(this.config.get("OPEN_DATA_SERVICE_KEY")),
-        dataType: "JSON",
-        dataCd: "ASOS",
-        dateCd: "DAY",
-        numOfRows: 370,
-      },
-    });
-  }
+  ) {}
 
-  async createClimates(year: number) {
+  async createCurrentWeather() {
     try {
       const cities = await this.cityRepository.getAllCities();
 
-      const promises = this.generateASOSPromises(cities, year);
+      const { baseDate, baseTime, formatDate } = this.utils.generateCurrentWeatherDate();
+      const promises = this.api.currentWeatherPromises(cities, baseDate, baseTime, formatDate);
 
       const responses = await Promise.all(promises);
 
-      const climates = [];
+      const currentWeathers = responses.map(({ city, date, currentWeather }) => ({
+        city,
+        date,
+        ...this.utils.parseCurrentWeather(currentWeather),
+      }));
 
-      responses.forEach(({ city, dailyInfos }) => {
-        dailyInfos.forEach((daily) => {
-          climates.push({
-            date: daily.tm,
-            temp: daily.avgTa ? Number(daily.avgTa) : 0,
-            minTemp: daily.minTa ? Number(daily.minTa) : 0,
-            maxTemp: daily.maxTa ? Number(daily.maxTa) : 0,
-            rain: daily.sumRn ? Number(daily.sumRn) : 0,
-            wind: daily.avgWs ? Number(daily.avgWs) : 0,
-            humid: daily.avgRhm ? Number(daily.avgRhm) : 0,
-            city,
-          });
-        });
-      });
+      // await this.weatherRepository.bulkCreateWeather(currentWeathers);
 
-      await this.climateRepository.bulkCreateClimate(climates);
-
-      return climates;
+      return currentWeathers;
     } catch (error) {
-      const message = `Failed to create climates with year ${year}`;
+      const message = `Failed to create weather`;
       this.logger.error(message);
       this.logger.error(error);
 
@@ -106,15 +45,86 @@ export class TasksService {
     }
   }
 
-  async bulkCreateClimates(startYear: number, endYear: number) {
-    let savedClimates = [];
+  async createShortForecast() {
+    try {
+      const cities = await this.cityRepository.getAllCities();
+
+      const { baseDate, baseTime } = this.utils.generateShortForecastDate();
+      const promises = this.api.shortForecastPromises(cities, baseDate, baseTime);
+
+      const responses = await Promise.all(promises);
+
+      const shortForecasts = responses.reduce((acc, { city, shortForecast }) => {
+        return acc.concat(this.utils.parseShortForecast(city, shortForecast));
+      }, []);
+
+      return shortForecasts;
+    } catch (error) {
+      const message = `Failed to create short forecast`;
+      this.logger.error(message);
+      this.logger.error(error);
+
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async createMidForecast() {
+    try {
+      const cities = await this.cityRepository.getAllCities();
+
+      const { baseDate, baseTime } = this.utils.generateMidForecastDate();
+      const promises = this.api.midForecastPromises(cities, baseDate, baseTime);
+
+      const responses = await Promise.all(promises);
+
+      const midForecasts = responses.reduce((acc, { city, midForecast }) => {
+        return acc.concat(this.utils.parseMidForecast(city, midForecast));
+      }, []);
+
+      return midForecasts;
+    } catch (error) {
+      const message = `Failed to create short forecast`;
+      this.logger.error(message);
+      this.logger.error(error);
+
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async createClimates(startYear: number, endYear: number) {
+    let climates = [];
+
+    const cities = await this.cityRepository.getAllCities();
 
     for (let year = startYear; year <= endYear; year++) {
-      const climates = await this.createClimates(year);
+      try {
+        const promises = this.api.climatesPromises(cities, year);
 
-      savedClimates = savedClimates.concat(climates);
+        const responses = await Promise.all(promises);
+
+        const yearClimate = [];
+
+        responses.forEach(({ city, dailyInfos }) => {
+          dailyInfos.forEach((daily) => {
+            yearClimate.push({
+              city,
+              ...this.utils.parseDailyASOS(daily),
+            });
+          });
+        });
+
+        await this.climateRepository.bulkCreateClimate(yearClimate);
+
+        climates = climates.concat(yearClimate);
+      } catch (error) {
+        const message = `Failed to create climates with year ${year}`;
+        this.logger.error(message);
+        this.logger.error(error);
+
+        throw new InternalServerErrorException(message);
+      }
     }
 
-    return savedClimates;
+    return climates;
   }
 }

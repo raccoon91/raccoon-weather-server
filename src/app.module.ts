@@ -1,9 +1,13 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { SnakeNamingStrategy } from "typeorm-naming-strategies";
 import { CitiesModule } from "./cities/cities.module";
+import { WeathersModule } from "./weathers/weathers.module";
 import { ClimatesModule } from "./climates/climates.module";
 import { TasksModule } from "./tasks/tasks.module";
+import { UtilsModule } from "./utils/utils.module";
+import { ApisModule } from "./apis/apis.module";
 
 @Module({
   imports: [
@@ -17,8 +21,12 @@ import { TasksModule } from "./tasks/tasks.module";
       database: process.env.DB_DATABASE,
       entities: [__dirname + "/**/*.entity.{js,ts}"],
       synchronize: process.env.DB_SYNC === "true",
+      namingStrategy: new SnakeNamingStrategy(),
     }),
+    ApisModule,
+    UtilsModule,
     CitiesModule,
+    WeathersModule,
     ClimatesModule,
     TasksModule,
   ],

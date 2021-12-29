@@ -1,20 +1,29 @@
-import { Controller, Post, Body } from "@nestjs/common";
+import { Controller, Post, Body, ValidationPipe } from "@nestjs/common";
 import { TasksService } from "./tasks.service";
 
 @Controller("tasks")
 export class TasksController {
   constructor(private schdulesService: TasksService) {}
 
+  @Post("/weathers")
+  createCurrentWeather() {
+    return this.schdulesService.createCurrentWeather();
+  }
+
+  @Post("/short-forecast")
+  createShortForecast() {
+    return this.schdulesService.createShortForecast();
+  }
+
+  @Post("/mid-forecast")
+  createMidForecast() {
+    return this.schdulesService.createMidForecast();
+  }
+
   @Post("/climates")
-  createClimates(@Body() body: { year?: number; startYear?: number; endYear?: number }) {
-    const { year, startYear, endYear } = body;
+  createClimates(@Body(ValidationPipe) body: { startYear: number; endYear: number }) {
+    const { startYear, endYear } = body;
 
-    if (year) {
-      return this.schdulesService.createClimates(year);
-    }
-
-    if (startYear && endYear) {
-      return this.schdulesService.bulkCreateClimates(startYear, endYear);
-    }
+    return this.schdulesService.createClimates(startYear, endYear);
   }
 }
