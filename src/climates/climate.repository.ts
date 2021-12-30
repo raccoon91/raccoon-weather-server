@@ -18,12 +18,9 @@ export class ClimateRepository extends Repository<Climate> {
   }
 
   async createClimate(createClimateDto: CreateClimateDto, city: City): Promise<Climate> {
-    const climate = this.create({
-      ...createClimateDto,
-      city,
-    });
-
     try {
+      const climate = this.create({ city, ...createClimateDto });
+
       await this.insert(climate);
 
       return climate;
@@ -43,9 +40,9 @@ export class ClimateRepository extends Repository<Climate> {
   }
 
   async bulkCreateClimate(createClimatesWithCityDto: CreateClimateWithCityDto[]): Promise<Climate[]> {
-    const climates = this.create(createClimatesWithCityDto);
-
     try {
+      const climates = this.create(createClimatesWithCityDto);
+
       await this.save(climates, { chunk: 1000 });
 
       return climates;

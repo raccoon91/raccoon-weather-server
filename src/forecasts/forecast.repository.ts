@@ -23,8 +23,9 @@ export class ForecastRepository extends Repository<Forecast> {
     const { city, date, sky, temp, rain, rainType, rainProb, humid, wind, windDirection } = createForecastwWithCityDto;
 
     try {
-      const foundForecast = await this.findOne({ where: { city, date } });
       let forecast: Forecast;
+
+      const foundForecast = await this.findOne({ where: { city, date } });
 
       if (foundForecast) {
         forecast = Object.assign({}, foundForecast);

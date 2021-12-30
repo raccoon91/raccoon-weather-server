@@ -2,7 +2,7 @@ import { EntityRepository, Repository } from "typeorm";
 import { Logger, ConflictException, InternalServerErrorException } from "@nestjs/common";
 import { City } from "src/cities/city.entity";
 import { Weather } from "./weather.entity";
-import { CreateWeatherDto, CreateWeatherWithCityDto } from "./dto";
+import { CreateWeatherWithCityDto } from "./dto";
 
 @EntityRepository(Weather)
 export class WeatherRepository extends Repository<Weather> {
@@ -15,13 +15,10 @@ export class WeatherRepository extends Repository<Weather> {
     });
   }
 
-  async createWeather(createWeatherDto: CreateWeatherDto, city: City): Promise<Weather> {
-    const weather = this.create({
-      ...createWeatherDto,
-      city,
-    });
-
+  async createWeather(createWeathersWithCityDto: CreateWeatherWithCityDto): Promise<Weather> {
     try {
+      const weather = this.create(createWeathersWithCityDto);
+
       await this.insert(weather);
 
       return weather;
@@ -29,9 +26,7 @@ export class WeatherRepository extends Repository<Weather> {
       if (error.code === "23505") {
         throw new ConflictException("Existing city");
       } else {
-        const message = `Can't create weather with city ${JSON.stringify(city)} data ${JSON.stringify(
-          createWeatherDto,
-        )}`;
+        const message = `Can't create weather with data ${JSON.stringify(createWeathersWithCityDto)}`;
         this.logger.error(message);
         this.logger.error(error);
 
@@ -41,9 +36,9 @@ export class WeatherRepository extends Repository<Weather> {
   }
 
   async bulkCreateWeathers(createWeathersWithCityDto: CreateWeatherWithCityDto[]): Promise<Weather[]> {
-    const weathers = this.create(createWeathersWithCityDto);
-
     try {
+      const weathers = this.create(createWeathersWithCityDto);
+
       await this.save(weathers, { chunk: 1000 });
 
       return weathers;

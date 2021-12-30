@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Cron } from "@nestjs/schedule";
 import { ApisService } from "src/apis/apis.service";
@@ -23,90 +23,66 @@ export class TasksService {
 
   @Cron("0 45 * * * *")
   async createCurrentWeather() {
-    try {
-      const cities = await this.cityRepository.getAllCities();
+    const cities = await this.cityRepository.getAllCities();
 
-      const { baseDate, baseTime, formatDate } = this.utils.generateCurrentWeatherDate();
-      const promises = this.api.currentWeatherPromises(cities, baseDate, baseTime, formatDate);
+    const { baseDate, baseTime, formatDate } = this.utils.generateCurrentWeatherDate();
+    const promises = this.api.currentWeatherPromises(cities, baseDate, baseTime, formatDate);
 
-      const responses = await Promise.all(promises);
+    const responses = await Promise.all(promises);
 
-      const createWeathersWithCityDto = responses.map(({ city, date, currentWeather }) => ({
-        city,
-        date,
-        ...this.utils.parseCurrentWeather(currentWeather),
-      }));
+    const createWeathersWithCityDto = responses.map(({ city, date, currentWeather }) => ({
+      city,
+      date,
+      ...this.utils.parseCurrentWeather(currentWeather),
+    }));
 
-      const currentWeathers = await this.weatherRepository.bulkCreateWeathers(createWeathersWithCityDto);
+    const currentWeathers = await this.weatherRepository.bulkCreateWeathers(createWeathersWithCityDto);
 
-      this.logger.verbose("cron current weather");
+    this.logger.verbose("cron current weather");
 
-      return currentWeathers;
-    } catch (error) {
-      const message = `Failed to create weather`;
-      this.logger.error(message);
-      this.logger.error(error);
-
-      throw new InternalServerErrorException(message);
-    }
+    return currentWeathers;
   }
 
   @Cron("0 50 * * * *")
   async createShortForecast() {
-    try {
-      const cities = await this.cityRepository.getAllCities();
+    const cities = await this.cityRepository.getAllCities();
 
-      const { baseDate, baseTime } = this.utils.generateShortForecastDate();
-      const promises = this.api.shortForecastPromises(cities, baseDate, baseTime);
+    const { baseDate, baseTime } = this.utils.generateShortForecastDate();
+    const promises = this.api.shortForecastPromises(cities, baseDate, baseTime);
 
-      const responses = await Promise.all(promises);
+    const responses = await Promise.all(promises);
 
-      const createForecastsWithCityDto = responses.reduce(
-        (acc, { city, shortForecast }) => acc.concat(this.utils.parseShortForecast(city, shortForecast)),
-        [],
-      );
+    const createForecastsWithCityDto = responses.reduce(
+      (acc, { city, shortForecast }) => acc.concat(this.utils.parseShortForecast(city, shortForecast)),
+      [],
+    );
 
-      const shortForecasts = await this.forecastRepository.bulkCreateOrUpdateForecasts(createForecastsWithCityDto);
+    const shortForecasts = await this.forecastRepository.bulkCreateOrUpdateForecasts(createForecastsWithCityDto);
 
-      this.logger.verbose("cron short forecast");
+    this.logger.verbose("cron short forecast");
 
-      return shortForecasts;
-    } catch (error) {
-      const message = `Failed to create short forecast`;
-      this.logger.error(message);
-      this.logger.error(error);
-
-      throw new InternalServerErrorException(message);
-    }
+    return shortForecasts;
   }
 
   @Cron("0 15 2,5,8,11,14,17,20,23 * * *")
   async createMidForecast() {
-    try {
-      const cities = await this.cityRepository.getAllCities();
+    const cities = await this.cityRepository.getAllCities();
 
-      const { baseDate, baseTime } = this.utils.generateMidForecastDate();
-      const promises = this.api.midForecastPromises(cities, baseDate, baseTime);
+    const { baseDate, baseTime } = this.utils.generateMidForecastDate();
+    const promises = this.api.midForecastPromises(cities, baseDate, baseTime);
 
-      const responses = await Promise.all(promises);
+    const responses = await Promise.all(promises);
 
-      const createForecastsWithCityDto = responses.reduce(
-        (acc, { city, midForecast }) => acc.concat(this.utils.parseMidForecast(city, midForecast)),
-        [],
-      );
+    const createForecastsWithCityDto = responses.reduce(
+      (acc, { city, midForecast }) => acc.concat(this.utils.parseMidForecast(city, midForecast)),
+      [],
+    );
 
-      const midForecasts = await this.forecastRepository.bulkCreateOrUpdateForecasts(createForecastsWithCityDto);
+    const midForecasts = await this.forecastRepository.bulkCreateOrUpdateForecasts(createForecastsWithCityDto);
 
-      this.logger.verbose("cron mid forecast");
+    this.logger.verbose("cron mid forecast");
 
-      return midForecasts;
-    } catch (error) {
-      const message = `Failed to create mid forecast`;
-      this.logger.error(message);
-      this.logger.error(error);
-
-      throw new InternalServerErrorException(message);
-    }
+    return midForecasts;
   }
 
   async createClimates(startYear: number, endYear: number) {
@@ -115,32 +91,19 @@ export class TasksService {
     const cities = await this.cityRepository.getAllCities();
 
     for (let year = startYear; year <= endYear; year++) {
-      try {
-        const promises = this.api.climatesPromises(cities, year);
+      const promises = this.api.climatesPromises(cities, year);
 
-        const responses = await Promise.all(promises);
+      const responses = await Promise.all(promises);
 
-        const yearClimate = [];
+      const createClimatesWithCityDto = [];
 
-        responses.forEach(({ city, dailyInfos }) => {
-          dailyInfos.forEach((daily) => {
-            yearClimate.push({
-              city,
-              ...this.utils.parseDailyASOS(daily),
-            });
-          });
-        });
+      responses.forEach(({ city, dailyInfos }) => {
+        dailyInfos.forEach((daily) => createClimatesWithCityDto.push({ city, ...this.utils.parseDailyASOS(daily) }));
+      });
 
-        await this.climateRepository.bulkCreateClimate(yearClimate);
+      await this.climateRepository.bulkCreateClimate(createClimatesWithCityDto);
 
-        climates = climates.concat(yearClimate);
-      } catch (error) {
-        const message = `Failed to create climates with year ${year}`;
-        this.logger.error(message);
-        this.logger.error(error);
-
-        throw new InternalServerErrorException(message);
-      }
+      climates = climates.concat(createClimatesWithCityDto);
     }
 
     return climates;

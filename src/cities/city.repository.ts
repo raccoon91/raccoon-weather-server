@@ -10,6 +10,13 @@ export class CityRepository extends Repository<City> {
   async getAllCities() {
     const cities = await this.find();
 
+    if (cities) {
+      const message = "Can't find cities";
+      this.logger.debug(message);
+
+      throw new NotFoundException(message);
+    }
+
     return cities;
   }
 
@@ -40,9 +47,9 @@ export class CityRepository extends Repository<City> {
   }
 
   async createCity(createCityDto: CreateCityDto): Promise<City> {
-    const city = this.create(createCityDto);
-
     try {
+      const city = this.create(createCityDto);
+
       await this.insert(city);
 
       return city;
@@ -60,9 +67,9 @@ export class CityRepository extends Repository<City> {
   }
 
   async bulkCreateCities(createCityDto: CreateCityDto[]): Promise<City[]> {
-    const cities = this.create(createCityDto);
-
     try {
+      const cities = this.create(createCityDto);
+
       await this.insert(cities);
 
       return cities;
@@ -92,10 +99,14 @@ export class CityRepository extends Repository<City> {
   }
 
   async deleteCity(id: number): Promise<void> {
-    const result = await this.delete({ id });
+    try {
+      const result = await this.delete({ id });
 
-    if (result.affected === 0) {
-      throw new NotFoundException(`Can't find City with id ${id}`);
+      if (result.affected === 0) {
+        throw new NotFoundException(`Can't find City with id ${id}`);
+      }
+    } catch (error) {
+      throw new InternalServerErrorException();
     }
   }
 }
