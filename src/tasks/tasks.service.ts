@@ -1,5 +1,6 @@
 import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { Cron } from "@nestjs/schedule";
 import { ApisService } from "src/apis/apis.service";
 import { UtilsService } from "src/utils/utils.service";
 import { CityRepository } from "src/cities/city.repository";
@@ -20,6 +21,7 @@ export class TasksService {
     @InjectRepository(ClimateRepository) private climateRepository: ClimateRepository,
   ) {}
 
+  @Cron("0 45 * * * *")
   async createCurrentWeather() {
     try {
       const cities = await this.cityRepository.getAllCities();
@@ -29,13 +31,15 @@ export class TasksService {
 
       const responses = await Promise.all(promises);
 
-      const currentWeathers = responses.map(({ city, date, currentWeather }) => ({
+      const createWeathersWithCityDto = responses.map(({ city, date, currentWeather }) => ({
         city,
         date,
         ...this.utils.parseCurrentWeather(currentWeather),
       }));
 
-      await this.weatherRepository.bulkCreateWeathers(currentWeathers);
+      const currentWeathers = await this.weatherRepository.bulkCreateWeathers(createWeathersWithCityDto);
+
+      this.logger.verbose("cron current weather");
 
       return currentWeathers;
     } catch (error) {
@@ -47,6 +51,7 @@ export class TasksService {
     }
   }
 
+  @Cron("0 50 * * * *")
   async createShortForecast() {
     try {
       const cities = await this.cityRepository.getAllCities();
@@ -56,12 +61,14 @@ export class TasksService {
 
       const responses = await Promise.all(promises);
 
-      const shortForecasts = responses.reduce(
+      const createForecastsWithCityDto = responses.reduce(
         (acc, { city, shortForecast }) => acc.concat(this.utils.parseShortForecast(city, shortForecast)),
         [],
       );
 
-      await this.forecastRepository.bulkCreateOrUpdateForecasts(shortForecasts);
+      const shortForecasts = await this.forecastRepository.bulkCreateOrUpdateForecasts(createForecastsWithCityDto);
+
+      this.logger.verbose("cron short forecast");
 
       return shortForecasts;
     } catch (error) {
@@ -73,6 +80,7 @@ export class TasksService {
     }
   }
 
+  @Cron("0 15 2,5,8,11,14,17,20,23 * * *")
   async createMidForecast() {
     try {
       const cities = await this.cityRepository.getAllCities();
@@ -82,16 +90,18 @@ export class TasksService {
 
       const responses = await Promise.all(promises);
 
-      const midForecasts = responses.reduce(
+      const createForecastsWithCityDto = responses.reduce(
         (acc, { city, midForecast }) => acc.concat(this.utils.parseMidForecast(city, midForecast)),
         [],
       );
 
-      await this.forecastRepository.bulkCreateOrUpdateForecasts(midForecasts);
+      const midForecasts = await this.forecastRepository.bulkCreateOrUpdateForecasts(createForecastsWithCityDto);
+
+      this.logger.verbose("cron mid forecast");
 
       return midForecasts;
     } catch (error) {
-      const message = `Failed to create short forecast`;
+      const message = `Failed to create mid forecast`;
       this.logger.error(message);
       this.logger.error(error);
 

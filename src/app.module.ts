@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { SnakeNamingStrategy } from "typeorm-naming-strategies";
+import { ScheduleModule } from "@nestjs/schedule";
 import { CitiesModule } from "./cities/cities.module";
 import { WeathersModule } from "./weathers/weathers.module";
 import { ClimatesModule } from "./climates/climates.module";
@@ -31,6 +32,7 @@ import { ForecastsModule } from "./forecasts/forecasts.module";
     ForecastsModule,
     ClimatesModule,
     TasksModule,
+    ScheduleModule.forRoot(),
   ],
 })
 export class AppModule {}

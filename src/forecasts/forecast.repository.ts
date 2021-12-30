@@ -9,13 +9,13 @@ import { CreateForecastWithCityDto } from "./dto";
 export class ForecastRepository extends Repository<Forecast> {
   private logger = new Logger("ForecastRepository");
 
-  async getForecast(city: City) {
+  getForecast(city: City) {
     const currentDate = dayjs().format("YYYY-MM-DD HH:mm");
 
     return this.find({
       where: { city, date: MoreThan(currentDate) },
       order: { date: "ASC" },
-      take: 8,
+      take: 16,
     });
   }
 
@@ -23,31 +23,33 @@ export class ForecastRepository extends Repository<Forecast> {
     const { city, date, sky, temp, rain, rainType, rainProb, humid, wind, windDirection } = createForecastwWithCityDto;
 
     try {
-      let forecast = await this.findOne({ where: { city, date } });
+      const foundForecast = await this.findOne({ where: { city, date } });
+      let forecast: Forecast;
 
-      if (forecast) {
-        forecast.sky = sky ? sky : forecast.sky;
-        forecast.temp = temp ? temp : forecast.temp;
-        forecast.rain = rain ? rain : forecast.rain;
-        forecast.rainType = rainType ? rainType : forecast.rainType;
-        forecast.rainProb = rainProb ? rainProb : forecast.rainProb;
-        forecast.humid = humid ? humid : forecast.humid;
-        forecast.wind = wind ? wind : forecast.wind;
-        forecast.windDirection = windDirection ? windDirection : forecast.windDirection;
+      if (foundForecast) {
+        forecast = Object.assign({}, foundForecast);
+
+        forecast.sky = sky ? sky : foundForecast.sky;
+        forecast.temp = temp ? temp : foundForecast.temp;
+        forecast.rain = rain ? rain : foundForecast.rain;
+        forecast.rainType = rainType ? rainType : foundForecast.rainType;
+        forecast.rainProb = rainProb ? rainProb : foundForecast.rainProb;
+        forecast.humid = humid ? humid : foundForecast.humid;
+        forecast.wind = wind ? wind : foundForecast.wind;
+        forecast.windDirection = windDirection ? windDirection : foundForecast.windDirection;
       } else {
         forecast = this.create(createForecastwWithCityDto);
       }
 
-      await this.save(forecast);
+      await this.upsert(forecast, ["city.id", "date"]);
 
       return forecast;
     } catch (error) {
       if (error.code === "23505") {
-        throw new ConflictException("Existing forecase");
+        throw new ConflictException(`Existing forecast with data ${JSON.stringify(createForecastwWithCityDto)}`);
       } else {
         const message = `Can't create forecast with data ${JSON.stringify(createForecastwWithCityDto)}`;
         this.logger.error(message);
-        this.logger.error(error);
 
         throw new InternalServerErrorException(message);
       }

@@ -8,7 +8,7 @@ import { CreateWeatherDto, CreateWeatherWithCityDto } from "./dto";
 export class WeatherRepository extends Repository<Weather> {
   private logger = new Logger("WeatherRepository");
 
-  async getWeather(city: City) {
+  getWeather(city: City) {
     return this.findOne({
       where: { city },
       order: { date: "DESC" },
