@@ -4,12 +4,17 @@ import { ApisModule } from "src/apis/apis.module";
 import { UtilsModule } from "src/utils/utils.module";
 import { CityRepository } from "src/cities/city.repository";
 import { WeatherRepository } from "src/weathers/weather.repository";
+import { ForecastRepository } from "src/forecasts/forecast.repository";
 import { ClimateRepository } from "src/climates/climate.repository";
 import { TasksController } from "./tasks.controller";
 import { TasksService } from "./tasks.service";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CityRepository, WeatherRepository, ClimateRepository]), ApisModule, UtilsModule],
+  imports: [
+    TypeOrmModule.forFeature([CityRepository, WeatherRepository, ForecastRepository, ClimateRepository]),
+    ApisModule,
+    UtilsModule,
+  ],
   controllers: [TasksController],
   providers: [TasksService],
 })

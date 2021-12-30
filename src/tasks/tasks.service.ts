@@ -5,6 +5,7 @@ import { UtilsService } from "src/utils/utils.service";
 import { CityRepository } from "src/cities/city.repository";
 import { WeatherRepository } from "src/weathers/weather.repository";
 import { ClimateRepository } from "src/climates/climate.repository";
+import { ForecastRepository } from "src/forecasts/forecast.repository";
 
 @Injectable()
 export class TasksService {
@@ -15,6 +16,7 @@ export class TasksService {
     private utils: UtilsService,
     @InjectRepository(CityRepository) private cityRepository: CityRepository,
     @InjectRepository(WeatherRepository) private weatherRepository: WeatherRepository,
+    @InjectRepository(ForecastRepository) private forecastRepository: ForecastRepository,
     @InjectRepository(ClimateRepository) private climateRepository: ClimateRepository,
   ) {}
 
@@ -33,7 +35,7 @@ export class TasksService {
         ...this.utils.parseCurrentWeather(currentWeather),
       }));
 
-      // await this.weatherRepository.bulkCreateWeather(currentWeathers);
+      await this.weatherRepository.bulkCreateWeathers(currentWeathers);
 
       return currentWeathers;
     } catch (error) {
@@ -54,9 +56,12 @@ export class TasksService {
 
       const responses = await Promise.all(promises);
 
-      const shortForecasts = responses.reduce((acc, { city, shortForecast }) => {
-        return acc.concat(this.utils.parseShortForecast(city, shortForecast));
-      }, []);
+      const shortForecasts = responses.reduce(
+        (acc, { city, shortForecast }) => acc.concat(this.utils.parseShortForecast(city, shortForecast)),
+        [],
+      );
+
+      await this.forecastRepository.bulkCreateOrUpdateForecasts(shortForecasts);
 
       return shortForecasts;
     } catch (error) {
@@ -77,9 +82,12 @@ export class TasksService {
 
       const responses = await Promise.all(promises);
 
-      const midForecasts = responses.reduce((acc, { city, midForecast }) => {
-        return acc.concat(this.utils.parseMidForecast(city, midForecast));
-      }, []);
+      const midForecasts = responses.reduce(
+        (acc, { city, midForecast }) => acc.concat(this.utils.parseMidForecast(city, midForecast)),
+        [],
+      );
+
+      await this.forecastRepository.bulkCreateOrUpdateForecasts(midForecasts);
 
       return midForecasts;
     } catch (error) {

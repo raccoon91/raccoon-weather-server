@@ -9,12 +9,15 @@ const transformer: ValueTransformer = {
 
 @Entity()
 @Unique(["date", "city.id"])
-export class Weather {
+export class Forecast {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ type: "timestamptz", transformer })
   date: string;
+
+  @Column({ type: "smallint" })
+  sky: number;
 
   @Column({ type: "real" })
   temp: number;
@@ -25,6 +28,9 @@ export class Weather {
   @Column({ type: "smallint" })
   rainType: number;
 
+  @Column({ type: "smallint" })
+  rainProb: number;
+
   @Column({ type: "real" })
   humid: number;
 
@@ -34,6 +40,6 @@ export class Weather {
   @Column({ type: "smallint" })
   windDirection: number;
 
-  @ManyToOne(() => City, (city) => city.weathers, { eager: false })
+  @ManyToOne(() => City, (city) => city.forecasts, { eager: false })
   city: City;
 }

@@ -8,6 +8,7 @@ import { ClimatesModule } from "./climates/climates.module";
 import { TasksModule } from "./tasks/tasks.module";
 import { UtilsModule } from "./utils/utils.module";
 import { ApisModule } from "./apis/apis.module";
+import { ForecastsModule } from "./forecasts/forecasts.module";
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ApisModule } from "./apis/apis.module";
     UtilsModule,
     CitiesModule,
     WeathersModule,
+    ForecastsModule,
     ClimatesModule,
     TasksModule,
   ],

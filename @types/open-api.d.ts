@@ -20,13 +20,12 @@ interface ICity {
 }
 
 interface ICurrentWeather {
-  date?: string;
-  temp?: number;
-  rain?: number;
-  rainType?: number;
-  humid?: number;
-  wind?: number;
-  windDirection?: number;
+  temp: number;
+  rain: number;
+  rainType: number;
+  humid: number;
+  wind: number;
+  windDirection: number;
 }
 
 interface ICurrentWeatherItem {
@@ -40,31 +39,17 @@ interface ICurrentWeatherItem {
 
 type ICurrentWeatherResponse = IOpenApiResponse<ICurrentWeatherItem>;
 
-interface IShortForecast {
+interface IForecast {
   city: ICity;
-  date?: string;
-  sky?: number;
-  temp?: number;
-  rain?: number;
-  rainType?: number;
-  humid?: number;
-  wind?: number;
-  windDirection?: number;
-}
-
-interface IMidForecast {
-  city: ICity;
-  date?: string;
-  sky?: number;
-  temp?: number;
-  maxTemp?: number;
-  minTemp?: number;
-  rain?: number;
-  rainType?: number;
-  rainProb?: number;
-  humid?: number;
-  wind?: number;
-  windDirection?: number;
+  date: string;
+  sky: number;
+  temp: number;
+  rain: number;
+  rainType: number;
+  rainProb: number;
+  humid: number;
+  wind: number;
+  windDirection: number;
 }
 
 interface IForecastItem<T> {

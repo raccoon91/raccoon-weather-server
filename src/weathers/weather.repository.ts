@@ -40,7 +40,7 @@ export class WeatherRepository extends Repository<Weather> {
     }
   }
 
-  async bulkCreateWeather(createWeathersWithCityDto: CreateWeatherWithCityDto[]): Promise<Weather[]> {
+  async bulkCreateWeathers(createWeathersWithCityDto: CreateWeatherWithCityDto[]): Promise<Weather[]> {
     const weathers = this.create(createWeathersWithCityDto);
 
     try {

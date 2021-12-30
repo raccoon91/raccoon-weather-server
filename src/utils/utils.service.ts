@@ -4,6 +4,19 @@ import { City } from "src/cities/city.entity";
 
 @Injectable()
 export class UtilsService {
+  private readonly defaultCurrentWeather = { temp: 0, rain: 0, rainType: 0, humid: 0, wind: 0, windDirection: 0 };
+
+  private readonly defaultForecast = {
+    sky: 0,
+    temp: 0,
+    rain: 0,
+    rainType: 0,
+    rainProb: 0,
+    humid: 0,
+    wind: 0,
+    windDirection: 0,
+  };
+
   private currentWeatherKey = {
     T1H: "temp",
     RN1: "rain",
@@ -26,8 +39,6 @@ export class UtilsService {
   private midForecastKey = {
     SKY: "sky",
     TMP: "temp",
-    TMN: "maxTemp",
-    TMX: "minTemp",
     PCP: "rain",
     PTY: "rainType",
     POP: "rainProb",
@@ -37,7 +48,7 @@ export class UtilsService {
   };
 
   private toNumber(value: string) {
-    if (typeof value != "string") return 0;
+    if (typeof value !== "string") return 0;
 
     if (!isNaN(parseFloat(value))) {
       return parseFloat(value);
@@ -99,7 +110,7 @@ export class UtilsService {
   }
 
   parseCurrentWeather(currentWeather: ICurrentWeatherItem[]) {
-    const parsedWeather: ICurrentWeather = {};
+    const parsedWeather: ICurrentWeather = Object.assign({}, this.defaultCurrentWeather);
 
     currentWeather.forEach((weather) => {
       const currentWeatherColumn = this.currentWeatherKey[weather.category];
@@ -113,14 +124,14 @@ export class UtilsService {
   }
 
   parseShortForecast(city: City, shortForecast: IShortForecastItem[]) {
-    const parsedShortForecastObject: { [date: string]: IShortForecast } = {};
+    const parsedShortForecastObject: { [date: string]: IForecast } = {};
 
     shortForecast.forEach((forecast) => {
       const date = this.formatForecastDate(forecast.fcstDate, forecast.fcstTime);
       const shortForecastColumn = this.shortForecastKey[forecast.category];
 
       if (parsedShortForecastObject[date] === undefined) {
-        parsedShortForecastObject[date] = { city, date };
+        parsedShortForecastObject[date] = { city, date, ...this.defaultForecast };
       }
 
       if (shortForecastColumn) {
@@ -132,14 +143,14 @@ export class UtilsService {
   }
 
   parseMidForecast(city: City, midForecast: IMidForecastItem[]) {
-    const parsedMidForecastObject: { [date: string]: IMidForecast } = {};
+    const parsedMidForecastObject: { [date: string]: IForecast } = {};
 
     midForecast.forEach((forecast) => {
       const date = this.formatForecastDate(forecast.fcstDate, forecast.fcstTime);
       const midForecastColumn = this.midForecastKey[forecast.category];
 
       if (parsedMidForecastObject[date] === undefined) {
-        parsedMidForecastObject[date] = { city, date };
+        parsedMidForecastObject[date] = { city, date, ...this.defaultForecast };
       }
 
       if (midForecastColumn) {
