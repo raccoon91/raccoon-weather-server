@@ -3,13 +3,13 @@ import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { SnakeNamingStrategy } from "typeorm-naming-strategies";
 import { ScheduleModule } from "@nestjs/schedule";
+import { ApisModule } from "./apis/apis.module";
+import { UtilsModule } from "./utils/utils.module";
 import { CitiesModule } from "./cities/cities.module";
 import { WeathersModule } from "./weathers/weathers.module";
 import { ClimatesModule } from "./climates/climates.module";
-import { TasksModule } from "./tasks/tasks.module";
-import { UtilsModule } from "./utils/utils.module";
-import { ApisModule } from "./apis/apis.module";
 import { ForecastsModule } from "./forecasts/forecasts.module";
+import { TasksModule } from "./tasks/tasks.module";
 
 @Module({
   imports: [
@@ -25,6 +25,7 @@ import { ForecastsModule } from "./forecasts/forecasts.module";
       synchronize: process.env.DB_SYNC === "true",
       namingStrategy: new SnakeNamingStrategy(),
     }),
+    ScheduleModule.forRoot(),
     ApisModule,
     UtilsModule,
     CitiesModule,
@@ -32,7 +33,6 @@ import { ForecastsModule } from "./forecasts/forecasts.module";
     ForecastsModule,
     ClimatesModule,
     TasksModule,
-    ScheduleModule.forRoot(),
   ],
 })
 export class AppModule {}
