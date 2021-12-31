@@ -161,8 +161,9 @@ export class UtilsService {
     return Object.values(parsedMidForecastObject);
   }
 
-  parseDailyASOS(daily: IASOSDailyInfoItem) {
-    return {
+  parseClimate(city: City, dailyInfos: IASOSDailyInfoItem[]) {
+    const climates = dailyInfos.map((daily) => ({
+      city,
       date: daily.tm,
       temp: this.toNumber(daily.avgTa),
       minTemp: this.toNumber(daily.minTa),
@@ -170,6 +171,8 @@ export class UtilsService {
       rain: this.toNumber(daily.sumRn),
       wind: this.toNumber(daily.avgWs),
       humid: this.toNumber(daily.avgRhm),
-    };
+    }));
+
+    return climates;
   }
 }

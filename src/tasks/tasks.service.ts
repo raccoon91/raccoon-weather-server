@@ -7,6 +7,7 @@ import { CityRepository } from "src/cities/city.repository";
 import { WeatherRepository } from "src/weathers/weather.repository";
 import { ClimateRepository } from "src/climates/climate.repository";
 import { ForecastRepository } from "src/forecasts/forecast.repository";
+import { CreateClimateWithCityDto } from "src/climates/dto";
 
 @Injectable()
 export class TasksService {
@@ -95,13 +96,14 @@ export class TasksService {
 
       const responses = await Promise.all(promises);
 
-      const createClimatesWithCityDto = [];
-
-      responses.forEach(({ city, dailyInfos }) => {
-        dailyInfos.forEach((daily) => createClimatesWithCityDto.push({ city, ...this.utils.parseDailyASOS(daily) }));
-      });
+      const createClimatesWithCityDto: CreateClimateWithCityDto[] = responses.reduce(
+        (acc, { city, dailyInfos }) => acc.concat(this.utils.parseClimate(city, dailyInfos)),
+        [],
+      );
 
       await this.climateRepository.bulkCreateClimate(createClimatesWithCityDto);
+
+      this.logger.verbose(`cron climate year with ${year}`);
 
       climates = climates.concat(createClimatesWithCityDto);
     }

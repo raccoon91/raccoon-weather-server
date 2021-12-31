@@ -10,7 +10,7 @@ export class CityRepository extends Repository<City> {
   async getAllCities() {
     const cities = await this.find();
 
-    if (cities) {
+    if (!cities) {
       const message = "Can't find cities";
       this.logger.debug(message);
 

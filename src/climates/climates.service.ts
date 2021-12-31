@@ -17,28 +17,30 @@ export class ClimatesService {
 
     const climates = await this.climateRepository.getClimatesByCity(city);
 
-    const tempClimates: { x: number; value: number }[] = [];
-    const rainClimateObject: { [year: number]: { x: number; value: number } } = {};
+    const temps: { [year: string]: number[] } = {};
+    const rains: { [year: string]: number } = {};
 
     climates.forEach((climate) => {
-      const year = dayjs(climate.date).year();
+      const year = dayjs(climate.date).format("YYYY");
 
-      tempClimates.push({
-        x: year,
-        value: climate.temp,
-      });
-
-      if (rainClimateObject[year] === undefined) {
-        rainClimateObject[year] = {
-          x: year,
-          value: climate.rain,
-        };
+      if (temps[year] === undefined) {
+        temps[year] = [climate.temp];
       } else {
-        rainClimateObject[year].value += climate.rain;
+        temps[year].push(climate.temp);
+      }
+
+      if (rains[year] === undefined) {
+        rains[year] = climate.rain;
+      } else {
+        rains[year] = Number((rains[year] + climate.rain).toFixed(1));
       }
     });
 
-    return { tempClimates, rainClimates: Object.values(rainClimateObject) };
+    return {
+      years: Object.keys(temps),
+      tempClimates: Object.values(temps),
+      rainClimates: Object.values(rains),
+    };
   }
 
   async createClimate(createClimateDto: CreateClimateDto, cityName: string) {
