@@ -10,6 +10,16 @@ export class TasksController {
     return this.tasksService.createCurrentWeather();
   }
 
+  @Post("/air-pollutions")
+  createAirPollution() {
+    return this.tasksService.createAirPollution();
+  }
+
+  @Post("/air-forecasts")
+  createAirForecasts() {
+    return this.tasksService.createAirForecast();
+  }
+
   @Post("/short-forecast")
   createShortForecast() {
     return this.tasksService.createShortForecast();

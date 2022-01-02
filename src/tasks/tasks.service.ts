@@ -5,8 +5,9 @@ import { ApisService } from "src/apis/apis.service";
 import { UtilsService } from "src/utils/utils.service";
 import { CityRepository } from "src/cities/city.repository";
 import { WeatherRepository } from "src/weathers/weather.repository";
-import { ClimateRepository } from "src/climates/climate.repository";
+import { AirPollutionRepository } from "src/air-pollutions/air-pollution.repository";
 import { ForecastRepository } from "src/forecasts/forecast.repository";
+import { ClimateRepository } from "src/climates/climate.repository";
 import { CreateClimateWithCityDto } from "src/climates/dto";
 
 @Injectable()
@@ -18,6 +19,7 @@ export class TasksService {
     private utils: UtilsService,
     @InjectRepository(CityRepository) private cityRepository: CityRepository,
     @InjectRepository(WeatherRepository) private weatherRepository: WeatherRepository,
+    @InjectRepository(AirPollutionRepository) private airPollutionRepository: AirPollutionRepository,
     @InjectRepository(ForecastRepository) private forecastRepository: ForecastRepository,
     @InjectRepository(ClimateRepository) private climateRepository: ClimateRepository,
   ) {}
@@ -26,14 +28,13 @@ export class TasksService {
   async createCurrentWeather() {
     const cities = await this.cityRepository.getAllCities();
 
-    const { baseDate, baseTime, formatDate } = this.utils.generateCurrentWeatherDate();
-    const promises = this.api.currentWeatherPromises(cities, baseDate, baseTime, formatDate);
+    const { baseDate, baseTime } = this.utils.generateCurrentWeatherDate();
+    const promises = this.api.currentWeatherPromises(cities, baseDate, baseTime);
 
     const responses = await Promise.all(promises);
 
-    const createWeathersWithCityDto = responses.map(({ city, date, currentWeather }) => ({
+    const createWeathersWithCityDto = responses.map(({ city, currentWeather }) => ({
       city,
-      date,
       ...this.utils.parseCurrentWeather(currentWeather),
     }));
 
@@ -42,6 +43,34 @@ export class TasksService {
     this.logger.verbose("cron current weather");
 
     return currentWeathers;
+  }
+
+  @Cron("0 20 * * * *")
+  async createAirPollution() {
+    const cities = await this.cityRepository.getAllCities();
+
+    const promises = this.api.airPollutionPromises(cities);
+
+    const responses = await Promise.all(promises);
+
+    const createAirPollutionWithCityDto = responses.map(({ city, airPollution }) => ({
+      city,
+      ...this.utils.parseAirPollution(airPollution),
+    }));
+
+    const airPollutions = await this.airPollutionRepository.bulkCreateAirPollutions(createAirPollutionWithCityDto);
+
+    return airPollutions;
+  }
+
+  async createAirForecast() {
+    const promises = this.api.airForecastPromises(["PM10", "PM25"]);
+
+    const [pm10Response, pm25Response] = await Promise.all(promises);
+
+    const createAirForecastWithCityDto = this.utils.parseAirForecast(pm10Response, pm25Response);
+
+    return createAirForecastWithCityDto;
   }
 
   @Cron("0 50 * * * *")

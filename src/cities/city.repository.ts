@@ -1,5 +1,6 @@
-import { EntityRepository, Repository } from "typeorm";
+import { EntityRepository, Repository, SelectQueryBuilder } from "typeorm";
 import { Logger, ConflictException, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import dayjs from "dayjs";
 import { City } from "./city.entity";
 import { CreateCityDto, UpdateCityDto } from "./dto";
 
@@ -21,7 +22,7 @@ export class CityRepository extends Repository<City> {
   }
 
   async getCity(id: number) {
-    const city = this.findOne({ id });
+    const city = await this.findOne({ id });
 
     if (!city) {
       const message = `Can't find city with id ${id}`;
@@ -34,7 +35,10 @@ export class CityRepository extends Repository<City> {
   }
 
   async getCityByName(name: string) {
-    const city = this.findOne({ name });
+    const city = await this.findOne({
+      select: ["id", "name", "korName"],
+      where: { name },
+    });
 
     if (!city) {
       const message = `Can't find city with name ${name}`;
@@ -44,6 +48,31 @@ export class CityRepository extends Repository<City> {
     }
 
     return city;
+  }
+
+  async getWeatherAndAirByCityName(cityName: string) {
+    const currentDate = dayjs().format("YYYY-MM-DD HH:mm");
+
+    const weatherAndAir = await this.findOne({
+      select: ["id", "name", "korName"],
+      join: {
+        alias: "city",
+        leftJoinAndSelect: {
+          weathers: "city.weathers",
+          airPollutions: "city.airPollutions",
+        },
+      },
+      where: (qb: SelectQueryBuilder<City>) => {
+        qb.where({ name: cityName })
+          .andWhere("weathers.date <= :date", { date: currentDate })
+          .andWhere("airPollutions.date <= :date", { date: currentDate })
+          .addOrderBy("weathers.date", "DESC")
+          .addOrderBy("airPollutions.date", "DESC")
+          .limit(1);
+      },
+    });
+
+    return weatherAndAir;
   }
 
   async createCity(createCityDto: CreateCityDto): Promise<City> {

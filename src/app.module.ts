@@ -7,9 +7,11 @@ import { ApisModule } from "./apis/apis.module";
 import { UtilsModule } from "./utils/utils.module";
 import { CitiesModule } from "./cities/cities.module";
 import { WeathersModule } from "./weathers/weathers.module";
-import { ClimatesModule } from "./climates/climates.module";
+import { AirPollutionsModule } from "./air-pollutions/air-pollutions.module";
 import { ForecastsModule } from "./forecasts/forecasts.module";
+import { ClimatesModule } from "./climates/climates.module";
 import { TasksModule } from "./tasks/tasks.module";
+import { AirForecastsModule } from './air-forecasts/air-forecasts.module';
 
 @Module({
   imports: [
@@ -30,9 +32,11 @@ import { TasksModule } from "./tasks/tasks.module";
     UtilsModule,
     CitiesModule,
     WeathersModule,
+    AirPollutionsModule,
     ForecastsModule,
     ClimatesModule,
     TasksModule,
+    AirForecastsModule,
   ],
 })
 export class AppModule {}

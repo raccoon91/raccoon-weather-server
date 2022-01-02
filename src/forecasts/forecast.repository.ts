@@ -19,11 +19,10 @@ export class ForecastRepository extends Repository<Forecast> {
     });
   }
 
-  async createOrUpdateForecast(createForecastwWithCityDto: CreateForecastWithCityDto): Promise<Forecast> {
-    const { city, date, sky, temp, rain, rainType, rainProb, humid, wind, windDirection } = createForecastwWithCityDto;
-
+  async createOrUpdateForecast(createForecastWithCityDto: CreateForecastWithCityDto): Promise<Forecast> {
     try {
       let forecast: Forecast;
+      const { city, date, sky, temp, rain, rainType, rainProb, humid, wind, windDirection } = createForecastWithCityDto;
 
       const foundForecast = await this.findOne({ where: { city, date } });
 
@@ -39,7 +38,7 @@ export class ForecastRepository extends Repository<Forecast> {
         forecast.wind = wind ? wind : foundForecast.wind;
         forecast.windDirection = windDirection ? windDirection : foundForecast.windDirection;
       } else {
-        forecast = this.create(createForecastwWithCityDto);
+        forecast = this.create(createForecastWithCityDto);
       }
 
       await this.upsert(forecast, ["city.id", "date"]);
@@ -47,9 +46,9 @@ export class ForecastRepository extends Repository<Forecast> {
       return forecast;
     } catch (error) {
       if (error.code === "23505") {
-        throw new ConflictException(`Existing forecast with data ${JSON.stringify(createForecastwWithCityDto)}`);
+        throw new ConflictException(`Existing forecast with data ${JSON.stringify(createForecastWithCityDto)}`);
       } else {
-        const message = `Can't create forecast with data ${JSON.stringify(createForecastwWithCityDto)}`;
+        const message = `Can't create forecast with data ${JSON.stringify(createForecastWithCityDto)}`;
         this.logger.error(message);
 
         throw new InternalServerErrorException(message);

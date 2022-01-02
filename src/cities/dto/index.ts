@@ -6,6 +6,10 @@ export class CreateCityDto {
   name: string;
 
   @IsNotEmpty()
+  @IsString()
+  korName: string;
+
+  @IsNotEmpty()
   @IsInt()
   stn: number;
 
@@ -22,6 +26,10 @@ export class UpdateCityDto {
   @IsOptional()
   @IsString()
   name: string;
+
+  @IsOptional()
+  @IsString()
+  korName: string;
 
   @IsOptional()
   @IsInt()

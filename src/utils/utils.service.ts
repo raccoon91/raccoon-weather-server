@@ -4,7 +4,15 @@ import { City } from "src/cities/city.entity";
 
 @Injectable()
 export class UtilsService {
-  private readonly defaultCurrentWeather = { temp: 0, rain: 0, rainType: 0, humid: 0, wind: 0, windDirection: 0 };
+  private readonly defaultCurrentWeather = {
+    date: null,
+    temp: 0,
+    rain: 0,
+    rainType: 0,
+    humid: 0,
+    wind: 0,
+    windDirection: 0,
+  };
 
   private readonly defaultForecast = {
     sky: 0,
@@ -47,6 +55,13 @@ export class UtilsService {
     VEC: "windDirection",
   };
 
+  private airForecastGrade = {
+    좋음: 1,
+    보통: 2,
+    나쁨: 3,
+    매우나쁨: 4,
+  };
+
   private toNumber(value: string) {
     if (typeof value !== "string") return 0;
 
@@ -57,8 +72,8 @@ export class UtilsService {
     return 0;
   }
 
-  private formatForecastDate(fcstDate: string, fcstTime: string) {
-    return dayjs(`${fcstDate} ${fcstTime}`).format("YYYY-MM-DD HH:mm");
+  private formatWeatherDate(weatherDate: string, weatherTime: string) {
+    return dayjs(`${weatherDate} ${weatherTime}`).format("YYYY-MM-DD HH:mm");
   }
 
   generateClimateDate(year: number) {
@@ -81,7 +96,7 @@ export class UtilsService {
     const baseDate = currentDate.format("YYYYMMDD");
     const baseTime = currentDate.format("HH00");
 
-    return { baseDate, baseTime, formatDate: currentDate.format("YYYY-MM-DD HH:mm") };
+    return { baseDate, baseTime };
   }
 
   generateShortForecastDate() {
@@ -115,6 +130,10 @@ export class UtilsService {
     currentWeather.forEach((weather) => {
       const currentWeatherColumn = this.currentWeatherKey[weather.category];
 
+      if (parsedWeather.date === null) {
+        parsedWeather.date = this.formatWeatherDate(weather.baseDate, weather.baseTime);
+      }
+
       if (currentWeatherColumn) {
         parsedWeather[currentWeatherColumn] = this.toNumber(weather.obsrValue);
       }
@@ -123,11 +142,98 @@ export class UtilsService {
     return parsedWeather;
   }
 
+  parseAirPollution(airPollution: ICurrentAirPollutionItem[]) {
+    let date: string;
+    const pm10 = { value: 0, count: 0 };
+    const pm25 = { value: 0, count: 0 };
+
+    airPollution.forEach((pollution) => {
+      if (!date && pollution.dataTime) {
+        date = pollution.dataTime;
+      }
+
+      if (pollution.pm10Value) {
+        pm10.value += this.toNumber(pollution.pm10Value);
+        pm10.count += 1;
+      }
+
+      if (pollution.pm25Value) {
+        pm25.value += this.toNumber(pollution.pm25Value);
+        pm25.count += 1;
+      }
+    });
+
+    return {
+      date,
+      pm10: Math.floor(pm10.value / pm10.count),
+      pm25: Math.floor(pm25.value / pm25.count),
+    };
+  }
+
+  combineForecastGrade(airForecast: { date?: string; PM10?: string; PM25?: string }) {
+    const parsedForecast: { [city: string]: { city: string; date?: string; pm10?: number; pm25?: number } } = {};
+    const date = airForecast.date;
+
+    airForecast.PM10.split(",").forEach((gradeList: any) => {
+      const [city, grade] = gradeList.split(" : ");
+
+      if (parsedForecast[city] === undefined) {
+        parsedForecast[city] = { city, date, pm10: this.airForecastGrade[grade] };
+      } else {
+        parsedForecast[city].pm10 = this.airForecastGrade[grade];
+      }
+    });
+
+    airForecast.PM25.split(",").forEach((gradeList: any) => {
+      const [city, grade] = gradeList.split(" : ");
+
+      if (parsedForecast[city] === undefined) {
+        parsedForecast[city] = { city, date, pm25: this.airForecastGrade[grade] };
+      } else {
+        parsedForecast[city].pm25 = this.airForecastGrade[grade];
+      }
+    });
+
+    return Object.values(parsedForecast);
+  }
+
+  parseAirForecast(pm10Response: IAirForecastItem[], pm25Response: IAirForecastItem[]) {
+    const airForecasts: { [date: string]: { date?: string; PM10?: string; PM25?: string } } = {};
+
+    pm10Response.forEach((airForecast) => {
+      if (airForecasts[airForecast.informData] === undefined) {
+        airForecasts[airForecast.informData] = {
+          date: airForecast.informData,
+          [airForecast.informCode]: airForecast.informGrade,
+        };
+      } else {
+        airForecasts[airForecast.informData][airForecast.informCode] = airForecast.informGrade;
+      }
+    });
+
+    pm25Response.forEach((airForecast) => {
+      if (airForecasts[airForecast.informData] === undefined) {
+        airForecasts[airForecast.informData] = {
+          [airForecast.informCode]: airForecast.informGrade,
+        };
+      } else {
+        airForecasts[airForecast.informData][airForecast.informCode] = airForecast.informGrade;
+      }
+    });
+
+    const parsedAirForecasts = Object.values(airForecasts).reduce(
+      (acc, forecast) => acc.concat(this.combineForecastGrade(forecast)),
+      [],
+    );
+
+    return parsedAirForecasts;
+  }
+
   parseShortForecast(city: City, shortForecast: IShortForecastItem[]) {
     const parsedShortForecastObject: { [date: string]: IForecast } = {};
 
     shortForecast.forEach((forecast) => {
-      const date = this.formatForecastDate(forecast.fcstDate, forecast.fcstTime);
+      const date = this.formatWeatherDate(forecast.fcstDate, forecast.fcstTime);
       const shortForecastColumn = this.shortForecastKey[forecast.category];
 
       if (parsedShortForecastObject[date] === undefined) {
@@ -146,7 +252,7 @@ export class UtilsService {
     const parsedMidForecastObject: { [date: string]: IForecast } = {};
 
     midForecast.forEach((forecast) => {
-      const date = this.formatForecastDate(forecast.fcstDate, forecast.fcstTime);
+      const date = this.formatWeatherDate(forecast.fcstDate, forecast.fcstTime);
       const midForecastColumn = this.midForecastKey[forecast.category];
 
       if (parsedMidForecastObject[date] === undefined) {

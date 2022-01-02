@@ -1,4 +1,4 @@
-interface IOpenApiResponse<T> {
+interface IOpenApiWeatherResponse<T> {
   response: {
     header: { resultCode: string; resultMsg: string };
     body: {
@@ -20,6 +20,7 @@ interface ICity {
 }
 
 interface ICurrentWeather {
+  date: string;
   temp: number;
   rain: number;
   rainType: number;
@@ -37,7 +38,7 @@ interface ICurrentWeatherItem {
   obsrValue: string;
 }
 
-type ICurrentWeatherResponse = IOpenApiResponse<ICurrentWeatherItem>;
+type ICurrentWeatherResponse = IOpenApiWeatherResponse<ICurrentWeatherItem>;
 
 interface IForecast {
   city: ICity;
@@ -65,11 +66,11 @@ interface IForecastItem<T> {
 
 type IShortForecastCatetory = "T1H" | "RN1" | "SKY" | "REH" | "PTY" | "VEC" | "WSD";
 type IShortForecastItem = IForecastItem<IShortForecastCatetory>;
-type IShortForecastResponse = IOpenApiResponse<IShortForecastItem>;
+type IShortForecastResponse = IOpenApiWeatherResponse<IShortForecastItem>;
 
 type IMidForecastCategory = "POP" | "PTY" | "PCP" | "REH" | "SKY" | "TMP" | "TMN" | "TMX" | "VEC" | "WSD";
 type IMidForecastItem = IForecastItem<IMidForecastCategory>;
-type IMidForecastResponse = IOpenApiResponse<IMidForecastItem>;
+type IMidForecastResponse = IOpenApiWeatherResponse<IMidForecastItem>;
 
 interface IASOSDailyInfoItem {
   tm: string;
@@ -81,4 +82,38 @@ interface IASOSDailyInfoItem {
   avgRhm: string;
 }
 
-type IASOSDailyInfoResponse = IOpenApiResponse<IASOSDailyInfoItem>;
+type IASOSDailyInfoResponse = IOpenApiWeatherResponse<IASOSDailyInfoItem>;
+
+interface IOpenApiAirPollutionResponse<T> {
+  response: {
+    header: { resultMsg: string; resultCode: string };
+    body: {
+      items: T[];
+      pageNo: number;
+      numOfRows: number;
+      totalCount: number;
+    };
+  };
+}
+
+interface ICurrentAirPollutionItem {
+  dataTime: string;
+  sidoName: string;
+  stationName: string;
+  pm10Flag: null;
+  pm10Grade: string;
+  pm10Value: string;
+  pm25Flag: null;
+  pm25Grade: string;
+  pm25Value: string;
+}
+
+type ICurrentAirPollutionResponse = IOpenApiAirPollutionResponse<ICurrentAirPollutionItem>;
+
+interface IAirForecastItem {
+  informCode: string;
+  informData: string;
+  informGrade: string;
+}
+
+type IAirForecastResponse = IOpenApiAirPollutionResponse<IAirForecastItem>;
