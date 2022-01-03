@@ -1,7 +1,11 @@
 import { IsNotEmpty, IsNumber, IsDateString, IsObject } from "class-validator";
 import { City } from "src/cities/city.entity";
 
-export class CreateClimateDto {
+export class CreateClimateWithCityDto {
+  @IsNotEmpty()
+  @IsObject()
+  city: City;
+
   @IsNotEmpty()
   @IsDateString()
   date: string;
@@ -29,10 +33,4 @@ export class CreateClimateDto {
   @IsNotEmpty()
   @IsNumber()
   humid: number;
-}
-
-export class CreateClimateWithCityDto extends CreateClimateDto {
-  @IsNotEmpty()
-  @IsObject()
-  city: City;
 }

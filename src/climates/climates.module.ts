@@ -6,7 +6,7 @@ import { ClimatesController } from "./climates.controller";
 import { ClimatesService } from "./climates.service";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ClimateRepository, CityRepository])],
+  imports: [TypeOrmModule.forFeature([CityRepository, ClimateRepository])],
   controllers: [ClimatesController],
   providers: [ClimatesService],
 })

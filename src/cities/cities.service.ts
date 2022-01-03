@@ -15,10 +15,6 @@ export class CitiesService {
     return this.cityRepository.getCity(id);
   }
 
-  getWeatherAndAirByCityName(cityName: string) {
-    return this.cityRepository.getWeatherAndAirByCityName(cityName);
-  }
-
   createCities(createCityDto: CreateCityDto[]) {
     return this.cityRepository.bulkCreateCities(createCityDto);
   }

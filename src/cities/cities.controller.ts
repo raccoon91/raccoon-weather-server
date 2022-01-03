@@ -16,11 +16,6 @@ export class CitiesController {
     return this.citiesService.getCity(id);
   }
 
-  @Get("/weathers/:cityName")
-  getWeatherAndAirByCityName(@Param("cityName") cityName: string) {
-    return this.citiesService.getWeatherAndAirByCityName(cityName);
-  }
-
   @Post()
   createCities(@Body(ValidationPipe) createCityDto: CreateCityDto[]) {
     return this.citiesService.createCities(createCityDto);

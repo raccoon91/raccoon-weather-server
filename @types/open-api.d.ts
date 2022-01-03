@@ -11,9 +11,22 @@ interface IOpenApiWeatherResponse<T> {
   };
 }
 
+interface IOpenApiAirPollutionResponse<T> {
+  response: {
+    header: { resultMsg: string; resultCode: string };
+    body: {
+      items: T[];
+      pageNo: number;
+      numOfRows: number;
+      totalCount: number;
+    };
+  };
+}
+
 interface ICity {
   id: number;
   name: string;
+  korName: string;
   stn: number;
   nx: number;
   ny: number;
@@ -39,6 +52,20 @@ interface ICurrentWeatherItem {
 }
 
 type ICurrentWeatherResponse = IOpenApiWeatherResponse<ICurrentWeatherItem>;
+
+interface ICurrentAirPollutionItem {
+  dataTime: string;
+  sidoName: string;
+  stationName: string;
+  pm10Flag: null;
+  pm10Grade: string;
+  pm10Value: string;
+  pm25Flag: null;
+  pm25Grade: string;
+  pm25Value: string;
+}
+
+type ICurrentAirPollutionResponse = IOpenApiAirPollutionResponse<ICurrentAirPollutionItem>;
 
 interface IForecast {
   city: ICity;
@@ -72,6 +99,21 @@ type IMidForecastCategory = "POP" | "PTY" | "PCP" | "REH" | "SKY" | "TMP" | "TMN
 type IMidForecastItem = IForecastItem<IMidForecastCategory>;
 type IMidForecastResponse = IOpenApiWeatherResponse<IMidForecastItem>;
 
+interface IForecastAir {
+  fromDate: string;
+  toDate: string;
+  pm10Grade: number;
+  pm25Grade: number;
+}
+
+interface IAirForecastItem {
+  informCode: string;
+  informData: string;
+  informGrade: string;
+}
+
+type IAirForecastResponse = IOpenApiAirPollutionResponse<IAirForecastItem>;
+
 interface IASOSDailyInfoItem {
   tm: string;
   avgTa: string;
@@ -83,37 +125,3 @@ interface IASOSDailyInfoItem {
 }
 
 type IASOSDailyInfoResponse = IOpenApiWeatherResponse<IASOSDailyInfoItem>;
-
-interface IOpenApiAirPollutionResponse<T> {
-  response: {
-    header: { resultMsg: string; resultCode: string };
-    body: {
-      items: T[];
-      pageNo: number;
-      numOfRows: number;
-      totalCount: number;
-    };
-  };
-}
-
-interface ICurrentAirPollutionItem {
-  dataTime: string;
-  sidoName: string;
-  stationName: string;
-  pm10Flag: null;
-  pm10Grade: string;
-  pm10Value: string;
-  pm25Flag: null;
-  pm25Grade: string;
-  pm25Value: string;
-}
-
-type ICurrentAirPollutionResponse = IOpenApiAirPollutionResponse<ICurrentAirPollutionItem>;
-
-interface IAirForecastItem {
-  informCode: string;
-  informData: string;
-  informGrade: string;
-}
-
-type IAirForecastResponse = IOpenApiAirPollutionResponse<IAirForecastItem>;

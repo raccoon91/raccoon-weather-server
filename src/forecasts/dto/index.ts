@@ -1,7 +1,11 @@
-import { IsNotEmpty, IsDateString, IsNumber, IsObject } from "class-validator";
+import { IsNotEmpty, IsOptional, IsDateString, IsNumber, IsObject } from "class-validator";
 import { City } from "src/cities/city.entity";
 
-export class CreateForecastDto {
+export class CreateForecastWithCityDto {
+  @IsNotEmpty()
+  @IsObject()
+  city: City;
+
   @IsNotEmpty()
   @IsDateString()
   date: string;
@@ -37,10 +41,34 @@ export class CreateForecastDto {
   @IsNotEmpty()
   @IsNumber()
   windDirection: number;
+
+  @IsOptional()
+  @IsNumber()
+  pm10Grade: number;
+
+  @IsOptional()
+  @IsNumber()
+  pm25Grade: number;
 }
 
-export class CreateForecastWithCityDto extends CreateForecastDto {
+export class UpdateForecastAirWithCityDto {
   @IsNotEmpty()
   @IsObject()
   city: City;
+
+  @IsNotEmpty()
+  @IsDateString()
+  fromDate: string;
+
+  @IsNotEmpty()
+  @IsDateString()
+  toDate: string;
+
+  @IsOptional()
+  @IsNumber()
+  pm10Grade: number;
+
+  @IsOptional()
+  @IsNumber()
+  pm25Grade: number;
 }

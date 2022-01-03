@@ -15,27 +15,7 @@ export class WeatherRepository extends Repository<Weather> {
     });
   }
 
-  async createWeather(createWeathersWithCityDto: CreateWeatherWithCityDto): Promise<Weather> {
-    try {
-      const weather = this.create(createWeathersWithCityDto);
-
-      await this.insert(weather);
-
-      return weather;
-    } catch (error) {
-      if (error.code === "23505") {
-        throw new ConflictException("Existing city");
-      } else {
-        const message = `Can't create weather with data ${JSON.stringify(createWeathersWithCityDto)}`;
-        this.logger.error(message);
-        this.logger.error(error);
-
-        throw new InternalServerErrorException(message);
-      }
-    }
-  }
-
-  async bulkCreateWeathers(createWeathersWithCityDto: CreateWeatherWithCityDto[]): Promise<Weather[]> {
+  async createWeathers(createWeathersWithCityDto: CreateWeatherWithCityDto[]): Promise<Weather[]> {
     try {
       const weathers = this.create(createWeathersWithCityDto);
 

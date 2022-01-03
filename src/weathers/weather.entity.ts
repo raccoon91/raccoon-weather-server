@@ -6,7 +6,6 @@ const transformer: ValueTransformer = {
   from: (value) => dayjs(value).add(9, "hour").toISOString(),
   to: (value) => value,
 };
-
 @Entity()
 @Unique(["date", "city.id"])
 export class Weather {
@@ -33,6 +32,12 @@ export class Weather {
 
   @Column({ type: "smallint" })
   windDirection: number;
+
+  @Column({ type: "real" })
+  pm10: number;
+
+  @Column({ type: "real" })
+  pm25: number;
 
   @ManyToOne(() => City, (city) => city.weathers, { eager: false })
   city: City;

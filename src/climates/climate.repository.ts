@@ -2,7 +2,7 @@ import { EntityRepository, Repository } from "typeorm";
 import { Logger, ConflictException, InternalServerErrorException } from "@nestjs/common";
 import { City } from "src/cities/city.entity";
 import { Climate } from "./climate.entity";
-import { CreateClimateDto, CreateClimateWithCityDto } from "./dto";
+import { CreateClimateWithCityDto } from "./dto";
 
 @EntityRepository(Climate)
 export class ClimateRepository extends Repository<Climate> {
@@ -17,29 +17,7 @@ export class ClimateRepository extends Repository<Climate> {
     return climate;
   }
 
-  async createClimate(createClimateDto: CreateClimateDto, city: City): Promise<Climate> {
-    try {
-      const climate = this.create({ city, ...createClimateDto });
-
-      await this.insert(climate);
-
-      return climate;
-    } catch (error) {
-      if (error.code === "23505") {
-        throw new ConflictException("Existing city");
-      } else {
-        const message = `Can't create climate with city ${JSON.stringify(city)} data ${JSON.stringify(
-          createClimateDto,
-        )}`;
-        this.logger.error(message);
-        this.logger.error(error);
-
-        throw new InternalServerErrorException(message);
-      }
-    }
-  }
-
-  async bulkCreateClimate(createClimatesWithCityDto: CreateClimateWithCityDto[]): Promise<Climate[]> {
+  async createClimates(createClimatesWithCityDto: CreateClimateWithCityDto[]): Promise<Climate[]> {
     try {
       const climates = this.create(createClimatesWithCityDto);
 

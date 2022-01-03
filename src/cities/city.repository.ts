@@ -1,6 +1,5 @@
-import { EntityRepository, Repository, SelectQueryBuilder } from "typeorm";
+import { EntityRepository, Repository } from "typeorm";
 import { Logger, ConflictException, InternalServerErrorException, NotFoundException } from "@nestjs/common";
-import dayjs from "dayjs";
 import { City } from "./city.entity";
 import { CreateCityDto, UpdateCityDto } from "./dto";
 
@@ -48,31 +47,6 @@ export class CityRepository extends Repository<City> {
     }
 
     return city;
-  }
-
-  async getWeatherAndAirByCityName(cityName: string) {
-    const currentDate = dayjs().format("YYYY-MM-DD HH:mm");
-
-    const weatherAndAir = await this.findOne({
-      select: ["id", "name", "korName"],
-      join: {
-        alias: "city",
-        leftJoinAndSelect: {
-          weathers: "city.weathers",
-          airPollutions: "city.airPollutions",
-        },
-      },
-      where: (qb: SelectQueryBuilder<City>) => {
-        qb.where({ name: cityName })
-          .andWhere("weathers.date <= :date", { date: currentDate })
-          .andWhere("airPollutions.date <= :date", { date: currentDate })
-          .addOrderBy("weathers.date", "DESC")
-          .addOrderBy("airPollutions.date", "DESC")
-          .limit(1);
-      },
-    });
-
-    return weatherAndAir;
   }
 
   async createCity(createCityDto: CreateCityDto): Promise<City> {

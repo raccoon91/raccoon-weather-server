@@ -1,9 +1,8 @@
 import { Injectable, Logger, InternalServerErrorException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import axios, { AxiosInstance, AxiosResponse } from "axios";
-import { UtilsService } from "src/utils/utils.service";
 import { City } from "src/cities/city.entity";
-import dayjs from "dayjs";
+import { DateService } from "./date.service";
 
 @Injectable()
 export class ApisService {
@@ -12,7 +11,7 @@ export class ApisService {
   private openAirPollutionApi: AxiosInstance;
   private openASOSApi: AxiosInstance;
 
-  constructor(private config: ConfigService, private utils: UtilsService) {
+  constructor(private config: ConfigService, private date: DateService) {
     const serviceKey = decodeURIComponent(this.config.get("OPEN_DATA_SERVICE_KEY"));
 
     this.openWeatherApi = axios.create({
@@ -50,66 +49,31 @@ export class ApisService {
 
   currentWeatherPromises(cities: City[], baseDate: string, baseTime: string) {
     return cities.map((city) =>
-      this.openWeatherApi({
-        url: "getUltraSrtNcst",
-        params: {
-          ver: "1.0",
-          base_date: baseDate,
-          base_time: baseTime,
-          nx: city.nx,
-          ny: city.ny,
-        },
-      })
-        .then((res: AxiosResponse<ICurrentWeatherResponse>) => ({
+      Promise.all([
+        this.openWeatherApi({
+          url: "getUltraSrtNcst",
+          params: {
+            base_date: baseDate,
+            base_time: baseTime,
+            nx: city.nx,
+            ny: city.ny,
+          },
+        }),
+        this.openAirPollutionApi({
+          url: "getCtprvnRltmMesureDnsty",
+          params: {
+            sidoName: city.korName,
+            ver: "1.0",
+          },
+        }),
+      ])
+        .then((responses: [AxiosResponse<ICurrentWeatherResponse>, AxiosResponse<ICurrentAirPollutionResponse>]) => ({
           city,
-          currentWeather: res?.data?.response?.body?.items?.item || [],
+          currentWeather: responses[0]?.data?.response?.body?.items?.item || [],
+          airPollution: responses[1]?.data?.response?.body?.items || [],
         }))
         .catch((error) => {
           const message = `Failed to request current weather with city ${city.name} ${baseDate} / ${baseTime}`;
-          this.logger.error(message);
-          this.logger.error(error);
-
-          throw new InternalServerErrorException(message);
-        }),
-    );
-  }
-
-  airPollutionPromises(cities: City[]) {
-    return cities.map((city) =>
-      this.openAirPollutionApi({
-        url: "getCtprvnRltmMesureDnsty",
-        params: {
-          sidoName: city.korName,
-        },
-      })
-        .then((res: AxiosResponse<ICurrentAirPollutionResponse>) => ({
-          city,
-          airPollution: res?.data?.response?.body?.items || [],
-        }))
-        .catch((error) => {
-          const message = `Failed to request current air pollution with city ${city.korName}`;
-          this.logger.error(message);
-          this.logger.error(error);
-
-          throw new InternalServerErrorException(message);
-        }),
-    );
-  }
-
-  airForecastPromises(forecastTypes: string[]) {
-    const currentDate = dayjs().format("YYYY-MM-DD");
-
-    return forecastTypes.map((type) =>
-      this.openAirPollutionApi({
-        url: "getMinuDustFrcstDspth",
-        params: {
-          informCode: type,
-          searchDate: currentDate,
-        },
-      })
-        .then((res: AxiosResponse<IAirForecastResponse>) => res?.data?.response?.body?.items || [])
-        .catch((error) => {
-          const message = `Failed to request air forecast with code ${type} date ${currentDate}`;
           this.logger.error(message);
           this.logger.error(error);
 
@@ -168,9 +132,31 @@ export class ApisService {
     );
   }
 
+  airForecastPromises(forecastTypes: string[]) {
+    const currentDate = this.date.dayjs().format("YYYY-MM-DD");
+
+    return forecastTypes.map((type) =>
+      this.openAirPollutionApi({
+        url: "getMinuDustFrcstDspth",
+        params: {
+          informCode: type,
+          searchDate: currentDate,
+        },
+      })
+        .then((res: AxiosResponse<IAirForecastResponse>) => res?.data?.response?.body?.items || [])
+        .catch((error) => {
+          const message = `Failed to request air forecast with code ${type} date ${currentDate}`;
+          this.logger.error(message);
+          this.logger.error(error);
+
+          throw new InternalServerErrorException(message);
+        }),
+    );
+  }
+
   climatesPromises(cities: City[], year: number) {
     const promises: Promise<{ city: City; dailyInfos: IASOSDailyInfoItem[] }>[] = [];
-    const { startDate, endDate } = this.utils.generateClimateDate(year);
+    const { startDate, endDate } = this.date.generateClimateDate(year);
 
     for (const city of cities) {
       promises.push(

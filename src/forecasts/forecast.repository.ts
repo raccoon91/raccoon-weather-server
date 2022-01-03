@@ -1,67 +1,79 @@
-import { EntityRepository, Repository, MoreThan } from "typeorm";
-import { Logger, ConflictException, InternalServerErrorException } from "@nestjs/common";
-import dayjs from "dayjs";
+import { EntityRepository, Repository, MoreThan, Between } from "typeorm";
+import { Logger, InternalServerErrorException } from "@nestjs/common";
 import { City } from "src/cities/city.entity";
 import { Forecast } from "./forecast.entity";
-import { CreateForecastWithCityDto } from "./dto";
+import { CreateForecastWithCityDto, UpdateForecastAirWithCityDto } from "./dto";
 
 @EntityRepository(Forecast)
 export class ForecastRepository extends Repository<Forecast> {
   private logger = new Logger("ForecastRepository");
 
-  getForecast(city: City) {
-    const currentDate = dayjs().format("YYYY-MM-DD HH:mm");
-
+  getForecasts(city: City, date: string) {
     return this.find({
-      where: { city, date: MoreThan(currentDate) },
+      where: { city, date: MoreThan(date) },
       order: { date: "ASC" },
       take: 16,
     });
   }
 
-  async createOrUpdateForecast(createForecastWithCityDto: CreateForecastWithCityDto): Promise<Forecast> {
+  async createOrUpdateForecast(createForecastWithCityDto: CreateForecastWithCityDto) {
     try {
-      let forecast: Forecast;
-      const { city, date, sky, temp, rain, rainType, rainProb, humid, wind, windDirection } = createForecastWithCityDto;
+      await this.upsert(createForecastWithCityDto, ["city.id", "date"]);
 
-      const foundForecast = await this.findOne({ where: { city, date } });
-
-      if (foundForecast) {
-        forecast = Object.assign({}, foundForecast);
-
-        forecast.sky = sky ? sky : foundForecast.sky;
-        forecast.temp = temp ? temp : foundForecast.temp;
-        forecast.rain = rain ? rain : foundForecast.rain;
-        forecast.rainType = rainType ? rainType : foundForecast.rainType;
-        forecast.rainProb = rainProb ? rainProb : foundForecast.rainProb;
-        forecast.humid = humid ? humid : foundForecast.humid;
-        forecast.wind = wind ? wind : foundForecast.wind;
-        forecast.windDirection = windDirection ? windDirection : foundForecast.windDirection;
-      } else {
-        forecast = this.create(createForecastWithCityDto);
-      }
-
-      await this.upsert(forecast, ["city.id", "date"]);
-
-      return forecast;
+      return createForecastWithCityDto;
     } catch (error) {
-      if (error.code === "23505") {
-        throw new ConflictException(`Existing forecast with data ${JSON.stringify(createForecastWithCityDto)}`);
-      } else {
-        const message = `Can't create forecast with data ${JSON.stringify(createForecastWithCityDto)}`;
-        this.logger.error(message);
+      const message = `Can't create forecast with data ${JSON.stringify(createForecastWithCityDto)}`;
+      this.logger.error(message);
+      this.logger.error(error);
 
-        throw new InternalServerErrorException(message);
-      }
+      throw new InternalServerErrorException(message);
     }
   }
 
-  async bulkCreateOrUpdateForecasts(createForecastsWithCityDto: CreateForecastWithCityDto[]): Promise<Forecast[]> {
+  async bulkCreateOrUpdateForecasts(createForecastsWithCityDto: CreateForecastWithCityDto[]) {
     const promises = createForecastsWithCityDto.map((createForecastWithCityDto) =>
       this.createOrUpdateForecast(createForecastWithCityDto),
     );
 
     const forecasts = await Promise.all(promises);
+
+    return forecasts;
+  }
+
+  async updateForecastAir(updateForecastAirWithCityDto: UpdateForecastAirWithCityDto) {
+    try {
+      const { city, fromDate, toDate, pm10Grade, pm25Grade } = updateForecastAirWithCityDto;
+
+      const foundForecasts = await this.find({
+        where: { city, date: Between(fromDate, toDate) },
+        order: { date: "ASC" },
+      });
+
+      const forecasts = foundForecasts.map((forecast) => ({
+        ...forecast,
+        city,
+        pm10Grade,
+        pm25Grade,
+      }));
+
+      return forecasts;
+    } catch (error) {
+      const message = `Can't update forecast with data ${JSON.stringify(updateForecastAirWithCityDto)}`;
+      this.logger.error(message);
+      this.logger.error(error);
+
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async bulkUpdateForecastsAir(updateForecastsAirWithCityDto: UpdateForecastAirWithCityDto[]) {
+    const promises = updateForecastsAirWithCityDto.map((updateForecastAirWithCityDto) =>
+      this.updateForecastAir(updateForecastAirWithCityDto),
+    );
+
+    const responses = await Promise.all(promises);
+
+    const forecasts = responses.reduce((acc, cur) => acc.concat(cur), []);
 
     return forecasts;
   }

@@ -1,15 +1,20 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import dayjs from "dayjs";
+import { ApisService, DateService, WeatherParserService } from "src/common/providers";
 import { CityRepository } from "src/cities/city.repository";
 import { ClimateRepository } from "./climate.repository";
-import { CreateClimateDto } from "./dto";
+import { CreateClimateWithCityDto } from "./dto";
 
 @Injectable()
 export class ClimatesService {
+  logger = new Logger("ClimatesService");
+
   constructor(
-    @InjectRepository(ClimateRepository) private climateRepository: ClimateRepository,
+    private api: ApisService,
+    private date: DateService,
+    private weatherParser: WeatherParserService,
     @InjectRepository(CityRepository) private cityRepository: CityRepository,
+    @InjectRepository(ClimateRepository) private climateRepository: ClimateRepository,
   ) {}
 
   async getClimates(cityName: string) {
@@ -21,7 +26,7 @@ export class ClimatesService {
     const rains: { [year: string]: number } = {};
 
     climates.forEach((climate) => {
-      const year = dayjs(climate.date).format("YYYY");
+      const year = this.date.dayjs(climate.date).format("YYYY");
 
       if (temps[year] === undefined) {
         temps[year] = [climate.temp];
@@ -43,9 +48,28 @@ export class ClimatesService {
     };
   }
 
-  async createClimate(createClimateDto: CreateClimateDto, cityName: string) {
-    const city = await this.cityRepository.getCityByName(cityName);
+  async createClimates(startYear: number, endYear: number) {
+    let climates = [];
 
-    return this.climateRepository.createClimate(createClimateDto, city);
+    const cities = await this.cityRepository.getAllCities();
+
+    for (let year = startYear; year <= endYear; year++) {
+      const promises = this.api.climatesPromises(cities, year);
+
+      const responses = await Promise.all(promises);
+
+      const createClimatesWithCityDto: CreateClimateWithCityDto[] = responses.reduce(
+        (acc, { city, dailyInfos }) => acc.concat(this.weatherParser.parseClimate(city, dailyInfos)),
+        [],
+      );
+
+      await this.climateRepository.createClimates(createClimatesWithCityDto);
+
+      this.logger.verbose(`create climate year with ${year}`);
+
+      climates = climates.concat(createClimatesWithCityDto);
+    }
+
+    return climates;
   }
 }

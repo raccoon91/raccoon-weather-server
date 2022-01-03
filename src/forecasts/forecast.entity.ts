@@ -40,6 +40,12 @@ export class Forecast {
   @Column({ type: "smallint" })
   windDirection: number;
 
+  @Column({ type: "smallint", nullable: true })
+  pm10Grade: number;
+
+  @Column({ type: "smallint", nullable: true })
+  pm25Grade: number;
+
   @ManyToOne(() => City, (city) => city.forecasts, { eager: false })
   city: City;
 }

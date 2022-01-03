@@ -6,8 +6,9 @@ import { ForecastsController } from "./forecasts.controller";
 import { ForecastsService } from "./forecasts.service";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ForecastRepository, CityRepository])],
+  imports: [TypeOrmModule.forFeature([CityRepository, ForecastRepository])],
   controllers: [ForecastsController],
   providers: [ForecastsService],
+  exports: [ForecastsService],
 })
 export class ForecastsModule {}
