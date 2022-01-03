@@ -10,6 +10,7 @@ export class WeatherRepository extends Repository<Weather> {
 
   getWeather(city: City) {
     return this.findOne({
+      relations: ["city"],
       where: { city },
       order: { date: "DESC" },
     });
