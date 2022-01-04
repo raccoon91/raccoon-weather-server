@@ -3,6 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { ApisService, DateService, WeatherParserService } from "src/common/providers";
 import { CityRepository } from "src/cities/city.repository";
 import { WeatherRepository } from "./weather.repository";
+import { ForecastRepository } from "src/forecasts/forecast.repository";
 
 @Injectable()
 export class WeathersService {
@@ -14,13 +15,21 @@ export class WeathersService {
     private weatherParser: WeatherParserService,
     @InjectRepository(CityRepository) private cityRepository: CityRepository,
     @InjectRepository(WeatherRepository) private weatherRepository: WeatherRepository,
+    @InjectRepository(ForecastRepository) private forecastRepository: ForecastRepository,
   ) {}
 
   async getWeather(cityName: string) {
     const city = await this.cityRepository.getCityByName(cityName);
     const weather = await this.weatherRepository.getWeather(city);
+    const forecast = await this.forecastRepository.getForecast(city, weather.date);
 
-    return weather;
+    return {
+      ...weather,
+      city,
+      sky: forecast?.sky || 0,
+      rainType: forecast?.rainType || 0,
+      rainProb: forecast?.rainProb || 0,
+    };
   }
 
   async createWeathers() {

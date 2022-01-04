@@ -19,7 +19,7 @@ export class ForecastsService {
   async getForecasts(cityName: string) {
     const city = await this.cityRepository.getCityByName(cityName);
 
-    const date = this.date.dayjs().format("YYYY-MM-DD HH:mm");
+    const date = this.date.dayjs().format("YYYY-MM-DD HH:00");
 
     return this.forecastRepository.getForecasts(city, date);
   }

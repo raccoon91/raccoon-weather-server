@@ -36,7 +36,6 @@ interface ICurrentWeather {
   date: string;
   temp: number;
   rain: number;
-  rainType: number;
   humid: number;
   wind: number;
   windDirection: number;

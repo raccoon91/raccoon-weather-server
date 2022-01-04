@@ -20,10 +20,6 @@ export class CreateWeatherWithCityDto {
 
   @IsNotEmpty()
   @IsNumber()
-  rainType: number;
-
-  @IsNotEmpty()
-  @IsNumber()
   humid: number;
 
   @IsNotEmpty()

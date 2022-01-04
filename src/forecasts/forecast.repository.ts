@@ -1,4 +1,4 @@
-import { EntityRepository, Repository, MoreThan, Between } from "typeorm";
+import { EntityRepository, Repository, MoreThanOrEqual, Between } from "typeorm";
 import { Logger, InternalServerErrorException } from "@nestjs/common";
 import { City } from "src/cities/city.entity";
 import { Forecast } from "./forecast.entity";
@@ -8,9 +8,15 @@ import { CreateForecastWithCityDto, UpdateForecastAirWithCityDto } from "./dto";
 export class ForecastRepository extends Repository<Forecast> {
   private logger = new Logger("ForecastRepository");
 
+  getForecast(city: City, date: string) {
+    return this.findOne({
+      where: { city, date },
+    });
+  }
+
   getForecasts(city: City, date: string) {
     return this.find({
-      where: { city, date: MoreThan(date) },
+      where: { city, date: MoreThanOrEqual(date) },
       order: { date: "ASC" },
       take: 16,
     });

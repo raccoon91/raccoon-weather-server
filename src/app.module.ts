@@ -23,6 +23,7 @@ import { TasksModule } from "./tasks/tasks.module";
       entities: [__dirname + "/**/*.entity.{js,ts}"],
       synchronize: process.env.DB_SYNC === "true",
       namingStrategy: new SnakeNamingStrategy(),
+      useUTC: false,
     }),
     ScheduleModule.forRoot(),
     CommonModule,

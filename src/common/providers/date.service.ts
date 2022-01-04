@@ -57,11 +57,12 @@ export class DateService {
     }
 
     const midForecastHour = Math.floor((currentHour + 1) / 3) * 3 - 1;
-    currentDate.hour(midForecastHour);
+    currentDate = currentDate.hour(midForecastHour);
 
     const baseDate = currentDate.format("YYYYMMDD");
+    const baseTime = currentDate.format("HH10");
 
-    return { baseDate, baseTime: `${midForecastHour}10` };
+    return { baseDate, baseTime };
   }
 
   generateAirForecastDate(date: string) {
