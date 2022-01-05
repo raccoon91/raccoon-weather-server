@@ -23,27 +23,36 @@ export class ClimatesService {
     const climates = await this.climateRepository.getClimatesByCity(city);
 
     const temps: { [year: string]: number[] } = {};
+    const feelTemps: { [year: string]: number[] } = {};
     const rains: { [year: string]: number } = {};
 
     climates.forEach((climate) => {
       const year = this.date.dayjs(climate.date).format("YYYY");
 
+      if (feelTemps[year] === undefined) {
+        feelTemps[year] = [];
+      }
+
       if (temps[year] === undefined) {
-        temps[year] = [climate.temp];
-      } else {
-        temps[year].push(climate.temp);
+        temps[year] = [];
       }
 
       if (rains[year] === undefined) {
-        rains[year] = climate.rain;
-      } else {
-        rains[year] = Number((rains[year] + climate.rain).toFixed(1));
+        rains[year] = 0;
       }
+
+      if (climate.feel >= 30) {
+        feelTemps[year].push(climate.feel);
+      }
+
+      temps[year].push(climate.temp);
+      rains[year] = Number((rains[year] + climate.rain).toFixed(1));
     });
 
     return {
       years: Object.keys(temps),
       tempClimates: Object.values(temps),
+      feelTempClimates: Object.values(feelTemps),
       rainClimates: Object.values(rains),
     };
   }

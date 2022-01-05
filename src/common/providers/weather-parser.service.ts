@@ -60,6 +60,7 @@ export class WeatherParserService extends BaseParserService {
       city,
       date: daily.tm,
       temp: this.toNumber(daily.avgTa),
+      feel: this.getFeelTemp(daily.avgTa, daily.avgWs),
       minTemp: this.toNumber(daily.minTa),
       maxTemp: this.toNumber(daily.maxTa),
       rain: this.toNumber(daily.sumRn),

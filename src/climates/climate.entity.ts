@@ -14,6 +14,9 @@ export class Climate {
   temp: number;
 
   @Column({ type: "real" })
+  feel: number;
+
+  @Column({ type: "real" })
   minTemp: number;
 
   @Column({ type: "real" })

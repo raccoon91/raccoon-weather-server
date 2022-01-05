@@ -16,6 +16,10 @@ export class CreateClimateWithCityDto {
 
   @IsNotEmpty()
   @IsNumber()
+  feel: number;
+
+  @IsNotEmpty()
+  @IsNumber()
   minTemp: number;
 
   @IsNotEmpty()

@@ -66,4 +66,10 @@ export class BaseParserService {
 
     return 0;
   }
+
+  getFeelTemp = (temp: string, wind: string) => {
+    const windCalib = Math.pow(Number(wind), 0.16);
+
+    return Number((13.12 + 0.6215 * Number(temp) - 11.37 * windCalib + 0.3965 * windCalib * Number(temp)).toFixed(1));
+  };
 }

@@ -15,13 +15,11 @@ export class WeatherRepository extends Repository<Weather> {
     });
   }
 
-  async createWeathers(createWeathersWithCityDto: CreateWeatherWithCityDto[]): Promise<Weather[]> {
+  async createWeathers(createWeathersWithCityDto: CreateWeatherWithCityDto[]) {
     try {
-      const weathers = this.create(createWeathersWithCityDto);
+      await this.upsert(createWeathersWithCityDto, ["city.id", "date"]);
 
-      await this.save(weathers, { chunk: 1000 });
-
-      return weathers;
+      return createWeathersWithCityDto;
     } catch (error) {
       if (error.code === "23505") {
         throw new ConflictException("Existing city");
