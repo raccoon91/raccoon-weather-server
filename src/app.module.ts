@@ -7,6 +7,7 @@ import { CommonModule } from "./common/common.module";
 import { CitiesModule } from "./cities/cities.module";
 import { WeathersModule } from "./weathers/weathers.module";
 import { ForecastsModule } from "./forecasts/forecasts.module";
+import { CovidsModule } from "./covids/covids.module";
 import { ClimatesModule } from "./climates/climates.module";
 import { TasksModule } from "./tasks/tasks.module";
 
@@ -30,6 +31,7 @@ import { TasksModule } from "./tasks/tasks.module";
     CitiesModule,
     WeathersModule,
     ForecastsModule,
+    CovidsModule,
     ClimatesModule,
     TasksModule,
   ],

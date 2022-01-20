@@ -9,6 +9,7 @@ export class ApisService {
   private logger = new Logger("ApisService");
   private openWeatherApi: AxiosInstance;
   private openAirPollutionApi: AxiosInstance;
+  private openCovidApi: AxiosInstance;
   private openASOSApi: AxiosInstance;
 
   constructor(private config: ConfigService, private date: DateService) {
@@ -32,6 +33,12 @@ export class ApisService {
         ServiceKey: serviceKey,
         returnType: "json",
       },
+    });
+
+    this.openCovidApi = axios.create({
+      baseURL: this.config.get("OPEN_DATA_COVID_API"),
+      method: "get",
+      params: { serviceKey },
     });
 
     this.openASOSApi = axios.create({
@@ -152,6 +159,46 @@ export class ApisService {
           throw new InternalServerErrorException(message);
         }),
     );
+  }
+
+  async covidPromise(currentDate: string) {
+    try {
+      const response: AxiosResponse<ICovidResponse> = await this.openCovidApi({
+        url: "getCovid19InfStateJson",
+        params: {
+          startCreateDt: currentDate,
+          endCreateDt: currentDate,
+        },
+      });
+
+      return response?.data?.response?.body?.items?.item;
+    } catch (error) {
+      const message = `Failed to request covid with date ${currentDate}`;
+      this.logger.error(message);
+      this.logger.error(error);
+
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async covidSidoPromise(currentDate: string) {
+    try {
+      const response: AxiosResponse<ICovidSidoResponse> = await this.openCovidApi({
+        url: "getCovid19SidoInfStateJson",
+        params: {
+          startCreateDt: currentDate,
+          endCreateDt: currentDate,
+        },
+      });
+
+      return response?.data?.response?.body?.items?.item || [];
+    } catch (error) {
+      const message = `Failed to request covid sido with date ${currentDate}`;
+      this.logger.error(message);
+      this.logger.error(error);
+
+      throw new InternalServerErrorException(message);
+    }
   }
 
   climatesPromises(cities: City[], year: number) {

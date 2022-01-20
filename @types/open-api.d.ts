@@ -23,6 +23,18 @@ interface IOpenApiAirPollutionResponse<T> {
   };
 }
 
+interface IOpenApiCovidResponse<T> {
+  response: {
+    header: { resultCode: string; resultMsg: string };
+    body: {
+      items: { item: T };
+      numOfRows: number;
+      pageNo: number;
+      totalCount: number;
+    };
+  };
+}
+
 interface ICity {
   id: number;
   name: string;
@@ -112,6 +124,30 @@ interface IAirForecastItem {
 }
 
 type IAirForecastResponse = IOpenApiAirPollutionResponse<IAirForecastItem>;
+
+interface ICovidItem {
+  deathCnt: number;
+  decideCnt: number;
+  stateDt: number;
+  stateTime: string;
+  createDt: string;
+  updateDt: string;
+}
+
+type ICovidResponse = IOpenApiCovidResponse<ICovidItem>;
+
+interface ICovidSidoItem {
+  gubun: string;
+  gubunEn: string;
+  deathCnt: number;
+  defCnt: number;
+  incDec: number;
+  stdDay: string;
+  createDt: string;
+  updateDt: string;
+}
+
+type ICovidSidoResponse = IOpenApiCovidResponse<ICovidSidoItem[]>;
 
 interface IASOSDailyInfoItem {
   tm: string;

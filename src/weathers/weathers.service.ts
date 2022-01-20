@@ -4,6 +4,7 @@ import { ApisService, DateService, WeatherParserService } from "src/common/provi
 import { CityRepository } from "src/cities/city.repository";
 import { WeatherRepository } from "./weather.repository";
 import { ForecastRepository } from "src/forecasts/forecast.repository";
+import { CovidRepository } from "src/covids/covid.repository";
 
 @Injectable()
 export class WeathersService {
@@ -16,19 +17,23 @@ export class WeathersService {
     @InjectRepository(CityRepository) private cityRepository: CityRepository,
     @InjectRepository(WeatherRepository) private weatherRepository: WeatherRepository,
     @InjectRepository(ForecastRepository) private forecastRepository: ForecastRepository,
+    @InjectRepository(CovidRepository) private covidRepository: CovidRepository,
   ) {}
 
   async getWeather(cityName: string) {
     const city = await this.cityRepository.getCityByName(cityName);
     const weather = await this.weatherRepository.getWeather(city);
     const forecast = await this.forecastRepository.getForecast(city, weather.date);
+    const covid = await this.covidRepository.getCovidByCity(city);
 
     return {
-      ...weather,
       city,
+      ...weather,
       sky: forecast?.sky || 0,
       rainType: forecast?.rainType || 0,
       rainProb: forecast?.rainProb || 0,
+      case: covid.case,
+      caseIncrement: covid.caseIncrement,
     };
   }
 
@@ -48,7 +53,7 @@ export class WeathersService {
 
     const currentWeathers = await this.weatherRepository.createWeathers(createWeathersWithCityDto);
 
-    this.logger.verbose("cron current weather");
+    this.logger.verbose("create current weather");
 
     return currentWeathers;
   }

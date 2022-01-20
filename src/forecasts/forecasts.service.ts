@@ -39,7 +39,7 @@ export class ForecastsService {
 
     const shortForecasts = await this.forecastRepository.bulkCreateOrUpdateForecasts(createForecastsWithCityDto);
 
-    this.logger.verbose("cron short forecast");
+    this.logger.verbose("create short forecast");
 
     return shortForecasts;
   }
@@ -59,7 +59,7 @@ export class ForecastsService {
 
     const midForecasts = await this.forecastRepository.bulkCreateOrUpdateForecasts(createForecastsWithCityDto);
 
-    this.logger.verbose("cron mid forecast");
+    this.logger.verbose("create mid forecast");
 
     return midForecasts;
   }

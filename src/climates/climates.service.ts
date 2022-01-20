@@ -1,6 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { ApisService, DateService, WeatherParserService } from "src/common/providers";
+import { ApisService, DateService, ClimateParserService } from "src/common/providers";
 import { CityRepository } from "src/cities/city.repository";
 import { ClimateRepository } from "./climate.repository";
 import { CreateClimateWithCityDto } from "./dto";
@@ -12,7 +12,7 @@ export class ClimatesService {
   constructor(
     private api: ApisService,
     private date: DateService,
-    private weatherParser: WeatherParserService,
+    private climateParser: ClimateParserService,
     @InjectRepository(CityRepository) private cityRepository: CityRepository,
     @InjectRepository(ClimateRepository) private climateRepository: ClimateRepository,
   ) {}
@@ -68,7 +68,7 @@ export class ClimatesService {
       const responses = await Promise.all(promises);
 
       const createClimatesWithCityDto: CreateClimateWithCityDto[] = responses.reduce(
-        (acc, { city, dailyInfos }) => acc.concat(this.weatherParser.parseClimate(city, dailyInfos)),
+        (acc, { city, dailyInfos }) => acc.concat(this.climateParser.parseClimate(city, dailyInfos)),
         [],
       );
 
