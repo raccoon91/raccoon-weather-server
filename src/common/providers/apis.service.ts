@@ -161,39 +161,19 @@ export class ApisService {
     );
   }
 
-  async covidPromise(currentDate: string) {
+  async covidSidoPromise(startDate: string, endDate?: string) {
     try {
-      const response: AxiosResponse<ICovidResponse> = await this.openCovidApi({
-        url: "getCovid19InfStateJson",
-        params: {
-          startCreateDt: currentDate,
-          endCreateDt: currentDate,
-        },
-      });
+      const startCreateDt = startDate;
+      const endCreateDt = endDate || startDate;
 
-      return response?.data?.response?.body?.items?.item;
-    } catch (error) {
-      const message = `Failed to request covid with date ${currentDate}`;
-      this.logger.error(message);
-      this.logger.error(error);
-
-      throw new InternalServerErrorException(message);
-    }
-  }
-
-  async covidSidoPromise(currentDate: string) {
-    try {
       const response: AxiosResponse<ICovidSidoResponse> = await this.openCovidApi({
         url: "getCovid19SidoInfStateJson",
-        params: {
-          startCreateDt: currentDate,
-          endCreateDt: currentDate,
-        },
+        params: { startCreateDt, endCreateDt },
       });
 
       return response?.data?.response?.body?.items?.item || [];
     } catch (error) {
-      const message = `Failed to request covid sido with date ${currentDate}`;
+      const message = `Failed to request covid sido with date ${startDate} - ${endDate}`;
       this.logger.error(message);
       this.logger.error(error);
 

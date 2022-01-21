@@ -38,3 +38,13 @@ export class CreateClimateWithCityDto {
   @IsNumber()
   humid: number;
 }
+
+export class CreateClimatesByYearDto {
+  @IsNotEmpty()
+  @IsNumber()
+  startYear: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  endYear: number;
+}

@@ -17,6 +17,8 @@ export class CovidParserService extends BaseParserService {
   }
 
   parseCovidSido(cities: City[], covidSidos: ICovidSidoItem[]) {
+    const citiesDictionary: { [cityName: string]: City } = {};
+
     const covids: {
       [key: string]: {
         city: City;
@@ -26,21 +28,22 @@ export class CovidParserService extends BaseParserService {
       };
     } = {};
 
-    cities.forEach((city) => {
-      if (!covids[city.korName]) {
-        covids[city.korName] = { city, date: "", case: 0, caseIncrement: 0 };
-      }
-    });
+    cities.forEach((city) => (citiesDictionary[city.korName] = city));
 
     covidSidos
       .filter((covidSido) => covidSido.gubunEn !== "Total" && covidSido.gubunEn !== "Lazaretto")
       .forEach((covidSido) => {
         const korName = covidSido.gubun;
+        const date = this.date.dayjs(covidSido.createDt).format("YYYY-MM-DD");
+        const city = citiesDictionary[korName];
 
-        if (covids[korName]) {
-          covids[korName].date = this.date.dayjs(covidSido.createDt).format("YYYY-MM-DD");
-          covids[korName].case = covidSido.defCnt;
-          covids[korName].caseIncrement = covidSido.incDec;
+        if (city && !covids[`${korName}-${date}`]) {
+          covids[`${korName}-${date}`] = {
+            city: city,
+            date: date,
+            case: covidSido.defCnt,
+            caseIncrement: covidSido.incDec,
+          };
         }
       });
 

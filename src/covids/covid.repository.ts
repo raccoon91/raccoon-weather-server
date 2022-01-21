@@ -15,6 +15,13 @@ export class CovidRepository extends Repository<Covid> {
     });
   }
 
+  getAllCovidsByCity(city: City) {
+    return this.find({
+      where: { city },
+      order: { date: "ASC" },
+    });
+  }
+
   async createCovids(createCovidsWithCityDto: CreateCovidWithCityDto[]) {
     try {
       await this.upsert(createCovidsWithCityDto, ["city.id", "date"]);

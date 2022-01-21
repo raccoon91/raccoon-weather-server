@@ -1,5 +1,6 @@
-import { Controller, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, ValidationPipe } from "@nestjs/common";
 import { CovidsService } from "./covids.service";
+import { CreateCovidsByDateDto } from "./dto";
 
 @Controller("covids")
 export class CovidsController {
@@ -13,5 +14,12 @@ export class CovidsController {
   @Post()
   createCovids() {
     return this.covidsService.createCovids();
+  }
+
+  @Post("/scrap")
+  createCovidsByDate(@Body(ValidationPipe) body: CreateCovidsByDateDto) {
+    const { startDate, endDate } = body;
+
+    return this.covidsService.createCovidsByDate(startDate, endDate);
   }
 }

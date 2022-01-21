@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post, ValidationPipe } from "@nestjs/common";
 import { ClimatesService } from "./climates.service";
+import { CreateClimatesByYearDto } from "./dto";
 
 @Controller("climates")
 export class ClimatesController {
@@ -11,7 +12,7 @@ export class ClimatesController {
   }
 
   @Post()
-  createClimates(@Body(ValidationPipe) body: { startYear: number; endYear: number }) {
+  createClimates(@Body(ValidationPipe) body: CreateClimatesByYearDto) {
     const { startYear, endYear } = body;
 
     return this.climatesService.createClimates(startYear, endYear);

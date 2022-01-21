@@ -1,5 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { City } from "src/cities/city.entity";
 import { CityRepository } from "src/cities/city.repository";
 import { ApisService, DateService, CovidParserService } from "src/common/providers";
 import { CovidRepository } from "./covid.repository";
@@ -23,6 +24,12 @@ export class CovidsService {
     return covid;
   }
 
+  async getAllCovidsByCity(city: City) {
+    const covids = await this.covidRepository.getAllCovidsByCity(city);
+
+    return covids;
+  }
+
   async createCovids() {
     const currentDate = this.date.dayjs().format("YYYYMMDD");
 
@@ -34,6 +41,19 @@ export class CovidsService {
     const covids = await this.covidRepository.createCovids(CreateWeatherWithCityDto);
 
     this.logger.verbose("create covid");
+
+    return covids;
+  }
+
+  async createCovidsByDate(startDate: string, endDate: string) {
+    const cities = await this.cityRepository.getAllCities();
+    const responses = await this.api.covidSidoPromise(startDate, endDate);
+
+    const CreateWeatherWithCityDto = this.covidParser.parseCovidSido(cities, responses);
+
+    const covids = await this.covidRepository.createCovids(CreateWeatherWithCityDto);
+
+    this.logger.verbose("create covid by date");
 
     return covids;
   }

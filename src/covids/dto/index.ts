@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsDateString, IsNumber, IsObject } from "class-validator";
+import { IsNotEmpty, IsDateString, IsNumber, IsObject, IsString } from "class-validator";
 import { City } from "src/cities/city.entity";
 
 export class CreateCovidWithCityDto {
@@ -17,4 +17,14 @@ export class CreateCovidWithCityDto {
   @IsNotEmpty()
   @IsNumber()
   caseIncrement: number;
+}
+
+export class CreateCovidsByDateDto {
+  @IsNotEmpty()
+  @IsString()
+  startDate: string;
+
+  @IsNotEmpty()
+  @IsString()
+  endDate: string;
 }

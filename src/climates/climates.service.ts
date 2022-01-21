@@ -4,6 +4,7 @@ import { ApisService, DateService, ClimateParserService } from "src/common/provi
 import { CityRepository } from "src/cities/city.repository";
 import { ClimateRepository } from "./climate.repository";
 import { CreateClimateWithCityDto } from "./dto";
+import { CovidRepository } from "src/covids/covid.repository";
 
 @Injectable()
 export class ClimatesService {
@@ -14,6 +15,7 @@ export class ClimatesService {
     private date: DateService,
     private climateParser: ClimateParserService,
     @InjectRepository(CityRepository) private cityRepository: CityRepository,
+    @InjectRepository(CovidRepository) private covidRepository: CovidRepository,
     @InjectRepository(ClimateRepository) private climateRepository: ClimateRepository,
   ) {}
 
@@ -21,16 +23,20 @@ export class ClimatesService {
     const city = await this.cityRepository.getCityByName(cityName);
 
     const climates = await this.climateRepository.getClimatesByCity(city);
+    const covids = await this.covidRepository.getAllCovidsByCity(city);
 
     const temps: { [year: string]: number[] } = {};
-    const feelTemps: { [year: string]: number[] } = {};
+    const maxTemps: { [year: string]: number[] } = {};
     const rains: { [year: string]: number } = {};
+    const covidDates: string[] = [];
+    const cases: number[] = [];
+    const caseIncrements: number[] = [];
 
     climates.forEach((climate) => {
       const year = this.date.dayjs(climate.date).format("YYYY");
 
-      if (feelTemps[year] === undefined) {
-        feelTemps[year] = [];
+      if (maxTemps[year] === undefined) {
+        maxTemps[year] = [];
       }
 
       if (temps[year] === undefined) {
@@ -41,19 +47,28 @@ export class ClimatesService {
         rains[year] = 0;
       }
 
-      if (climate.feel >= 30) {
-        feelTemps[year].push(climate.feel);
+      if (climate.maxTemp >= 32) {
+        maxTemps[year].push(climate.maxTemp);
       }
 
       temps[year].push(climate.temp);
       rains[year] = Number((rains[year] + climate.rain).toFixed(1));
     });
 
+    covids.forEach((covid) => {
+      covidDates.push(covid.date);
+      cases.push(covid.case);
+      caseIncrements.push(covid.caseIncrement);
+    });
+
     return {
       years: Object.keys(temps),
       tempClimates: Object.values(temps),
-      feelTempClimates: Object.values(feelTemps),
+      maxTempClimates: Object.values(maxTemps),
       rainClimates: Object.values(rains),
+      covidDates,
+      cases,
+      caseIncrements,
     };
   }
 
