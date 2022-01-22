@@ -38,7 +38,7 @@ export class WeathersService {
   }
 
   async createWeathers() {
-    const cities = await this.cityRepository.getAllCities();
+    const cities = await this.cityRepository.getOnlyCities();
 
     const { baseDate, baseTime } = this.date.generateCurrentWeatherDate();
     const promises = this.api.currentWeatherPromises(cities, baseDate, baseTime);

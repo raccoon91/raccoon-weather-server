@@ -75,7 +75,7 @@ export class ClimatesService {
   async createClimates(startYear: number, endYear: number) {
     let climates = [];
 
-    const cities = await this.cityRepository.getAllCities();
+    const cities = await this.cityRepository.getOnlyCities();
 
     for (let year = startYear; year <= endYear; year++) {
       const promises = this.api.climatesPromises(cities, year);

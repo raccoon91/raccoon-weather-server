@@ -1,4 +1,4 @@
-import { EntityRepository, Repository } from "typeorm";
+import { EntityRepository, Repository, Not } from "typeorm";
 import { Logger, ConflictException, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { City } from "./city.entity";
 import { CreateCityDto, UpdateCityDto } from "./dto";
@@ -9,6 +9,19 @@ export class CityRepository extends Repository<City> {
 
   async getAllCities() {
     const cities = await this.find();
+
+    if (!cities) {
+      const message = "Can't find cities";
+      this.logger.debug(message);
+
+      throw new NotFoundException(message);
+    }
+
+    return cities;
+  }
+
+  async getOnlyCities() {
+    const cities = await this.find({ name: Not("total") });
 
     if (!cities) {
       const message = "Can't find cities";

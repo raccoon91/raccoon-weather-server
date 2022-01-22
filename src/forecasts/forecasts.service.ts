@@ -25,7 +25,7 @@ export class ForecastsService {
   }
 
   async createShortForecasts() {
-    const cities = await this.cityRepository.getAllCities();
+    const cities = await this.cityRepository.getOnlyCities();
 
     const { baseDate, baseTime } = this.date.generateShortForecastDate();
     const promises = this.api.shortForecastPromises(cities, baseDate, baseTime);
@@ -45,7 +45,7 @@ export class ForecastsService {
   }
 
   async createMidForecasts() {
-    const cities = await this.cityRepository.getAllCities();
+    const cities = await this.cityRepository.getOnlyCities();
 
     const { baseDate, baseTime } = this.date.generateMidForecastDate();
     const promises = this.api.midForecastPromises(cities, baseDate, baseTime);
@@ -65,7 +65,7 @@ export class ForecastsService {
   }
 
   async createAirForecasts() {
-    const cities = await this.cityRepository.getAllCities();
+    const cities = await this.cityRepository.getOnlyCities();
 
     const promises = this.api.airForecastPromises(["PM10", "PM25"]);
 

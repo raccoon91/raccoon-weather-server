@@ -31,7 +31,7 @@ export class CovidParserService extends BaseParserService {
     cities.forEach((city) => (citiesDictionary[city.korName] = city));
 
     covidSidos
-      .filter((covidSido) => covidSido.gubunEn !== "Total" && covidSido.gubunEn !== "Lazaretto")
+      .filter((covidSido) => covidSido.gubunEn !== "Lazaretto")
       .forEach((covidSido) => {
         const korName = covidSido.gubun;
         const date = this.date.dayjs(covidSido.createDt).format("YYYY-MM-DD");

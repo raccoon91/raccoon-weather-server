@@ -8,7 +8,7 @@ export class CitiesService {
   constructor(@InjectRepository(CityRepository) private cityRepository: CityRepository) {}
 
   getCities() {
-    return this.cityRepository.getAllCities();
+    return this.cityRepository.getOnlyCities();
   }
 
   getCity(id: number) {
