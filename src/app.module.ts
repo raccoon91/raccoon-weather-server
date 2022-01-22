@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { SnakeNamingStrategy } from "typeorm-naming-strategies";
 import { ScheduleModule } from "@nestjs/schedule";
@@ -10,21 +10,26 @@ import { ForecastsModule } from "./forecasts/forecasts.module";
 import { CovidsModule } from "./covids/covids.module";
 import { ClimatesModule } from "./climates/climates.module";
 import { TasksModule } from "./tasks/tasks.module";
+import { AppController } from "./app.controller";
 
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: ".env" }),
-    TypeOrmModule.forRoot({
-      type: "postgres",
-      host: process.env.DB_HOSTNAME,
-      port: parseInt(process.env.DB_PORT),
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_DATABASE,
-      entities: [__dirname + "/**/*.entity.{js,ts}"],
-      synchronize: process.env.DB_SYNC === "true",
-      namingStrategy: new SnakeNamingStrategy(),
-      useUTC: false,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (config: ConfigService) => ({
+        type: "postgres",
+        host: config.get("DB_HOST"),
+        port: parseInt(config.get("DB_PORT")),
+        username: config.get("DB_USERNAME"),
+        password: config.get("DB_PASSWORD"),
+        database: config.get("DB_DATABASE"),
+        entities: [__dirname + "/**/*.entity.{js,ts}"],
+        synchronize: config.get("DB_SYNC") === "true",
+        namingStrategy: new SnakeNamingStrategy(),
+        useUTC: false,
+      }),
+      inject: [ConfigService],
     }),
     ScheduleModule.forRoot(),
     CommonModule,
@@ -35,5 +40,6 @@ import { TasksModule } from "./tasks/tasks.module";
     ClimatesModule,
     TasksModule,
   ],
+  controllers: [AppController],
 })
 export class AppModule {}

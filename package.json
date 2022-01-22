@@ -12,8 +12,7 @@
     "lint": "eslint \"{src,apps,libs}/**/*.ts\" --fix",
     "start": "nest start",
     "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main"
+    "start:debug": "nest start --debug --watch"
   },
   "dependencies": {
     "@nestjs/common": "^7.6.15",
@@ -25,7 +24,6 @@
     "axios": "^0.24.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
-    "config": "^3.3.6",
     "dayjs": "^1.10.7",
     "pg": "^8.7.1",
     "reflect-metadata": "^0.1.13",

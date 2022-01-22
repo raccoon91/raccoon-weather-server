@@ -2,9 +2,6 @@
 /dist
 /node_modules
 
-# Yarn
-yarn.lock
-
 # Env
 .env
 
