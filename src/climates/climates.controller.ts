@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, ValidationPipe } from "@nestjs/common";
 import { ClimatesService } from "./climates.service";
 import { CreateClimatesByYearDto } from "./dto";
 
@@ -16,5 +16,10 @@ export class ClimatesController {
     const { startYear, endYear } = body;
 
     return this.climatesService.createClimates(startYear, endYear);
+  }
+
+  @Delete()
+  deleteAllClimates() {
+    return this.climatesService.deleteAllClimates();
   }
 }

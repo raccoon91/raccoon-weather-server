@@ -36,4 +36,14 @@ export class ClimateRepository extends Repository<Climate> {
       }
     }
   }
+
+  async deleteAllClimates() {
+    try {
+      const climates = await this.find();
+
+      await this.remove(climates);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
 }
