@@ -98,7 +98,7 @@ export class ClimatesService {
     return climates;
   }
 
-  async deleteAllClimates() {
-    return this.climateRepository.deleteAllClimates;
+  deleteAllClimates() {
+    return this.climateRepository.deleteAllClimates();
   }
 }
