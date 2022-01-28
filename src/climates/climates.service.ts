@@ -21,9 +21,10 @@ export class ClimatesService {
 
   async getClimates(cityName: string) {
     const city = await this.cityRepository.getCityByName(cityName);
+    const total = await this.cityRepository.getCityByName("total");
 
     const climates = await this.climateRepository.getClimatesByCity(city);
-    const covids = await this.covidRepository.getAllCovidsByCity(city);
+    const covids = await this.covidRepository.getAllCovidsByCity(total);
 
     const temps: { [year: string]: number[] } = {};
     const maxTemps: { [year: string]: number[] } = {};
