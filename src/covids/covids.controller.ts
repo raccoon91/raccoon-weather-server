@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, ValidationPipe } from "@nestjs/common";
 import { CovidsService } from "./covids.service";
 import { CreateCovidsByDateDto } from "./dto";
 
@@ -21,5 +21,10 @@ export class CovidsController {
     const { startDate, endDate } = body;
 
     return this.covidsService.createCovidsByDate(startDate, endDate);
+  }
+
+  @Delete()
+  deleteAllCovids() {
+    return this.covidsService.deleteAllCovids();
   }
 }

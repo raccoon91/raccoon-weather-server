@@ -35,4 +35,14 @@ export class CovidRepository extends Repository<Covid> {
       throw new InternalServerErrorException(message);
     }
   }
+
+  async deleteAllCovids() {
+    try {
+      const covids = await this.find();
+
+      await this.remove(covids);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
 }

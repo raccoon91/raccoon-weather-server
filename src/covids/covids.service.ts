@@ -57,4 +57,8 @@ export class CovidsService {
 
     return covids;
   }
+
+  deleteAllCovids() {
+    return this.covidRepository.deleteAllCovids();
+  }
 }
