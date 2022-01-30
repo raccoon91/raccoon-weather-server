@@ -98,7 +98,7 @@ export class ClimatesService {
     return climates;
   }
 
-  deleteAllClimates() {
-    return this.climateRepository.deleteAllClimates();
+  deleteClimates(startYear: number, endYear: number) {
+    return this.climateRepository.deleteClimates(startYear, endYear);
   }
 }

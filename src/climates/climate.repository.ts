@@ -1,4 +1,4 @@
-import { EntityRepository, Repository } from "typeorm";
+import { EntityRepository, Repository, Between } from "typeorm";
 import { Logger, ConflictException, InternalServerErrorException } from "@nestjs/common";
 import { City } from "src/cities/city.entity";
 import { Climate } from "./climate.entity";
@@ -37,11 +37,17 @@ export class ClimateRepository extends Repository<Climate> {
     }
   }
 
-  async deleteAllClimates() {
+  async deleteClimates(startYear: number, endYear: number) {
     try {
-      const climates = await this.find();
+      const climates = await this.find({
+        where: {
+          date: Between(`${startYear}-01-01`, `${endYear}-12-31`),
+        },
+      });
 
-      await this.remove(climates);
+      const result = await this.remove(climates);
+
+      return result;
     } catch (error) {
       throw new InternalServerErrorException();
     }

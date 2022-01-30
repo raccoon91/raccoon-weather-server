@@ -39,7 +39,7 @@ export class CreateClimateWithCityDto {
   humid: number;
 }
 
-export class CreateClimatesByYearDto {
+export class ClimatesByYearDto {
   @IsNotEmpty()
   @IsNumber()
   startYear: number;
