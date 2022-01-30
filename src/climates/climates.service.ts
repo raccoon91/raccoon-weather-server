@@ -3,7 +3,6 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { ApisService, DateService, ClimateParserService } from "src/common/providers";
 import { CityRepository } from "src/cities/city.repository";
 import { ClimateRepository } from "./climate.repository";
-import { CreateClimateWithCityDto } from "./dto";
 import { CovidRepository } from "src/covids/covid.repository";
 
 @Injectable()
@@ -83,16 +82,16 @@ export class ClimatesService {
 
       const responses = await Promise.all(promises);
 
-      const createClimatesWithCityDto: CreateClimateWithCityDto[] = responses.reduce(
-        (acc, { city, dailyInfos }) => acc.concat(this.climateParser.parseClimate(city, dailyInfos)),
-        [],
-      );
+      for (const response of responses) {
+        const { city, dailyInfos } = response;
+        const createClimateWithCityDto = this.climateParser.parseClimate(city, dailyInfos);
 
-      await this.climateRepository.createClimates(createClimatesWithCityDto);
+        const climate = await this.climateRepository.createClimates(createClimateWithCityDto);
+
+        climates = climates.concat(climate);
+      }
 
       this.logger.verbose(`create climate year with ${year}`);
-
-      climates = climates.concat(createClimatesWithCityDto);
     }
 
     return climates;

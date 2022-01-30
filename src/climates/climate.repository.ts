@@ -17,13 +17,11 @@ export class ClimateRepository extends Repository<Climate> {
     return climate;
   }
 
-  async createClimates(createClimatesWithCityDto: CreateClimateWithCityDto[]): Promise<Climate[]> {
+  async createClimates(createClimatesWithCityDto: CreateClimateWithCityDto[]) {
     try {
-      const climates = this.create(createClimatesWithCityDto);
+      await this.upsert(createClimatesWithCityDto, ["city.id", "date"]);
 
-      await this.save(climates, { chunk: 1000 });
-
-      return climates;
+      return createClimatesWithCityDto;
     } catch (error) {
       if (error.code === "23505") {
         throw new ConflictException("Existing city");
