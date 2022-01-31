@@ -32,7 +32,7 @@ export class TasksService {
     return this.covidsService.createCovids();
   }
 
-  async createAirForecasts() {
-    return this.forecastsService.createAirForecasts();
-  }
+  // async createAirForecasts() {
+  //   return this.forecastsService.createAirForecasts();
+  // }
 }
