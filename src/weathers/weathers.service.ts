@@ -34,6 +34,7 @@ export class WeathersService {
       rainProb: forecast?.rainProb || 0,
       case: covid.case,
       caseIncrement: covid.caseIncrement,
+      caseDate: covid.date,
     };
   }
 
