@@ -31,14 +31,14 @@ export class CovidsService {
   }
 
   async createCovids() {
-    const currentDate = this.date.dayjs().format("YYYYMMDD");
+    const currentDate = this.date.dayjs().subtract(1, "day").format("YYYYMMDD");
 
     const cities = await this.cityRepository.getAllCities();
     const responses = await this.api.covidSidoPromise(currentDate);
 
-    const CreateWeatherWithCityDto = this.covidParser.parseCovidSido(cities, responses);
+    const createCovidsWithCityDto = this.covidParser.parseCovidSido(cities, responses);
 
-    const covids = await this.covidRepository.createCovids(CreateWeatherWithCityDto);
+    const covids = await this.covidRepository.createCovids(createCovidsWithCityDto);
 
     this.logger.verbose("create covid");
 
@@ -49,9 +49,9 @@ export class CovidsService {
     const cities = await this.cityRepository.getAllCities();
     const responses = await this.api.covidSidoPromise(startDate, endDate);
 
-    const CreateWeatherWithCityDto = this.covidParser.parseCovidSido(cities, responses);
+    const createCovidsWithCityDto = this.covidParser.parseCovidSido(cities, responses);
 
-    const covids = await this.covidRepository.createCovids(CreateWeatherWithCityDto);
+    const covids = await this.covidRepository.createCovids(createCovidsWithCityDto);
 
     this.logger.verbose("create covid by date");
 
