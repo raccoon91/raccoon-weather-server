@@ -62,6 +62,7 @@ export class ClimatesService {
     });
 
     return {
+      city,
       years: Object.keys(temps),
       tempClimates: Object.values(temps),
       maxTempClimates: Object.values(maxTemps),
